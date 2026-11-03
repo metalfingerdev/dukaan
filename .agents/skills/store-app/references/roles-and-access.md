@@ -96,6 +96,13 @@ ones to add to `isPublic`. `/admin/*` and `/delivery/*` stay private, and each l
 neutral spinner while `myRoles` resolves, then "Access denied" for the wrong role, as
 `src/routes/admin/+page.svelte` does.
 
+**A private page also needs its own client-side redirect.** `hooks.server.ts` only runs when the
+server is asked for the page, so a page without a server `load` is opened by client-side
+navigation (pressing "Checkout" in the app) without ever reaching it, and a signed-out visitor
+would see a broken page. Call `useRequireSignIn()` (`src/lib/store/requireSignIn.svelte.ts`) in
+every private page (`/checkout`, `/orders*`, `/account/*`); it sends them to `/signin` and back.
+Found by testing in a browser. It is UX only: the Convex functions still refuse a signed-out caller.
+
 ## Tests worth having
 
 For each guarded function: signed-out is refused, a customer is refused on admin functions, a

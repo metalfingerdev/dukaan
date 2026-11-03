@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatPaise, percentOff } from './format';
+import { formatDateTime, formatPaise, formatSlot, percentOff } from './format';
 
 describe('formatPaise', () => {
 	it('drops the decimals for whole rupees and keeps them otherwise', () => {
@@ -11,6 +11,19 @@ describe('formatPaise', () => {
 
 	it('groups digits the Indian way', () => {
 		expect(formatPaise(123456700)).toBe('₹12,34,567');
+	});
+});
+
+describe('IST time formatting', () => {
+	// The day changes at midnight India time, not midnight UTC: 19:00 UTC on the 3rd is already
+	// 00:30 on the 4th in India, and an order placed then must show the 4th
+	it('shows the India date and time, whatever time zone the phone is in', () => {
+		expect(formatDateTime(Date.UTC(2026, 10, 3, 19, 0)).toLowerCase()).toBe('4 nov, 12:30 am');
+	});
+
+	it('shows a slot that ends in a different hour as one range', () => {
+		const eleven = Date.UTC(2026, 10, 3, 5, 30);
+		expect(formatSlot(eleven, 60).toLowerCase()).toBe('11:00 am to 12:00 pm');
 	});
 });
 

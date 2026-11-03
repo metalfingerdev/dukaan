@@ -4,7 +4,7 @@
   import favicon from "#lib/assets/favicon.svg";
   import { PUBLIC_APP_ENV } from "$app/env/public";
 
-  import { createSvelteAuthClient } from "@mmailaender/convex-better-auth-svelte/svelte";
+  import { createSvelteAuthClient, useAuth } from "@mmailaender/convex-better-auth-svelte/svelte";
   import { authClient } from "#lib/auth/api/auth-client.js";
   import { api } from "#convex/_generated/api.js";
   import { AUTH_CONSTANTS } from "#convex/auth.constants.js";
@@ -23,6 +23,7 @@
   let { children, data } = $props();
 
   createSvelteAuthClient({ authClient, getServerState: () => data.authState });
+  const auth = useAuth();
   // After the auth client: the cart reads the auth state and the Convex client it sets up
   setCartContext(new Cart());
 </script>
@@ -52,6 +53,9 @@
         >
           Staging
         </span>
+      {/if}
+      {#if auth.isAuthenticated}
+        <a href={resolve("/orders")} class="text-sm font-medium">Orders</a>
       {/if}
       {#if AUTH_CONSTANTS.organizations}
         <OrganizationSwitcher initialData={data.initialData} />
