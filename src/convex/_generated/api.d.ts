@@ -45,6 +45,7 @@ import type * as otp_truecaller from "../otp/truecaller.js";
 import type * as otp_types from "../otp/types.js";
 import type * as storage from "../storage.js";
 import type * as store_access from "../store/access.js";
+import type * as store_catalog from "../store/catalog.js";
 import type * as store_seed from "../store/seed.js";
 import type * as store_validators from "../store/validators.js";
 import type * as url from "../url.js";
@@ -96,6 +97,7 @@ declare const fullApi: ApiFromModules<{
   "otp/types": typeof otp_types;
   storage: typeof storage;
   "store/access": typeof store_access;
+  "store/catalog": typeof store_catalog;
   "store/seed": typeof store_seed;
   "store/validators": typeof store_validators;
   url: typeof url;
