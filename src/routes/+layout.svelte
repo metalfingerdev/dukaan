@@ -8,6 +8,7 @@
   import { authClient } from "#lib/auth/api/auth-client.js";
   import { api } from "#convex/_generated/api.js";
   import { AUTH_CONSTANTS } from "#convex/auth.constants.js";
+  import { STORE_NAME } from "#convex/model/store/storeProfile.js";
 
   import { Toaster } from "#lib/primitives/ui/sonner/index.js";
   import OrganizationSwitcher from "#lib/organizations/ui/OrganizationSwitcher.svelte";
@@ -38,7 +39,7 @@
       <a
         href={resolve("/")}
         class="mr-auto min-w-0 truncate text-xl font-bold text-orange-500 sm:text-2xl"
-        >Svelte</a
+        >{STORE_NAME}</a
       >
       {#if PUBLIC_APP_ENV === "staging"}
         <span

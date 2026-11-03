@@ -2,8 +2,10 @@
 
 The only file in this skill that is specific to the store. Everything else is the same in the
 template. Values marked **TODO (dictate)** haven't been decided: don't invent them. Put a
-placeholder in one named constant (`src/lib/store/storeProfile.ts`, mirrored in the seeded
-`storeSettings` row), say so in your report, and ask when it affects behaviour.
+placeholder in one named constant (`src/convex/model/store/storeProfile.ts`, which the seed copies
+into the `storeSettings` row; it sits under `src/convex` because Convex code imports it, and the
+frontend reaches it as `#convex/model/store/storeProfile.js`), say so in your report, and ask when
+it affects behaviour. The current placeholders are the `TODO (dictate)` lines in that file.
 
 ## What's known
 
