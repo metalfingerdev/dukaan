@@ -34,7 +34,8 @@ export const deliveryAddress = v.object({
 	contactName: v.string(),
 	contactPhone: v.string(), // E.164
 	lat: v.optional(v.number()),
-	lng: v.optional(v.number())
+	lng: v.optional(v.number()),
+	mapsUrl: v.optional(v.string()) // a shared Google Maps link; see isAllowedMapsUrl
 });
 
 export const orderActorKind = v.union(

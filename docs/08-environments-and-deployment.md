@@ -63,6 +63,7 @@ and builds.
    | `CONVEX_DEPLOY_KEY` | the key from step 2 |
    | `PUBLIC_CONVEX_SITE_URL` | `https://<name>.convex.site` of the production deployment |
    | `PUBLIC_APP_ENV` | `staging` |
+   | `PUBLIC_GOOGLE_MAPS_API_KEY` | optional: the Maps browser key for the delivery pin. Public by design, so restrict it by HTTP referrer (this site's domain) and to the Maps JavaScript and Geocoding APIs, and set a budget alert in Google Cloud. It is baked in at build time, so redeploy after changing it. Without it the pin is hidden and nothing else changes |
    | `ENABLE_EXPERIMENTAL_COREPACK` | `1` (so Vercel uses the pnpm version in `package.json`) |
 
    `PUBLIC_CONVEX_URL` is set by `convex deploy` during the build; don't add it.

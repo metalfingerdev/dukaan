@@ -12,6 +12,29 @@ const LIMITS = { label: 30, line1: 200, landmark: 200, contactName: 80 } as cons
 
 export type AddressKind = 'house' | 'hostel' | 'shop';
 
+const MAX_MAPS_URL_LENGTH = 500;
+
+/**
+ * Whether `value` is a link a customer may attach to an address: https, on a Google Maps host.
+ * The delivery person taps this link, so anything else (another site, `javascript:`, a lookalike
+ * such as google.com.evil.com) must be refused. The host is compared exactly, never by "contains".
+ */
+export function isAllowedMapsUrl(value: string): boolean {
+	let url: URL;
+	try {
+		url = new URL(value);
+	} catch {
+		return false;
+	}
+	if (url.protocol !== 'https:' || url.username || url.password) return false;
+	const host = url.hostname.toLowerCase();
+	if (host === 'maps.app.goo.gl') return true;
+	if (host === 'maps.google.com') return true;
+	if (host === 'www.google.com' || host === 'google.com') return url.pathname.startsWith('/maps');
+	if (host === 'goo.gl') return url.pathname.startsWith('/maps');
+	return false;
+}
+
 export type AddressInput = {
 	label: string;
 	kind: AddressKind;
@@ -22,13 +45,15 @@ export type AddressInput = {
 	contactPhone: string;
 	lat?: number;
 	lng?: number;
+	mapsUrl?: string;
 };
 
 /** The fields that get stored (no `userId`, no `isDefault`) */
-export type CleanAddress = Omit<AddressInput, 'landmark' | 'lat' | 'lng'> & {
+export type CleanAddress = Omit<AddressInput, 'landmark' | 'lat' | 'lng' | 'mapsUrl'> & {
 	landmark?: string;
 	lat?: number;
 	lng?: number;
+	mapsUrl?: string;
 };
 
 const invalid = (field: string, code = 'INVALID_ADDRESS') =>
@@ -62,6 +87,12 @@ export function validateAddress(input: AddressInput, deliveryAreas: string[]): C
 
 	if (input.landmark !== undefined && input.landmark.trim() !== '') {
 		clean.landmark = requiredText(input.landmark, 'landmark');
+	}
+
+	if (input.mapsUrl !== undefined && input.mapsUrl.trim() !== '') {
+		const mapsUrl = input.mapsUrl.trim();
+		if (mapsUrl.length > MAX_MAPS_URL_LENGTH || !isAllowedMapsUrl(mapsUrl)) throw invalid('mapsUrl');
+		clean.mapsUrl = mapsUrl;
 	}
 
 	// Coordinates come as a pair, from the browser's geolocation; anything else is dropped

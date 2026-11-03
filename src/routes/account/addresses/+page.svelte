@@ -83,6 +83,14 @@
 								{address.area}{#if address.landmark} &middot; {address.landmark}{/if}
 							</p>
 							<p class="text-surface-600-400 text-sm">{address.contactName}, {address.contactPhone}</p>
+							{#if address.lat !== undefined && address.lng !== undefined}
+								<a
+									class="text-primary-600-400 text-sm"
+									href={`https://www.google.com/maps/search/?api=1&query=${address.lat},${address.lng}`}
+									target="_blank"
+									rel="noopener noreferrer">{strings.address.openInMaps}</a
+								>
+							{/if}
 							<div class="mt-2 flex flex-wrap gap-2">
 								<button
 									type="button"

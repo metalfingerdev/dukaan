@@ -178,7 +178,8 @@ export const placeOrder = mutation({
 				contactName: address.contactName,
 				contactPhone: address.contactPhone,
 				lat: address.lat,
-				lng: address.lng
+				lng: address.lng,
+				mapsUrl: address.mapsUrl
 			},
 			slotStartMs: args.slotStartMs,
 			customerNote: note || undefined,

@@ -23,6 +23,7 @@ const savedAddress = v.object({
 	contactPhone: v.string(),
 	lat: v.optional(v.number()),
 	lng: v.optional(v.number()),
+	mapsUrl: v.optional(v.string()),
 	isDefault: v.boolean()
 });
 
@@ -37,6 +38,7 @@ const toSavedAddress = (address: Doc<'addresses'>) => ({
 	contactPhone: address.contactPhone,
 	lat: address.lat,
 	lng: address.lng,
+	mapsUrl: address.mapsUrl,
 	isDefault: address.isDefault
 });
 
@@ -89,6 +91,7 @@ export const saveAddress = mutation({
 		contactPhone: v.string(),
 		lat: v.optional(v.number()),
 		lng: v.optional(v.number()),
+		mapsUrl: v.optional(v.string()),
 		makeDefault: v.optional(v.boolean())
 	},
 	returns: v.object({ addressId: v.id('addresses') }),

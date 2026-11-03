@@ -154,7 +154,8 @@ describe('placeOrder: the happy path', () => {
 	it('creates the order, snapshots, event and stock movements, and clears the cart', async () => {
 		const { t, alice } = await setup();
 		await fillBasket(t, alice);
-		const addressId = await saveAddress(alice, { landmark: 'near the temple', lat: 23.2, lng: 77.4 });
+		const mapsUrl = 'https://maps.app.goo.gl/AbC123xyz';
+		const addressId = await saveAddress(alice, { landmark: 'near the temple', lat: 23.2, lng: 77.4, mapsUrl });
 		const tomatoBefore = await stockOf(t, 'tomato-500g');
 		const milkBefore = await stockOf(t, 'toned-milk-500ml');
 
@@ -190,7 +191,8 @@ describe('placeOrder: the happy path', () => {
 				contactName: 'Test Customer',
 				contactPhone: '+919876543210',
 				lat: 23.2,
-				lng: 77.4
+				lng: 77.4,
+				mapsUrl
 			});
 
 			const items = await ctx.db.query('orderItems').collect();

@@ -138,7 +138,14 @@ One page, four blocks, a single primary button:
    `model/store/address.ts`): the customer picks an **area** from `storeSettings.deliveryAreas` and may
    tap "use my current location" to save `lat`/`lng` (no map widget, no Google Maps key; the
    partner's Maps button uses those coordinates). Until the real areas are known, set them with
-   `npx convex run store/seed:setDeliveryAreas '{"areas":[...]}'` (`--prod` for staging). Pick a saved one or add one. The form adapts to `kind` (house: house/street +
+   `npx convex run store/seed:setDeliveryAreas '{"areas":[...]}'` (`--prod` for staging). A
+   Google Maps **pin picker** is also offered when `PUBLIC_GOOGLE_MAPS_API_KEY` is set (lazy-loaded
+   only on the address form, never required: the delivery person is a store employee who phones the
+   customer, and a failed map load must not block an order). Rules: coverage is still the named
+   areas, not the pin; only the customer's confirmed pin and their own edited text are stored (not
+   the geocoder's raw results; check Google's terms on caching before launch); the optional "Google
+   Maps link" is only accepted for https Google Maps hosts, because the rider taps it
+   (`isAllowedMapsUrl`). Pick a saved one or add one. The form adapts to `kind` (house: house/street +
    landmark; hostel: hostel/PG name, block, room; shop). `area` is a select from
    `storeSettings.deliveryAreas`; an address outside them can't be saved ("We don't deliver there
    yet"). Phone is required and defaults to the signed-in number.
