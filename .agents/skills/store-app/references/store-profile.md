@@ -68,6 +68,13 @@ When the user dictates values, update this table first, then the code constants 
   static data. Pages are checked in a real browser.
 - **Workflow**: one branch and one draft PR per piece; the founder merges; merging to `main`
   deploys staging.
+- **Real store values go in through the admin, not the repo.** The placeholders in
+  `storeProfile.ts` stay; the founder types the real hours, fees, areas, store phone and UPI id in
+  `/admin/settings`. The repo is public, so the phone and UPI id never belong in it.
+- **Products**: entered one by one in the admin *and* by CSV import. A CSV import asks what its
+  stock column means for existing products: leave stock alone (default), add as received, or set
+  to a counted number. A count becomes *count − what placed/accepted orders hold* (those items are
+  still on the shelf), and the import stops if stock changed between preview and apply.
 
 ## Status (what exists)
 
@@ -77,8 +84,13 @@ saved addresses with optional pin, Maps link and Myself/Someone else; checkout w
 order engine (`placeOrder`, `cancelOrder`, stock and status helpers, rate limits); `/orders` and
 live `/orders/[id]` with the delivery code.
 
-**Not built**: anything for the admin or the delivery partner, so **an order stays at "Order
-placed" forever**; payments beyond cash; invoices; the designed UI.
+Step 1 in progress: the admin area has a layout and nav, `/admin` (home with the open/closed
+switch, until the order board), `/admin/settings` (hours, ETA, fees, minimum order, delivery areas,
+store phone, UPI id) and `/admin/users` (the user dashboard, moved from `/admin`).
+
+**Not built**: products, categories and stock screens, the order board and anything for the
+delivery partner, so **an order stays at "Order placed" forever**; payments beyond cash; invoices;
+the designed UI.
 
 ## Roadmap (agreed order; each step is its own PR or small series)
 
@@ -87,8 +99,10 @@ those come first. Ordered by what unblocks what.
 
 1. **Admin: catalogue, stock and settings** (`admin.md`). Product, category and stock screens
    (stock through `adjustStock` only), and a settings page that replaces the placeholders: hours,
-   fees, delivery areas, store phone, UPI id (replacing `store/seed:setDeliveryAreas`). Move the
-   user dashboard from `/admin` to `/admin/users`. *Needs from the founder:* real products with
+   fees, delivery areas, store phone, UPI id (**built**; `store/seed:setDeliveryAreas` is gone).
+   The user dashboard moved from `/admin` to `/admin/users` (**built**). Still to come, one PR
+   each: categories and products with images; the stock screen (received, counted, damaged,
+   history); CSV export and import with the stock modes above. *Needs from the founder:* real products with
    prices and stock, real hours and fees, the real delivery areas, the store phone number.
 2. **Admin: the live order board**. Columns by status, one-tap Accept, Reject (with a reason), Mark
    packed, Assign partner; new-order alert; all moves through `transitionOrder`. Orders finally move.
@@ -122,8 +136,8 @@ those come first. Ordered by what unblocks what.
 8. **The designed UI**, last: colours, logo, layout, Hindi strings if wanted, inspired by
    slothbytes.dev and not by another company's branding.
 
-**Smaller items, any time**: real delivery areas and the store phone (until step 1, set areas with
-`store/seed:setDeliveryAreas`); create a Maps key if wrong-door deliveries show up; push or SMS
+**Smaller items, any time**: the founder enters the real delivery areas, hours, fees and store
+phone in `/admin/settings` on staging; create a Maps key if wrong-door deliveries show up; push or SMS
 notifications (SMS to Indian numbers at scale needs TRAI DLT registration); prune the weak older
 tests (`demoCatalog.test.ts`, the table-mirroring parts of `orderStatus.test.ts`, the digit
 statistics in `deliveryCode.test.ts`); bump the GitHub Actions versions that warn about Node 20;

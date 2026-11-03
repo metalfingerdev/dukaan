@@ -13,7 +13,6 @@ import { ConvexError, v } from 'convex/values';
 import type { Id } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
 import { internalMutation } from '../_generated/server';
-import { validateDeliveryAreas } from '../model/store/address';
 import { DEMO_CATEGORIES, DEMO_PRODUCTS } from '../model/store/demoCatalog';
 import { STORE_SETTINGS_DEFAULTS } from '../model/store/storeProfile';
 
@@ -69,26 +68,6 @@ export const seedDemo = internalMutation({
 		}
 
 		return { settingsAdded: !settings, categoriesAdded, productsAdded };
-	}
-});
-
-/**
- * Sets the areas customers can deliver to, until `/admin/settings` exists:
- *
- *   npx convex run store/seed:setDeliveryAreas '{"areas":["Main Market","Govt College","Boys Hostel"]}'
- *
- * Add `--prod` for staging. Saved addresses keep the area they were saved with, but checkout
- * refuses an address whose area is no longer in this list, so rename areas with care.
- */
-export const setDeliveryAreas = internalMutation({
-	args: { areas: v.array(v.string()) },
-	returns: v.object({ areas: v.array(v.string()) }),
-	handler: async (ctx, args) => {
-		const areas = validateDeliveryAreas(args.areas);
-		const settings = await ctx.db.query('storeSettings').first();
-		if (!settings) throw new ConvexError('Run seedDemo first: there is no storeSettings row');
-		await ctx.db.patch(settings._id, { deliveryAreas: areas });
-		return { areas };
 	}
 });
 

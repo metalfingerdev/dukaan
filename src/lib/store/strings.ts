@@ -206,6 +206,71 @@ export const strings = {
 			cancelled: 'Cancelled'
 		}
 	},
+	admin: {
+		title: 'Store admin',
+		accessDenied: 'Access denied',
+		accessDeniedHint: "You don't have permission to view this page.",
+		nav: { home: 'Home', settings: 'Settings', users: 'Users' },
+		home: {
+			intro: 'Products, stock and the live order board are on their way. For now:',
+			settingsLink: 'Hours, fees, delivery areas, phone and UPI id',
+			usersLink: 'Users and sign-ins'
+		},
+		openSwitch: {
+			label: 'Taking orders',
+			on: 'Store switched on',
+			off: 'Store switched off',
+			turnOff: 'Close the store now',
+			turnOn: 'Open the store',
+			takingOrders: 'Customers can check out now.',
+			outsideHours: (opens: string, closes: string) =>
+				`Switched on, but outside opening hours (${opens} to ${closes}). Customers can browse but not check out.`,
+			switchedOff: "Switched off. Customers can browse but can't check out until you switch it on."
+		},
+		settings: {
+			title: 'Store settings',
+			notSaved: 'These are the starting placeholders. Nothing is saved until you press Save.',
+			hoursTitle: 'Opening hours (India time)',
+			opensAt: 'Opens at',
+			closesAt: 'Closes at',
+			hoursSummary: (hours: string) => `Open ${hours} a day.`,
+			pastMidnight: 'Closing time is earlier than opening time, so the store stays open past midnight.',
+			eta: 'Usual delivery time (minutes)',
+			etaHint: 'Shown in the header as "Delivery in ~N min".',
+			areasTitle: 'Delivery areas',
+			areas: 'One area per line: localities, colleges, hostels',
+			areasHint: 'Customers pick one of these for their address. Orders to other areas are refused.',
+			areasRemoved: (areas: string) =>
+				`Removing ${areas}. Customers with a saved address there must pick another area before they can order.`,
+			moneyTitle: 'Fees and minimum order (₹)',
+			minOrder: 'Minimum order',
+			minOrderHint: 'Checkout is refused below this item total.',
+			deliveryFee: 'Delivery fee',
+			freeDeliveryAbove: 'Free delivery from',
+			freeDeliveryHint: 'Carts at or above this item total pay no delivery fee.',
+			smallCartFee: 'Handling fee for small carts',
+			smallCartBelow: 'Charged when the item total is below',
+			contactTitle: 'Contact and payment',
+			storePhone: 'Store phone (optional)',
+			storePhoneHint: 'Customers can tap to call it from their order page.',
+			upiVpa: 'UPI id (optional)',
+			upiVpaHint: 'For UPI on delivery, which comes later. Not shown to customers yet.',
+			save: 'Save settings',
+			saving: 'Saving…',
+			saved: 'Settings saved.',
+			fixErrors: 'Please fix the highlighted fields.',
+			errors: {
+				opensAtMinute: 'Enter an opening time.',
+				closesAtMinute: 'Enter a closing time.',
+				hours: 'Opening and closing times must differ. To close for a day, switch the store off.',
+				etaMinutes: 'Enter whole minutes between 5 and 240.',
+				deliveryAreas: 'Enter 1 to 30 areas, each up to 80 characters.',
+				money: 'Enter an amount in rupees, like 20 or 20.50, up to ₹10,000.',
+				storePhone: 'Enter an Indian mobile or landline number with its STD code.',
+				upiVpa: 'Enter a UPI id like shopname@okaxis.'
+			}
+		}
+	},
 	common: {
 		backHome: 'Back to home',
 		loading: 'Loading',

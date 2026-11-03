@@ -72,7 +72,7 @@ Convex dashboard under **Data → component `betterAuth` → `user`**. Copy the 
 npx convex env set ADMIN_USER_IDS "<your-user-id>"
 ```
 
-`/admin` now works for you, and you can promote other users from there.
+`/admin` now works for you, and you can promote other users from `/admin/users`.
 
 ## Everyday commands
 

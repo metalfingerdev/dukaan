@@ -19,6 +19,7 @@
   import UserProfileHost from "#lib/users/ui/UserProfileHost.svelte";
   import OrganizationProfileHost from "#lib/organizations/ui/OrganizationProfileHost.svelte";
   import ImpersonationBanner from "#lib/admin/ui/ImpersonationBanner.svelte";
+  import AdminButton from "#lib/admin/ui/AdminButton.svelte";
 
   let { children, data } = $props();
 
@@ -56,6 +57,8 @@
       {/if}
       {#if auth.isAuthenticated}
         <a href={resolve("/orders")} class="text-sm font-medium">Orders</a>
+        <!-- Renders only for admins; /admin and every admin function check access themselves -->
+        <AdminButton class="flex items-center gap-1 text-sm font-medium" />
       {/if}
       {#if AUTH_CONSTANTS.organizations}
         <OrganizationSwitcher initialData={data.initialData} />

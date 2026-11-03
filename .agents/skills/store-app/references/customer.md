@@ -137,8 +137,7 @@ One page, four blocks, a single primary button:
 1. **Address** (built, `store/addresses.ts` and `/account/addresses`; validation in
    `model/store/address.ts`): the customer picks an **area** from `storeSettings.deliveryAreas` and may
    tap "use my current location" to save `lat`/`lng` (no map widget, no Google Maps key; the
-   partner's Maps button uses those coordinates). Until the real areas are known, set them with
-   `npx convex run store/seed:setDeliveryAreas '{"areas":[...]}'` (`--prod` for staging). A
+   partner's Maps button uses those coordinates). The admin edits the list in `/admin/settings`. A
    Google Maps **pin picker** is also offered when `PUBLIC_GOOGLE_MAPS_API_KEY` is set (lazy-loaded
    only on the address form, never required: the delivery person is a store employee who phones the
    customer, and a failed map load must not block an order). Rules: coverage is still the named

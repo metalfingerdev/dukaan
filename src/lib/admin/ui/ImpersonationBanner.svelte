@@ -10,7 +10,7 @@
 	import { getAuthContext } from '../../auth/context.svelte.js';
 	import { toast } from 'svelte-sonner';
 	// Constants
-	import { ADMIN_ROUTE } from '../utils/admin.constants.js';
+	import { ADMIN_USERS_ROUTE } from '../utils/admin.constants.js';
 
 	const { api, authClient } = getAuthContext();
 	const auth = useAuth();
@@ -38,7 +38,7 @@
 		// Refresh the Convex JWT cookie the server renders with, then reload so every query
 		// runs as the admin again
 		await authClient.getSession();
-		window.location.assign(resolve(ADMIN_ROUTE));
+		window.location.assign(resolve(ADMIN_USERS_ROUTE));
 	}
 </script>
 

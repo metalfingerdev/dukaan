@@ -17,10 +17,9 @@
 </script>
 
 <!--
-	Optional navigation link to the `/admin` dashboard. Renders nothing unless the
-	`admin` feature is enabled and the current user is an application admin. Not
-	mounted in the default layout — drop it into your own nav if you want a visible
-	entry point. The admin dashboard is the `/admin` route.
+	Navigation link to the admin area (`/admin`). Renders nothing unless the `admin`
+	feature is enabled and the current user is an application admin. The root layout
+	shows it in the header; the user dashboard is at `/admin/users`.
 -->
 {#if authConstants.admin && admin.isAppAdmin}
 	<a href={resolve(ADMIN_ROUTE)} class={className ?? 'btn preset-tonal gap-2'}>

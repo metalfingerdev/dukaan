@@ -479,7 +479,10 @@ describe('placeOrder: everything else that can refuse', () => {
 		const { t, alice } = await setup();
 		await fillBasket(t, alice);
 		const addressId = await saveAddress(alice);
-		await t.mutation(internal.store.seed.setDeliveryAreas, { areas: ['Somewhere else'] });
+		await t.run(async (ctx) => {
+			const settings = await ctx.db.query('storeSettings').first();
+			await ctx.db.patch(settings!._id, { deliveryAreas: ['Somewhere else'] });
+		});
 		expect((await failure(alice.mutation(api.store.orders.placeOrder, orderArgs(addressId)))).code).toBe('OUT_OF_AREA');
 	});
 
