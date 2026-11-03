@@ -6,6 +6,8 @@ export default defineConfig({
 	test: {
 		environment: 'edge-runtime',
 		server: { deps: { inline: ['convex-test'] } },
-		include: ['src/**/*.test.ts']
+		include: ['src/**/*.test.ts'],
+		// Stand-ins for the access guards, for every test: src/convex/vitest.setup.ts
+		setupFiles: ['src/convex/vitest.setup.ts']
 	}
 });

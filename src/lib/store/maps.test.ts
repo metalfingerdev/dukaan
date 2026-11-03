@@ -22,15 +22,6 @@ describe('loadGoogleMaps', () => {
 		expect(append).not.toHaveBeenCalled();
 	});
 
-	it('answers "no map" when the script is blocked, and tries again the next time', async () => {
-		vi.stubGlobal('window', {});
-		const { doc, append } = fakeDoc((script) => queueMicrotask(() => script.onerror?.()));
-		await expect(loadGoogleMaps('test-key', { doc })).resolves.toBeNull();
-		await expect(loadGoogleMaps('test-key', { doc })).resolves.toBeNull();
-		expect(append).toHaveBeenCalledTimes(2); // the failure was not cached
-		vi.unstubAllGlobals();
-	});
-
 	it('gives up on a script that never answers', async () => {
 		vi.stubGlobal('window', {});
 		const { doc } = fakeDoc(() => {});

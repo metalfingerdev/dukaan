@@ -1,49 +1,9 @@
-/// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
-import { ConvexError } from 'convex/values';
-import { describe, expect, it, vi } from 'vitest';
-import { api, internal } from '../../_generated/api';
+import { describe, expect, it } from 'vitest';
+import { api } from '../../_generated/api';
 import { STORE_SETTINGS_DEFAULTS } from '../../model/store/storeProfile';
-import schema from '../../schema';
-
-// Stand-ins for the real guards, which need the Better Auth component (see cart.test.ts). The
-// identity with subject "admin" is the store admin; any other signed-in identity is a customer.
-type Ctx = { auth: { getUserIdentity: () => Promise<{ subject: string } | null> } };
-vi.mock('../../model/store/access', () => ({
-	requireCustomer: async (ctx: Ctx) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new ConvexError('Not authenticated');
-		return { _id: identity.subject };
-	},
-	requireAppAdmin: async (ctx: Ctx) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new ConvexError('Not authenticated');
-		if (identity.subject !== 'admin') throw new ConvexError('Forbidden: application admin role required');
-		return { _id: identity.subject };
-	}
-}));
-
-// See seed.test.ts for why the patterns are anchored at the project root
-const modules = import.meta.glob([
-	'/src/convex/_generated/*.js',
-	'/src/convex/store/*.ts',
-	'/src/convex/store/admin/*.ts',
-	'/src/convex/model/store/*.ts',
-	'/src/convex/otp/phone.ts',
-	'!/src/convex/**/*.test.ts'
-]);
+import { setupStore as setup } from '../harness.testutils';
 
 const { getSettings, updateSettings, setStoreOpen } = api.store.admin.settings;
-
-const setup = async () => {
-	const t = convexTest(schema, modules);
-	await t.mutation(internal.store.seed.seedDemo, {});
-	return {
-		t,
-		admin: t.withIdentity({ subject: 'admin' }),
-		alice: t.withIdentity({ subject: 'alice' })
-	};
-};
 
 const form = {
 	opensAtMinute: 8 * 60,

@@ -11,11 +11,13 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:e2e": "playwright test"
 	},
 	"devDependencies": {
 		"@edge-runtime/vm": "^5.0.0",
 		"@lucide/svelte": "^1.66.0",
+		"@playwright/test": "1.64.1",
 		"@skeletonlabs/skeleton": "^5.0.1",
 		"@sveltejs/adapter-vercel": "^7.0.2",
 		"@sveltejs/kit": "^3.0.0",

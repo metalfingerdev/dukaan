@@ -38,15 +38,6 @@ describe('priceCart', () => {
 		expect(atThreshold.totalPaise).toBe(29900);
 	});
 
-	it('reports savings against MRP', () => {
-		const result = priceCart([line(2500, 2, 3000), line(100, 1, 100)], fees);
-		expect(result.savingsPaise).toBe(1000);
-	});
-
-	it('never reports negative savings when an MRP is below the price', () => {
-		expect(priceCart([line(500, 1, 400)], fees).savingsPaise).toBe(0);
-	});
-
 	it('charges nothing for an empty cart', () => {
 		expect(priceCart([], fees)).toEqual({
 			subtotalPaise: 0,

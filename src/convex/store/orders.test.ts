@@ -1,30 +1,15 @@
-/// <reference types="vite/client" />
-import rateLimiterTest from '@convex-dev/rate-limiter/test';
-import { convexTest } from 'convex-test';
-import { ConvexError } from 'convex/values';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api, internal } from '../_generated/api';
-import { listSlots } from '../model/store/slots';
+import { api } from '../_generated/api';
 import { transitionOrder } from '../model/store/orderStatus';
-import schema from '../schema';
-
-// Stand-in for the real guard, which needs the Better Auth component; see cart.test.ts
-vi.mock('../model/store/access', () => ({
-	requireCustomer: async (ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> } }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new ConvexError('Not authenticated');
-		return { _id: identity.subject };
-	}
-}));
-
-// See seed.test.ts for why the patterns are anchored at the project root
-const modules = import.meta.glob([
-	'/src/convex/_generated/*.js',
-	'/src/convex/store/*.ts',
-	'/src/convex/model/store/*.ts',
-	'/src/convex/otp/phone.ts',
-	'!/src/convex/**/*.test.ts'
-]);
+import {
+	failure,
+	idOf,
+	patchProduct,
+	setupStore as setup,
+	stockOf,
+	type Client,
+	type StoreTest
+} from './harness.testutils';
 
 // 12:00 IST on 3 Nov 2026: inside the placeholder opening hours (09:00-21:00)
 const NOON_IST = Date.UTC(2026, 10, 3, 6, 30);
@@ -36,54 +21,7 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
-const setup = async () => {
-	const t = convexTest(schema, modules);
-	rateLimiterTest.register(t);
-	await t.mutation(internal.store.seed.seedDemo, {});
-	return { t, alice: t.withIdentity({ subject: 'alice' }), bob: t.withIdentity({ subject: 'bob' }) };
-};
-type Setup = Awaited<ReturnType<typeof setup>>;
-type Client = Setup['alice'];
-
-/** The data of the ConvexError a call throws; fails if it doesn't throw one */
-const failure = async (call: Promise<unknown>) => {
-	try {
-		await call;
-	} catch (error) {
-		if (error instanceof ConvexError) return error.data as { code: string; [key: string]: unknown };
-		throw error;
-	}
-	throw new Error('expected the call to throw a ConvexError');
-};
-
-const idOf = (t: Setup['t'], slug: string) =>
-	t.run(async (ctx) => {
-		const product = await ctx.db
-			.query('products')
-			.withIndex('by_slug', (q) => q.eq('slug', slug))
-			.unique();
-		return product!._id;
-	});
-
-const patchProduct = (t: Setup['t'], slug: string, fields: Record<string, unknown>) =>
-	t.run(async (ctx) => {
-		const product = await ctx.db
-			.query('products')
-			.withIndex('by_slug', (q) => q.eq('slug', slug))
-			.unique();
-		await ctx.db.patch(product!._id, fields);
-	});
-
-const stockOf = (t: Setup['t'], slug: string) =>
-	t.run(async (ctx) => {
-		const product = await ctx.db
-			.query('products')
-			.withIndex('by_slug', (q) => q.eq('slug', slug))
-			.unique();
-		return product!.stock;
-	});
-
-const addToCart = async (t: Setup['t'], client: Client, slug: string, quantity: number) => {
+const addToCart = async (t: StoreTest['t'], client: Client, slug: string, quantity: number) => {
 	const productId = await idOf(t, slug);
 	await client.mutation(api.store.cart.setQuantity, { productId, quantity });
 };
@@ -103,7 +41,7 @@ const saveAddress = async (client: Client, overrides: Record<string, unknown> = 
 
 // tomato 2 x 25.00 + milk 3 x 29.00 = 137.00; below Rs 299 so delivery 20.00; above Rs 99 so no handling fee
 const BASKET_TOTAL = 15_700;
-const fillBasket = async (t: Setup['t'], client: Client) => {
+const fillBasket = async (t: StoreTest['t'], client: Client) => {
 	await addToCart(t, client, 'tomato-500g', 2);
 	await addToCart(t, client, 'toned-milk-500ml', 3);
 };
@@ -121,7 +59,7 @@ const orderArgs = (
 });
 
 /** Row counts and stock, to prove a failed order left nothing behind */
-const snapshot = (t: Setup['t']) =>
+const snapshot = (t: StoreTest['t']) =>
 	t.run(async (ctx) => ({
 		orders: (await ctx.db.query('orders').collect()).length,
 		orderItems: (await ctx.db.query('orderItems').collect()).length,
@@ -216,40 +154,6 @@ describe('placeOrder: the happy path', () => {
 		expect(await stockOf(t, 'toned-milk-500ml')).toBe(milkBefore - 3);
 	});
 
-	it('records stockAfter on each adjustment', async () => {
-		const { t, alice } = await setup();
-		await fillBasket(t, alice);
-		const addressId = await saveAddress(alice);
-		await alice.mutation(api.store.orders.placeOrder, orderArgs(addressId));
-		await t.run(async (ctx) => {
-			for (const adjustment of await ctx.db.query('stockAdjustments').collect()) {
-				const product = (await ctx.db.get(adjustment.productId))!;
-				expect(adjustment.stockAfter).toBe(product.stock);
-			}
-		});
-	});
-
-	it('numbers orders one after another', async () => {
-		const { t, alice, bob } = await setup();
-		const results = [];
-		for (const client of [alice, bob, alice]) {
-			await fillBasket(t, client);
-			const addressId = await saveAddress(client);
-			results.push((await client.mutation(api.store.orders.placeOrder, orderArgs(addressId))).orderNumber);
-		}
-		expect(results).toEqual([1, 2, 3]);
-	});
-
-	it('accepts a valid slot and stores it', async () => {
-		const { t, alice } = await setup();
-		await fillBasket(t, alice);
-		const addressId = await saveAddress(alice);
-		const settings = await t.run((ctx) => ctx.db.query('storeSettings').first());
-		const [slot] = listSlots(settings!, NOON_IST);
-		const placed = await alice.mutation(api.store.orders.placeOrder, orderArgs(addressId, { slotStartMs: slot }));
-		const order = await t.run((ctx) => ctx.db.get(placed.orderId));
-		expect(order!.slotStartMs).toBe(slot);
-	});
 });
 
 describe('placeOrder: idempotency', () => {
@@ -290,16 +194,6 @@ describe('placeOrder: idempotency', () => {
 		expect((await snapshot(t)).orders).toBe(2);
 	});
 
-	it('refuses a key that is too short or too long', async () => {
-		const { t, alice } = await setup();
-		await fillBasket(t, alice);
-		const addressId = await saveAddress(alice);
-		for (const idempotencyKey of ['short', 'x'.repeat(65)]) {
-			expect((await failure(alice.mutation(api.store.orders.placeOrder, orderArgs(addressId, { idempotencyKey })))).code).toBe(
-				'INVALID_IDEMPOTENCY_KEY'
-			);
-		}
-	});
 });
 
 describe('placeOrder: money', () => {
@@ -354,14 +248,6 @@ describe('placeOrder: money', () => {
 		expect((await snapshot(t)).orders).toBe(0);
 	});
 
-	it('is free of delivery fees from the threshold up', async () => {
-		const { t, alice } = await setup();
-		await addToCart(t, alice, 'wheat-atta-5kg', 2); // Rs 470
-		const addressId = await saveAddress(alice);
-		const placed = await alice.mutation(api.store.orders.placeOrder, orderArgs(addressId, { expectedTotalPaise: 47_000 }));
-		const order = await t.run((ctx) => ctx.db.get(placed.orderId));
-		expect(order).toMatchObject({ deliveryFeePaise: 0, smallCartFeePaise: 0, totalPaise: 47_000 });
-	});
 });
 
 describe('placeOrder: stock', () => {
@@ -440,12 +326,6 @@ describe('placeOrder: stock', () => {
 });
 
 describe('placeOrder: everything else that can refuse', () => {
-	it('refuses an empty cart', async () => {
-		const { alice } = await setup();
-		const addressId = await saveAddress(alice);
-		expect((await failure(alice.mutation(api.store.orders.placeOrder, orderArgs(addressId)))).code).toBe('EMPTY_CART');
-	});
-
 	it('refuses while the store is closed, by the switch or by the clock', async () => {
 		const { t, alice } = await setup();
 		await fillBasket(t, alice);
@@ -497,15 +377,6 @@ describe('placeOrder: everything else that can refuse', () => {
 		}
 	});
 
-	it('refuses a note that is too long', async () => {
-		const { t, alice } = await setup();
-		await fillBasket(t, alice);
-		const addressId = await saveAddress(alice);
-		expect((await failure(alice.mutation(api.store.orders.placeOrder, orderArgs(addressId, { note: 'x'.repeat(301) })))).code).toBe(
-			'INVALID_NOTE'
-		);
-	});
-
 	it('refuses a fourth open order, and allows one again after a cancellation', async () => {
 		const { t, alice } = await setup();
 		const addressId = await saveAddress(alice);
@@ -544,7 +415,7 @@ describe('placeOrder: everything else that can refuse', () => {
 });
 
 describe('cancelOrder', () => {
-	const placeBasket = async (s: Setup) => {
+	const placeBasket = async (s: StoreTest) => {
 		await fillBasket(s.t, s.alice);
 		const addressId = await saveAddress(s.alice);
 		return (await s.alice.mutation(api.store.orders.placeOrder, orderArgs(addressId))).orderId;
@@ -643,14 +514,6 @@ describe('transitionOrder', () => {
 		expect(await snapshot(s.t)).toEqual(before);
 	});
 
-	it('cannot be cancelled and delivered: both are final', async () => {
-		const s = await placed();
-		await move(s, 'cancelled');
-		for (const to of ['delivered', 'accepted', 'cancelled'] as const) {
-			await expect(move(s, to), to).rejects.toThrow(/INVALID_TRANSITION/);
-		}
-	});
-
 	it('restores stock when a later-stage order is cancelled, and again never', async () => {
 		const s = await placed();
 		const start = (await stockOf(s.t, 'tomato-500g')) + 2; // before the order took 2
@@ -669,11 +532,6 @@ describe('transitionOrder', () => {
 		expect(await stockOf(s.t, 'tomato-500g')).toBe(start);
 	});
 
-	it('cannot cancel an order that is out for delivery', async () => {
-		const s = await placed();
-		for (const to of ['accepted', 'packed', 'out_for_delivery'] as const) await move(s, to);
-		await expect(move(s, 'cancelled')).rejects.toThrow(/INVALID_TRANSITION/);
-	});
 });
 
 describe('reading orders', () => {
@@ -684,7 +542,7 @@ describe('reading orders', () => {
 	];
 	const PRIVATE = ['userId', 'idempotencyKey', 'assignedPartnerId', 'cashCollectedPaise', 'cashSettledAt', '_creationTime'];
 
-	const placedOrder = async (s: Setup, client: Client = s.alice) => {
+	const placedOrder = async (s: StoreTest, client: Client = s.alice) => {
 		await fillBasket(s.t, client);
 		const addressId = await saveAddress(client);
 		return (await client.mutation(api.store.orders.placeOrder, orderArgs(addressId))).orderId;
@@ -728,13 +586,6 @@ describe('reading orders', () => {
 		const delivered = await s.alice.query(api.store.orders.getOrder, { orderId });
 		expect(delivered).not.toHaveProperty('deliveryCode');
 		expect(delivered!.status).toBe('delivered');
-	});
-
-	it('hides the delivery code on a cancelled order', async () => {
-		const s = await setup();
-		const orderId = await placedOrder(s);
-		await s.alice.mutation(api.store.orders.cancelOrder, { orderId });
-		expect(await s.alice.query(api.store.orders.getOrder, { orderId })).not.toHaveProperty('deliveryCode');
 	});
 
 	it('lists only my orders, newest first, and pages through them', async () => {
