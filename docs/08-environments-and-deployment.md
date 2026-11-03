@@ -20,7 +20,7 @@ header (`PUBLIC_APP_ENV=staging`), so nobody mistakes it for the store.
 
 ```
  PR opened ──▶ GitHub Actions (.github/workflows/ci.yml)
-               pnpm check · tsc on src/convex · pnpm build      ← must be green to merge
+               pnpm check · tsc on src/convex · pnpm test · pnpm build   ← must be green to merge
 
  merge to main ──▶ Vercel build (vercel.json)
                    npx convex deploy --cmd 'pnpm build'

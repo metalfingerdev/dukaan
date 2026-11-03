@@ -37,10 +37,13 @@ Hosted on Vercel (staging for now).
 | `pnpm dev` | SvelteKit dev server on http://localhost:5173 |
 | `pnpm check` | type-check Svelte + TS (must be 0 errors) |
 | `npx tsc -p src/convex --noEmit` | type-check the Convex functions |
+| `pnpm test` | vitest, including `convex-test` for Convex functions (`*.test.ts` next to the code) |
 | `pnpm build` | production build (needs `PUBLIC_CONVEX_URL` and `PUBLIC_CONVEX_SITE_URL` set) |
 
-There is no test runner yet. CI (`.github/workflows/ci.yml`) runs the three checks above on every
-PR. Run them before you say something is done.
+CI (`.github/workflows/ci.yml`) runs the four checks above on every PR. Run them before you say
+something is done. Convex ignores file names with more than one dot, so `foo.test.ts` is never
+deployed. In a `convex-test` file, anchor the `import.meta.glob` patterns at the project root
+(`/src/convex/...`) and keep `betterAuth/_generated` out of them; `store/seed.test.ts` shows how.
 
 ## Repo map
 
