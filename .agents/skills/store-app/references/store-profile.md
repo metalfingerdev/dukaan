@@ -64,8 +64,10 @@ When the user dictates values, update this table first, then the code constants 
   tracking** until there is a rider app that can report location in the background (a web page
   stops reporting when the screen locks).
 - **Payment today**: cash on delivery or UPI on delivery. Online payment is wanted too (see below).
-- **Tests**: only tests that fail when behaviour breaks. No tests that restate a table, a string or
-  static data. Pages are checked in a real browser.
+- **Tests**: very few, and only tests that fail when behaviour breaks: security refusals, money and
+  stock correctness, real invariants. No tests that restate a table, a string or static data.
+  Pages are checked by the Playwright suite in `tests/e2e`, run locally against the dev deployment
+  only, not in CI (`docs/09-testing.md`). Each new screen adds its spec there.
 - **Workflow**: one branch and one draft PR per piece; the founder merges; merging to `main`
   deploys staging.
 - **Real store values go in through the admin, not the repo.** The placeholders in
@@ -138,7 +140,5 @@ those come first. Ordered by what unblocks what.
 
 **Smaller items, any time**: the founder enters the real delivery areas, hours, fees and store
 phone in `/admin/settings` on staging; create a Maps key if wrong-door deliveries show up; push or SMS
-notifications (SMS to Indian numbers at scale needs TRAI DLT registration); prune the weak older
-tests (`demoCatalog.test.ts`, the table-mirroring parts of `orderStatus.test.ts`, the digit
-statistics in `deliveryCode.test.ts`); bump the GitHub Actions versions that warn about Node 20;
+notifications (SMS to Indian numbers at scale needs TRAI DLT registration); bump the GitHub Actions versions that warn about Node 20;
 a rider app if live tracking is ever wanted.

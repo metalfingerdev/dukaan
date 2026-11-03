@@ -87,6 +87,7 @@ tabs in `src/lib/primitives/ui/`, `createContext` as in `src/lib/auth/context.sv
 ## Finish
 
 - `pnpm check` and `npx tsc -p src/convex --noEmit` pass.
-- If you touched access rules, prove them: the `convex-verify` skill drives each role and checks
-  that the wrong role is refused.
+- If you touched access rules, prove them: a Vitest refusal per role through the shared harness
+  (`src/convex/store/harness.testutils.ts`), and a Playwright spec in `tests/e2e` for the pages
+  (`docs/09-testing.md`). Only tests that can fail when the behaviour breaks.
 - Report what you built, which `TODO (dictate)` values you assumed, and anything you left for later.

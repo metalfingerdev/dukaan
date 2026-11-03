@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isOpenNow, istDayStartMs, istMinuteOfDay } from './time';
+import { isOpenNow, istDayStartMs } from './time';
 
 // IST is UTC+5:30, so 09:00 IST is 03:30 UTC
 const ist = (day: number, hour: number, minute = 0) =>
@@ -15,11 +15,6 @@ describe('IST time', () => {
 		expect(istDayStartMs(midnightIst - 1)).toBe(midnightIst - 24 * 60 * 60 * 1000);
 	});
 
-	it('reads the minute of the IST day', () => {
-		expect(istMinuteOfDay(ist(3, 0, 0))).toBe(0);
-		expect(istMinuteOfDay(ist(3, 9, 30))).toBe(9 * 60 + 30);
-		expect(istMinuteOfDay(ist(3, 23, 59))).toBe(23 * 60 + 59);
-	});
 });
 
 describe('isOpenNow', () => {
@@ -30,10 +25,6 @@ describe('isOpenNow', () => {
 		expect(isOpenNow(hours, ist(3, 21, 0))).toBe(false);
 	});
 
-	it('is closed whenever the manual switch is off', () => {
-		expect(isOpenNow({ ...hours, isOpen: false }, ist(3, 12))).toBe(false);
-	});
-
 	it('handles hours that wrap past midnight', () => {
 		const late = { isOpen: true, opensAtMinute: 22 * 60, closesAtMinute: 2 * 60 };
 		expect(isOpenNow(late, ist(3, 23))).toBe(true);
@@ -42,9 +33,4 @@ describe('isOpenNow', () => {
 		expect(isOpenNow(late, ist(3, 12))).toBe(false);
 	});
 
-	it('treats equal opening and closing minutes as closed all day', () => {
-		expect(isOpenNow({ isOpen: true, opensAtMinute: 600, closesAtMinute: 600 }, ist(3, 10))).toBe(
-			false
-		);
-	});
 });

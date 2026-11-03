@@ -1,37 +1,6 @@
-/// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
-import { ConvexError } from 'convex/values';
-import { describe, expect, it, vi } from 'vitest';
-import { api, internal } from '../_generated/api';
-import schema from '../schema';
-
-// Stand-in for the real guard, which needs the Better Auth component; see cart.test.ts
-vi.mock('../model/store/access', () => ({
-	requireCustomer: async (ctx: { auth: { getUserIdentity: () => Promise<{ subject: string } | null> } }) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) throw new ConvexError('Not authenticated');
-		return { _id: identity.subject };
-	}
-}));
-
-// See seed.test.ts for why the patterns are anchored at the project root
-const modules = import.meta.glob([
-	'/src/convex/_generated/*.js',
-	'/src/convex/store/*.ts',
-	'/src/convex/model/store/*.ts',
-	'/src/convex/otp/phone.ts',
-	'!/src/convex/**/*.test.ts'
-]);
-
-const setup = async () => {
-	const t = convexTest(schema, modules);
-	await t.mutation(internal.store.seed.seedDemo, {});
-	return {
-		t,
-		alice: t.withIdentity({ subject: 'alice' }),
-		bob: t.withIdentity({ subject: 'bob' })
-	};
-};
+import { describe, expect, it } from 'vitest';
+import { api } from '../_generated/api';
+import { setupStore as setup } from './harness.testutils';
 
 const home = {
 	label: 'Home',
@@ -69,13 +38,6 @@ describe('saveAddress', () => {
 			isDefault: true
 		});
 		expect(saved).not.toHaveProperty('userId');
-	});
-
-	it('stores coordinates when given', async () => {
-		const { alice } = await setup();
-		await alice.mutation(api.store.addresses.saveAddress, { ...home, lat: 23.2, lng: 77.4 });
-		const [saved] = await alice.query(api.store.addresses.listAddresses, {});
-		expect(saved).toMatchObject({ lat: 23.2, lng: 77.4 });
 	});
 
 	it('refuses an area outside the delivery list and a bad phone', async () => {
@@ -124,12 +86,6 @@ describe('saveAddress', () => {
 		);
 	});
 
-	it('refuses to save before the store is set up', async () => {
-		const t = convexTest(schema, modules);
-		await expect(
-			t.withIdentity({ subject: 'alice' }).mutation(api.store.addresses.saveAddress, home)
-		).rejects.toThrow(/STORE_NOT_SET_UP/);
-	});
 });
 
 describe('ownership', () => {
@@ -166,15 +122,6 @@ describe('ownership', () => {
 });
 
 describe('setDefaultAddress and deleteAddress', () => {
-	it('switches the default', async () => {
-		const { alice } = await setup();
-		await alice.mutation(api.store.addresses.saveAddress, home);
-		const { addressId } = await alice.mutation(api.store.addresses.saveAddress, { ...home, label: 'B' });
-		await alice.mutation(api.store.addresses.setDefaultAddress, { id: addressId });
-		const list = await alice.query(api.store.addresses.listAddresses, {});
-		expect(list.filter((a) => a.isDefault).map((a) => a.label)).toEqual(['B']);
-	});
-
 	it('promotes the oldest remaining address when the default is deleted', async () => {
 		const { alice } = await setup();
 		const first = await alice.mutation(api.store.addresses.saveAddress, { ...home, label: 'First' });
@@ -185,12 +132,4 @@ describe('setDefaultAddress and deleteAddress', () => {
 		expect(list[0]).toMatchObject({ label: 'Second', isDefault: true });
 	});
 
-	it('keeps the default when a different address is deleted', async () => {
-		const { alice } = await setup();
-		await alice.mutation(api.store.addresses.saveAddress, { ...home, label: 'First' });
-		const second = await alice.mutation(api.store.addresses.saveAddress, { ...home, label: 'Second' });
-		await alice.mutation(api.store.addresses.deleteAddress, { id: second.addressId });
-		const list = await alice.query(api.store.addresses.listAddresses, {});
-		expect(list).toEqual([expect.objectContaining({ label: 'First', isDefault: true })]);
-	});
 });

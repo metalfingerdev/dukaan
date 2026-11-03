@@ -38,12 +38,15 @@ Hosted on Vercel (staging for now).
 | `pnpm check` | type-check Svelte + TS (must be 0 errors) |
 | `npx tsc -p src/convex --noEmit` | type-check the Convex functions |
 | `pnpm test` | vitest, including `convex-test` for Convex functions (`*.test.ts` next to the code) |
+| `pnpm test:e2e` | Playwright in `tests/e2e` against the **dev** deployment (not in CI; `docs/09-testing.md`) |
 | `pnpm build` | production build (needs `PUBLIC_CONVEX_URL` and `PUBLIC_CONVEX_SITE_URL` set) |
 
 CI (`.github/workflows/ci.yml`) runs the four checks above on every PR. Run them before you say
 something is done. Convex ignores file names with more than one dot, so `foo.test.ts` is never
-deployed. In a `convex-test` file, anchor the `import.meta.glob` patterns at the project root
-(`/src/convex/...`) and keep `betterAuth/_generated` out of them; `store/seed.test.ts` shows how.
+deployed. Store tests share `src/convex/store/harness.testutils.ts` (setup, module list, helpers),
+and `src/convex/vitest.setup.ts` replaces the access guards for every test. **Only real tests**:
+each must be able to fail when the behaviour it guards breaks; no tests that restate a table, a
+string or static data, and nothing tested twice across Vitest and Playwright (`docs/09-testing.md`).
 
 ## Repo map
 

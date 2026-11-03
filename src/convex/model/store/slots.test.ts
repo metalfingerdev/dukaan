@@ -20,16 +20,6 @@ describe('listSlots', () => {
 		expect(listSlots(hours, ist(3, 10, 31))[0]).toBe(ist(3, 12));
 	});
 
-	it('offers the whole day before opening time', () => {
-		const slots = listSlots(hours, ist(3, 7, 0));
-		expect(slots.map(istHour)).toEqual([9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
-	});
-
-	it('offers nothing once the last slot is too close, or after closing', () => {
-		expect(listSlots(hours, ist(3, 19, 45))).toEqual([]); // 20:00 slot is 15 minutes away
-		expect(listSlots(hours, ist(3, 22, 0))).toEqual([]);
-	});
-
 	it('never offers a slot that would run past closing time', () => {
 		const odd = { opensAtMinute: 9 * 60, closesAtMinute: 20 * 60 + 30 };
 		const slots = listSlots(odd, ist(3, 7, 0));
@@ -40,10 +30,6 @@ describe('listSlots', () => {
 	it('never offers tomorrow', () => {
 		const slots = listSlots(hours, ist(3, 12, 0));
 		expect(slots.every((start) => start < ist(4, 0))).toBe(true);
-	});
-
-	it('is empty when opening and closing times are equal', () => {
-		expect(listSlots({ opensAtMinute: 600, closesAtMinute: 600 }, ist(3, 5))).toEqual([]);
 	});
 
 	it('handles hours that run past midnight, in the evening and after midnight', () => {

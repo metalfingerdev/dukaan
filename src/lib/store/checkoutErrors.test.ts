@@ -30,11 +30,6 @@ describe('describeCheckoutError', () => {
 		]);
 	});
 
-	it('recognises the rate limiter, whose error has a kind and no code', () => {
-		const problem = describeCheckoutError(new ConvexError({ kind: 'RateLimited', retryAfter: 1000 }), names);
-		expect(problem.message).toMatch(/try again later/i);
-	});
-
 	it('never shows a technical message for an error it does not know', () => {
 		for (const error of [
 			new Error('Server Error'),

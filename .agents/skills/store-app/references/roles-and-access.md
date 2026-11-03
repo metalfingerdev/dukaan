@@ -107,4 +107,5 @@ Found by testing in a browser. It is UX only: the Convex functions still refuse 
 
 For each guarded function: signed-out is refused, a customer is refused on admin functions, a
 partner can't open another partner's order, and an unverified phone number doesn't make a partner.
-The `convex-verify` skill drives these.
+In Vitest the guards are stand-ins (`src/convex/vitest.setup.ts`, extend it for a new guard); the
+pages and the real guards are checked by the Playwright suite (`tests/e2e`, `docs/09-testing.md`).
