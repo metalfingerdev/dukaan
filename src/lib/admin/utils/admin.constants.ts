@@ -1,5 +1,8 @@
-/** Path of the admin dashboard route. */
+/** Path of the admin area's home page. */
 export const ADMIN_ROUTE = '/admin' as const;
+
+/** Path of the user and organization dashboard inside the admin area. */
+export const ADMIN_USERS_ROUTE = '/admin/users' as const;
 
 /** Users the users table loads at first and adds per "Load more". */
 export const USERS_PAGE_SIZE = 50;

@@ -1,7 +1,7 @@
 /**
  * Facts about this store, in one place so the seed, the storefront and (later) checkout agree.
  * Every value marked TODO (dictate) is a placeholder the store hasn't decided yet; change it here
- * and re-run the seed on a fresh deployment, or edit `storeSettings` in the dashboard. The decided
+ * and re-run the seed on a fresh deployment, or change them in /admin/settings. The decided
  * facts and the open questions are in .agents/skills/store-app/references/store-profile.md.
  *
  * Lives under src/convex because the seed imports it; the frontend imports Convex files through
@@ -26,7 +26,7 @@ export const STORE_SETTINGS_DEFAULTS = {
 	closesAtMinute: 21 * 60, // TODO (dictate): 21:00 IST
 	etaMinutes: 30, // TODO (dictate)
 	// TODO (dictate): the real localities, colleges and hostels. These are placeholders so checkout
-	// can be tried; set the real list with `npx convex run store/seed:setDeliveryAreas`
+	// can be tried; the admin sets the real list in /admin/settings
 	deliveryAreas: ['Main Market (placeholder)', 'College campus (placeholder)', 'Hostels (placeholder)'],
 	minOrderPaise: rupees(99), // TODO (dictate)
 	deliveryFeePaise: rupees(20), // TODO (dictate)

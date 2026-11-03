@@ -8,7 +8,7 @@ function here starts with `requireAppAdmin(ctx)` (`roles-and-access.md`).
 
 | Route | Shows |
 | --- | --- |
-| `/admin` | **Live order board** (the page an admin lands on) |
+| `/admin` | **Live order board** (the page an admin lands on); until it exists, an admin home with the open/closed switch |
 | `/admin/orders` | all orders, filter by status/date, paginated |
 | `/admin/orders/[id]` | one order: items, address, payment, timeline, actions, invoice |
 | `/admin/orders/[id]/invoice` | printable invoice |
@@ -18,10 +18,11 @@ function here starts with `requireAppAdmin(ctx)` (`roles-and-access.md`).
 | `/admin/settings` | hours, open/closed switch, fees, areas, invoice details |
 | `/admin/users` | the existing user and organization dashboard |
 
-The starter's user-management dashboard currently *is* `/admin` (`src/routes/admin/+page.svelte`,
+The starter's user-management dashboard starts out *as* `/admin` (`src/routes/admin/+page.svelte`,
 `ADMIN_ROUTE` in `src/lib/admin/utils/admin.constants.ts`, and the `AdminDashboard` component).
 Moving it to `/admin/users` means: move the page, add the new board at `/admin`, and grep for
-`ADMIN_ROUTE` and `AdminButton` to update every link and `redirectTo`. Keep its access check.
+`ADMIN_ROUTE` and `AdminButton` to update every link and `redirectTo` (the impersonation banner
+returns to the user dashboard). Keep its access check.
 
 A shared `src/routes/admin/+layout.svelte` holds the nav (a bottom tab bar on mobile, a sidebar on
 desktop; `src/lib/primitives/ui/Sidebar.svelte` exists) and the access check, so each page doesn't

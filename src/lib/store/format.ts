@@ -37,6 +37,10 @@ export const formatTime = (ms: number) => timeFormatter.format(ms);
 /** "3 Nov, 11:00 am", in IST */
 export const formatDateTime = (ms: number) => dateTimeFormatter.format(ms);
 
+/** Minutes after midnight IST as "9:00 am" (opening hours) */
+export const formatMinuteOfDay = (minute: number) =>
+	formatTime(Date.UTC(2026, 0, 1, 0, minute) - 5.5 * 60 * 60 * 1000);
+
 /** A delivery slot as a range, "11:00 am to 12:00 pm", given its start and length in minutes */
 export const formatSlot = (startMs: number, slotMinutes: number) =>
 	`${formatTime(startMs)} to ${formatTime(startMs + slotMinutes * 60 * 1000)}`;

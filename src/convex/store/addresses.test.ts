@@ -194,21 +194,3 @@ describe('setDefaultAddress and deleteAddress', () => {
 		expect(list).toEqual([expect.objectContaining({ label: 'First', isDefault: true })]);
 	});
 });
-
-describe('setDeliveryAreas (internal)', () => {
-	it('replaces the list, and saved addresses can then only use the new areas', async () => {
-		const { t, alice } = await setup();
-		await t.mutation(internal.store.seed.setDeliveryAreas, { areas: ['Govt College', ' Boys Hostel '] });
-		await expect(alice.mutation(api.store.addresses.saveAddress, home)).rejects.toThrow(/OUT_OF_AREA/);
-		await alice.mutation(api.store.addresses.saveAddress, { ...home, area: 'Boys Hostel' });
-		const info = await t.query(api.store.catalog.getStoreInfo, {});
-		expect(info!.deliveryAreas).toEqual(['Govt College', 'Boys Hostel']);
-	});
-
-	it('refuses an empty list', async () => {
-		const { t } = await setup();
-		await expect(t.mutation(internal.store.seed.setDeliveryAreas, { areas: [] })).rejects.toThrow(
-			/INVALID_AREAS/
-		);
-	});
-});

@@ -8,7 +8,7 @@
   keys and account deletion.
 - **Organizations** (optional): create and switch orgs, invite members, roles, logo, leave or
   delete. Every new user gets a "Personal Organization".
-- **Admin dashboard** at `/admin` (optional): list and search users and orgs, ban, set roles,
+- **Admin dashboard** at `/admin/users` (optional): list and search users and orgs, ban, set roles,
   revoke sessions, impersonate.
 - **Device authorization** (optional): the `/device` flow for CLIs and TVs.
 - **Transactional emails** through Resend: verification, OTP, magic link, password reset,
