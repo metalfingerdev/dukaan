@@ -23,6 +23,7 @@ import type * as model_emails_templates_emailTemplates from "../model/emails/tem
 import type * as model_emails_validateEmail from "../model/emails/validateEmail.js";
 import type * as model_organizations_index from "../model/organizations/index.js";
 import type * as model_store_access from "../model/store/access.js";
+import type * as model_store_address from "../model/store/address.js";
 import type * as model_store_demoCatalog from "../model/store/demoCatalog.js";
 import type * as model_store_pricing from "../model/store/pricing.js";
 import type * as model_store_publicProjection from "../model/store/publicProjection.js";
@@ -46,6 +47,7 @@ import type * as otp_truecaller from "../otp/truecaller.js";
 import type * as otp_types from "../otp/types.js";
 import type * as storage from "../storage.js";
 import type * as store_access from "../store/access.js";
+import type * as store_addresses from "../store/addresses.js";
 import type * as store_cart from "../store/cart.js";
 import type * as store_catalog from "../store/catalog.js";
 import type * as store_seed from "../store/seed.js";
@@ -77,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   "model/emails/validateEmail": typeof model_emails_validateEmail;
   "model/organizations/index": typeof model_organizations_index;
   "model/store/access": typeof model_store_access;
+  "model/store/address": typeof model_store_address;
   "model/store/demoCatalog": typeof model_store_demoCatalog;
   "model/store/pricing": typeof model_store_pricing;
   "model/store/publicProjection": typeof model_store_publicProjection;
@@ -100,6 +103,7 @@ declare const fullApi: ApiFromModules<{
   "otp/types": typeof otp_types;
   storage: typeof storage;
   "store/access": typeof store_access;
+  "store/addresses": typeof store_addresses;
   "store/cart": typeof store_cart;
   "store/catalog": typeof store_catalog;
   "store/seed": typeof store_seed;
