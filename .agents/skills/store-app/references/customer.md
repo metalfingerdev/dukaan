@@ -162,11 +162,21 @@ transaction it:
 8. calls `adjustStock` for each line (reason `sold`)
 9. clears the user's `cartItems`
 
-Failures throw `ConvexError({ code, ... })` with one of `STORE_CLOSED`, `BELOW_MINIMUM`,
-`OUT_OF_AREA`, `OUT_OF_STOCK` (with the product id) or `PRICE_CHANGED`. The page turns each into a
+Failures throw `ConvexError({ code, ... })` with one of `STORE_CLOSED`, `BELOW_MINIMUM`
+(`minOrderPaise`), `OUT_OF_AREA`, `INVALID_SLOT`, `EMPTY_CART`, `TOO_MANY_OPEN_ORDERS`,
+`CART_CHANGED` or `PRICE_CHANGED` (`totalPaise`, the new total). The page turns each into a
 "Review your cart" state that shows exactly what changed and lets the customer accept and retry;
 never a bare error toast. Compare the total the customer saw (sent as `expectedTotalPaise`) with
 the recomputed one, and throw `PRICE_CHANGED` if they differ.
+
+`CART_CHANGED` carries `problems: [{ productId, reason, available }]` for **every** line that can't
+be ordered as it is (`reason` is `unavailable`, `out_of_stock` or `over_limit`; `available` is the
+most that can be ordered now). It replaces a per-product `OUT_OF_STOCK` so the customer fixes the
+whole cart in one pass instead of discovering problems one retry at a time. The cart is read from
+`cartItems` on the server, never from the request, and every check runs before the first write, so a
+refusal leaves nothing behind. Built in `src/convex/store/orders.ts`; the one place stock changes is
+`model/store/stock.ts` (`adjustStock`) and the one place status changes is
+`model/store/orderStatus.ts` (`transitionOrder`).
 
 ## Orders and tracking
 
