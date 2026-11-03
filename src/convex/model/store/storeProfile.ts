@@ -14,6 +14,10 @@ export const STORE_NAME = (AUTH_CONSTANTS.brandName ?? 'Dukaan').trim();
 
 const rupees = (amount: number) => amount * 100;
 
+/** Delivery time slots: decided by the store, so plain constants rather than settings */
+export const SLOT_MINUTES = 60;
+export const SLOT_NOTICE_MINUTES = 30;
+
 /** Values for the single `storeSettings` row the seed creates. Placeholders unless noted. */
 export const STORE_SETTINGS_DEFAULTS = {
 	storeName: STORE_NAME,
@@ -21,7 +25,9 @@ export const STORE_SETTINGS_DEFAULTS = {
 	opensAtMinute: 9 * 60, // TODO (dictate): 09:00 IST
 	closesAtMinute: 21 * 60, // TODO (dictate): 21:00 IST
 	etaMinutes: 30, // TODO (dictate)
-	deliveryAreas: ['TODO (dictate): add localities, colleges and hostels'],
+	// TODO (dictate): the real localities, colleges and hostels. These are placeholders so checkout
+	// can be tried; set the real list with `npx convex run store/seed:setDeliveryAreas`
+	deliveryAreas: ['Main Market (placeholder)', 'College campus (placeholder)', 'Hostels (placeholder)'],
 	minOrderPaise: rupees(99), // TODO (dictate)
 	deliveryFeePaise: rupees(20), // TODO (dictate)
 	freeDeliveryAbovePaise: rupees(299), // TODO (dictate)

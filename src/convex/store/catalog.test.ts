@@ -106,7 +106,8 @@ describe('catalogue is public and returns projections only', () => {
 		expect(info).not.toHaveProperty('gstin');
 		expect(info).not.toHaveProperty('legalName');
 		expect(info).not.toHaveProperty('addressLine');
-		expect(info).not.toHaveProperty('deliveryAreas');
+		// The areas customers can pick are public by nature
+		expect(info!.deliveryAreas.length).toBeGreaterThan(0);
 		expect(info!.storePhone).toBe('+919999999999');
 	});
 

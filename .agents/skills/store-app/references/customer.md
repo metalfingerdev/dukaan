@@ -134,7 +134,11 @@ delivery").
 
 One page, four blocks, a single primary button:
 
-1. **Address**: pick a saved one or add one. The form adapts to `kind` (house: house/street +
+1. **Address** (built, `store/addresses.ts` and `/account/addresses`; validation in
+   `model/store/address.ts`): the customer picks an **area** from `storeSettings.deliveryAreas` and may
+   tap "use my current location" to save `lat`/`lng` (no map widget, no Google Maps key; the
+   partner's Maps button uses those coordinates). Until the real areas are known, set them with
+   `npx convex run store/seed:setDeliveryAreas '{"areas":[...]}'` (`--prod` for staging). Pick a saved one or add one. The form adapts to `kind` (house: house/street +
    landmark; hostel: hostel/PG name, block, room; shop). `area` is a select from
    `storeSettings.deliveryAreas`; an address outside them can't be saved ("We don't deliver there
    yet"). Phone is required and defaults to the signed-in number.
