@@ -22,6 +22,7 @@ import type * as model_emails_templates_baseEmail from "../model/emails/template
 import type * as model_emails_templates_emailTemplates from "../model/emails/templates/emailTemplates.js";
 import type * as model_emails_validateEmail from "../model/emails/validateEmail.js";
 import type * as model_organizations_index from "../model/organizations/index.js";
+import type * as model_store_access from "../model/store/access.js";
 import type * as organizations_invitations_queries from "../organizations/invitations/queries.js";
 import type * as organizations_members_mutations from "../organizations/members/mutations.js";
 import type * as organizations_mutations from "../organizations/mutations.js";
@@ -39,6 +40,8 @@ import type * as otp_send from "../otp/send.js";
 import type * as otp_truecaller from "../otp/truecaller.js";
 import type * as otp_types from "../otp/types.js";
 import type * as storage from "../storage.js";
+import type * as store_access from "../store/access.js";
+import type * as store_validators from "../store/validators.js";
 import type * as url from "../url.js";
 import type * as users_actions from "../users/actions.js";
 import type * as users_mutations from "../users/mutations.js";
@@ -65,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   "model/emails/templates/emailTemplates": typeof model_emails_templates_emailTemplates;
   "model/emails/validateEmail": typeof model_emails_validateEmail;
   "model/organizations/index": typeof model_organizations_index;
+  "model/store/access": typeof model_store_access;
   "organizations/invitations/queries": typeof organizations_invitations_queries;
   "organizations/members/mutations": typeof organizations_members_mutations;
   "organizations/mutations": typeof organizations_mutations;
@@ -82,6 +86,8 @@ declare const fullApi: ApiFromModules<{
   "otp/truecaller": typeof otp_truecaller;
   "otp/types": typeof otp_types;
   storage: typeof storage;
+  "store/access": typeof store_access;
+  "store/validators": typeof store_validators;
   url: typeof url;
   "users/actions": typeof users_actions;
   "users/mutations": typeof users_mutations;
