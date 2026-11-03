@@ -19,7 +19,15 @@ checkout, phone-first, and the guest cart follows them.
 | `/account/addresses` | signed in | saved addresses |
 
 Add the public ones to `isPublic` in `src/hooks.server.ts`, with the same pattern syntax it uses
-(`'/c/{*rest}'`, `'/p/{*rest}'`). Everything else stays private by default. Replace the
+(`'/c/{*rest}'`, `'/p/{*rest}'`). Everything else stays private by default. The patterns live in
+`src/lib/store/publicRoutes.ts` (tested) and `hooks.server.ts` spreads them in; `/cart` is added
+with the cart page.
+
+**Don't put the storefront pages in a route group** such as `(shop)`. A group renames route IDs
+(`/` becomes `/(shop)`), and `resolve('/')` is used all over the app, so every one of those breaks.
+The pages share `src/lib/store/ui/ShopPage.svelte` (open/closed strip, search box) instead.
+Catalogue queries return `stockLeft` only while `lowStock` is true, so "Only N left" works without
+exposing the real stock otherwise. Replace the
 placeholder `src/routes/+page.svelte`, and the "Svelte" wordmark in `src/routes/+layout.svelte`,
 with the store's name from `store-profile.md`.
 
