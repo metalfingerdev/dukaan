@@ -9,6 +9,8 @@
   import { api } from "#convex/_generated/api.js";
   import { AUTH_CONSTANTS } from "#convex/auth.constants.js";
   import { STORE_NAME } from "#convex/model/store/storeProfile.js";
+  import { Cart } from "#lib/store/cart.svelte.js";
+  import { setCartContext } from "#lib/store/cart.context.js";
 
   import { Toaster } from "#lib/primitives/ui/sonner/index.js";
   import OrganizationSwitcher from "#lib/organizations/ui/OrganizationSwitcher.svelte";
@@ -21,6 +23,8 @@
   let { children, data } = $props();
 
   createSvelteAuthClient({ authClient, getServerState: () => data.authState });
+  // After the auth client: the cart reads the auth state and the Convex client it sets up
+  setCartContext(new Cart());
 </script>
 
 <svelte:head>

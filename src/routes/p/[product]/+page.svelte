@@ -7,6 +7,7 @@
 
 	import ShopPage from '#lib/store/ui/ShopPage.svelte';
 	import ProductGrid from '#lib/store/ui/ProductGrid.svelte';
+	import AddToCart from '#lib/store/ui/AddToCart.svelte';
 	import { formatPaise, percentOff } from '#lib/store/format.js';
 	import { strings } from '#lib/store/strings.js';
 
@@ -78,6 +79,7 @@
 						{strings.product.maxPerOrder(product.maxQuantity)}
 					</p>
 				{/if}
+				<div class="mt-2 max-w-xs"><AddToCart {product} /></div>
 			</div>
 		</div>
 

@@ -20,8 +20,8 @@ checkout, phone-first, and the guest cart follows them.
 
 Add the public ones to `isPublic` in `src/hooks.server.ts`, with the same pattern syntax it uses
 (`'/c/{*rest}'`, `'/p/{*rest}'`). Everything else stays private by default. The patterns live in
-`src/lib/store/publicRoutes.ts` (tested) and `hooks.server.ts` spreads them in; `/cart` is added
-with the cart page.
+`src/lib/store/publicRoutes.ts` (tested) and `hooks.server.ts` spreads them in; `/cart` is public
+too, since a guest has a cart.
 
 **Don't put the storefront pages in a route group** such as `(shop)`. A group renames route IDs
 (`/` becomes `/(shop)`), and `resolve('/')` is used all over the app, so every one of those breaks.
@@ -48,7 +48,8 @@ Mobile first: design at 360px wide, then widen.
   MRP struck through with "% off" when `mrp > price`, and one control: **Add**, which becomes a
   **− qty +** stepper once in the cart. When `stock === 0` show "Out of stock" and no control.
   Show "Only N left" when stock is at or below the product's `lowStockAt`.
-- **Cart drawer**: `src/lib/primitives/ui/drawer`, as a bottom sheet on mobile.
+- **Cart drawer**: `src/lib/primitives/ui/drawer`, as a bottom sheet on mobile. Not built yet: the
+  sticky cart bar links to the `/cart` page instead. Add the drawer when the UI is designed.
 - **States**: skeletons while loading, an empty cart with a way back to the shelves, a "closed
   right now" banner (browsing allowed, checkout disabled), an offline banner.
 - **Images**: product images come from Convex storage (`ctx.storage.getUrl`). Use `loading="lazy"`
@@ -79,13 +80,20 @@ export class Cart {
 - **Guest**: lines in `localStorage` under a versioned key (`store.cart.v1`), every read and write in
   `try/catch` since storage can be blocked. Prices are *not* stored; look them up live so a stale
   cart never shows a stale price.
-- **Signed in**: lines in `cartItems` through mutations in `src/convex/store/cart.ts`. The UI updates
-  optimistically (`convex-svelte` optimistic updates) and rolls back on error.
+- **Signed in**: lines in `cartItems` through mutations in `src/convex/store/cart.ts`. The cart
+  query is live, so the stepper updates a moment after the mutation returns. Optimistic updates
+  were left out for now (a joined query makes them fiddly); add them if the delay is noticeable on
+  a slow connection.
 - **Merge on sign-in**: when `useAuth().isAuthenticated` turns true and the guest cart isn't empty,
-  call `mergeGuestCart({ lines })` once, then clear local storage. The mutation sums quantities for
-  products in both carts and clamps each to `min(stock, maxPerOrder)`. It must be idempotent: a
-  repeated call with the same lines must not double the quantities. Clear storage only after
-  success.
+  call `mergeGuestCart({ lines })` once, then clear local storage. The mutation takes the **larger**
+  quantity for products in both carts and clamps each to `min(stock, maxPerOrder)`. It must be
+  idempotent: a repeated call with the same lines must not double the quantities. Why max, not sum:
+  a lost response or a second tab makes the call run again, and a sum would double the quantities;
+  max can't. The two differ only when the same item is already in the signed-in cart. Clear storage
+  only after success.
+- **Guest lines for products that vanish**: counted only until their details load, then ignored.
+  `useQuery` for the guest's products uses `keepPreviousData`, or the cart page flashes to its
+  loading state on every tap.
 - **Clamping**: the stepper stops at `min(stock, maxPerOrder)` and says why ("Only 3 available").
   The server clamps again.
 

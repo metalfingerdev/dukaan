@@ -4,4 +4,4 @@
  * private by default (src/hooks.server.ts). The route check is UX only: the Convex functions
  * these pages call decide what data comes back.
  */
-export const STORE_PUBLIC_ROUTES = ['/c{/*rest}', '/p{/*rest}', '/search'];
+export const STORE_PUBLIC_ROUTES = ['/c{/*rest}', '/p{/*rest}', '/search', '/cart'];
