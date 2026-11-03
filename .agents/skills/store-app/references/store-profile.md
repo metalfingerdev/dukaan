@@ -27,15 +27,15 @@ it affects behaviour. The current placeholders are the `TODO (dictate)` lines in
 
 | Item | Value | Used for |
 | --- | --- | --- |
-| Name on the shop signboard | **TODO (dictate)** | header, invoices, SMS text |
+| Name on the shop signboard | **Dukaan** (decided for now; confirm the signboard name before invoices) | header, invoices, SMS text |
 | Opening and closing time (IST) | **TODO (dictate)** | `opensAtMinute`/`closesAtMinute`, checkout gate |
 | Typical delivery time | **TODO (dictate)** | `etaMinutes`, the header pill |
 | Delivery areas: localities, colleges, hostels | **TODO (dictate)** | `deliveryAreas`, address form |
 | Delivery fee, free-delivery threshold | **TODO (dictate)** | `priceCart` |
 | Small-cart fee and its threshold | **TODO (dictate)** | `priceCart` |
 | Minimum order | **TODO (dictate)** | checkout check |
-| Product categories to start with | **TODO (dictate)** | seed data, home grid |
-| Languages in the UI | English, plus Hindi? **TODO (dictate)** | `strings.ts` |
+| Product categories to start with | **Decided**: Fruits & Vegetables, Dairy & Eggs, Atta/Rice/Dal, Snacks & Biscuits, Beverages, Instant Food & Noodles, Personal Care, Household & Cleaning, Stationery (the seeded demo set; the founder edits them in the admin screens later) | seed data, home grid |
+| Languages in the UI | **Decided**: English only, Hindi-ready (all text in `src/lib/store/strings.ts`) | `strings.ts` |
 | Brand colours and logo | **TODO (dictate)** | Skeleton theme in `src/app.css` / `src/themes/` |
 | Number of delivery partners at launch | **TODO (dictate)** | `/admin/delivery` seed |
 | Store phone number for customers | **TODO (dictate)** | cancel/help text |
@@ -43,7 +43,88 @@ it affects behaviour. The current placeholders are the `TODO (dictate)` lines in
 | GST: registered? GSTIN? composition scheme? | **TODO (dictate)**, confirm with the CA | invoice tax columns |
 | Invoice prefix (≤ 3 letters, so numbers stay within 16 characters) | `DK` (proposed) | invoice numbers |
 | Legal name and address for invoices | **TODO (dictate)** | invoice header |
-| Slots or ASAP only | **TODO (dictate)** | checkout "Delivery" block |
+| Slots or ASAP only | **Decided**: ASAP plus one-hour slots, at least 30 minutes' notice, today only, no capacity limit (`SLOT_MINUTES`, `SLOT_NOTICE_MINUTES`) | checkout "Delivery" block |
 | Tips for delivery partners? How partners are paid? | **TODO (dictate)** | out of scope until answered |
 
 When the user dictates values, update this table first, then the code constants and the seed.
+
+## Decisions already made (don't re-ask)
+
+- **Direction**: a Blinkit-style quick-commerce app. Mechanics are fine; Blinkit's name, logo,
+  colours and screens are not. **Function first, visual design last** (the look will be inspired by
+  slothbytes.dev, but only at the end).
+- **Delivery people are store employees** in a very small town and **phone the customer**. So the
+  customer's phone number and a landmark matter more than a perfect pin.
+- **Maps**: customers pick a named area; an optional Google Maps pin, an optional pasted Google
+  Maps link and "use my current location" help the rider. **No coverage radius.** The pin is never
+  required, and the map is hidden unless `PUBLIC_GOOGLE_MAPS_API_KEY` is set. Google requires a
+  billing account for the Maps APIs, but at this size usage stays inside the free monthly allowance
+  (70,000 events per product on Google's India pricing); if a key is created, cap it with a daily
+  API quota (a budget alert only emails). The founder has not created a key yet. **No live rider
+  tracking** until there is a rider app that can report location in the background (a web page
+  stops reporting when the screen locks).
+- **Payment today**: cash on delivery or UPI on delivery. Online payment is wanted too (see below).
+- **Tests**: only tests that fail when behaviour breaks. No tests that restate a table, a string or
+  static data. Pages are checked in a real browser.
+- **Workflow**: one branch and one draft PR per piece; the founder merges; merging to `main`
+  deploys staging.
+
+## Status (what exists)
+
+Built and live on staging: auth and admin user dashboard; store tables and access guards;
+catalogue, search and the seeded demo catalogue; cart (guest and signed-in, merge on sign-in);
+saved addresses with optional pin, Maps link and Myself/Someone else; checkout with slots; the
+order engine (`placeOrder`, `cancelOrder`, stock and status helpers, rate limits); `/orders` and
+live `/orders/[id]` with the delivery code.
+
+**Not built**: anything for the admin or the delivery partner, so **an order stays at "Order
+placed" forever**; payments beyond cash; invoices; the designed UI.
+
+## Roadmap (agreed order; each step is its own PR or small series)
+
+The founder wants all three payment pieces, and they depend on the admin and partner screens, so
+those come first. Ordered by what unblocks what.
+
+1. **Admin: catalogue, stock and settings** (`admin.md`). Product, category and stock screens
+   (stock through `adjustStock` only), and a settings page that replaces the placeholders: hours,
+   fees, delivery areas, store phone, UPI id (replacing `store/seed:setDeliveryAreas`). Move the
+   user dashboard from `/admin` to `/admin/users`. *Needs from the founder:* real products with
+   prices and stock, real hours and fees, the real delivery areas, the store phone number.
+2. **Admin: the live order board**. Columns by status, one-tap Accept, Reject (with a reason), Mark
+   packed, Assign partner; new-order alert; all moves through `transitionOrder`. Orders finally move.
+3. **Admin: delivery partners and cash settlement**. Add a partner by phone number (matched to
+   their verified sign-in phone), activate or deactivate, cash to settle per partner per day.
+   *Needs:* the partners' phone numbers.
+4. **Delivery-partner screens** (`delivery.md`). Only their own orders; the customer's phone as a
+   big tap-to-call button first (the main way a rider finds the door), the address, landmark and a
+   Maps button (from the saved pin or Maps link, else a search on the address text); "Picked up",
+   "Delivered" (types the customer's 4-digit code; rate-limited), "Couldn't deliver" with a reason.
+5. **UPI on delivery**. Show the store's UPI id and a scannable QR on the order page for UPI
+   orders (never expose the UPI id in public queries; return it through the order projection); the
+   rider records how it was actually paid (cash or UPI) so the admin can reconcile; `paymentStatus`
+   becomes `paid` on delivery. *Needs:* the real UPI id.
+6. **Invoices** (`admin.md`). Numbered only when an order is delivered, immutable, printable.
+   *Needs:* a decision with the founder's accountant on GST (registered? GSTIN? composition
+   scheme?), the legal name and address. Don't assert tax rules in code or copy.
+7. **Online payments through a payment gateway**. Customers pay before delivery. A separate plan
+   is needed before building. Prerequisites the founder must arrange: a gateway merchant account
+   with business KYC (Razorpay, Cashfree, PhonePe PG and similar are the usual choices; compare
+   current fees and settlement times yourself, none are verified here), test and live API keys,
+   and a webhook endpoint. Design rules that follow from this codebase:
+   - A new payment method value and a payment-attempt table; the order is created `pending` and
+     becomes `paid` **only from the gateway's signed webhook** (an HTTP action on the `.convex.site`
+     URL that verifies the signature). Never trust the browser's "payment succeeded" redirect.
+   - Idempotent webhook handling (gateways resend). Secrets only in Convex env vars.
+   - Stock is held when the order is placed, so an unpaid online order must expire (a scheduled
+     function) and put its stock back through `transitionOrder`.
+   - Refunds on cancellation and failed delivery, and a reconciliation view for the admin.
+   - Cash on delivery and UPI on delivery stay available.
+8. **The designed UI**, last: colours, logo, layout, Hindi strings if wanted, inspired by
+   slothbytes.dev and not by another company's branding.
+
+**Smaller items, any time**: real delivery areas and the store phone (until step 1, set areas with
+`store/seed:setDeliveryAreas`); create a Maps key if wrong-door deliveries show up; push or SMS
+notifications (SMS to Indian numbers at scale needs TRAI DLT registration); prune the weak older
+tests (`demoCatalog.test.ts`, the table-mirroring parts of `orderStatus.test.ts`, the digit
+statistics in `deliveryCode.test.ts`); bump the GitHub Actions versions that warn about Node 20;
+a rider app if live tracking is ever wanted.

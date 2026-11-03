@@ -121,7 +121,7 @@ Skills live in `.agents/skills/<name>/` (read by Claude Code, Codex and other AG
 
 | Skill | Use it for |
 | --- | --- |
-| `store-app` | anything about the shop: catalogue, cart, checkout, orders, admin stock and order board, delivery-partner screens, invoices. Dukaan's own facts are in `references/store-profile.md` |
+| `store-app` | anything about the shop: catalogue, cart, checkout, orders, admin stock and order board, delivery-partner screens, invoices. Dukaan's own facts, decisions already made, what is built and **the roadmap** (what to build next and what each step needs from the founder) are in `references/store-profile.md` |
 | `convex*` (many) | Convex work: auth, crons, migrations, review, tests, deploy safety |
 
 To add a skill: copy `.agents/skill-template/` to `.agents/skills/<name>/`, add the symlink
