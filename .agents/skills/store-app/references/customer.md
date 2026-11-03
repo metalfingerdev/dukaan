@@ -180,6 +180,12 @@ refusal leaves nothing behind. Built in `src/convex/store/orders.ts`; the one pl
 
 ## Orders and tracking
 
+Built: `/checkout`, `/orders` and `/orders/[id]` (`src/routes/`). Checkout refuses nothing silently:
+`describeCheckoutError` (`src/lib/store/checkoutErrors.ts`) turns every `placeOrder` refusal into
+plain words and a next step, and an error it doesn't know gets a calm "try again", never a raw
+message. The page disables "Place order" for what it can already see (closed, no address, area no
+longer served, bad slot, below minimum), but the server stays the authority.
+
 - `/orders` is a paginated query (`paginationOptsValidator`) on `by_userId`, newest first.
 - `/orders/[id]` uses `useQuery`, so the status updates live without polling. Show the
   `orderEvents` timeline with human labels from `strings.ts` ("Packed", "On the way"), the items,

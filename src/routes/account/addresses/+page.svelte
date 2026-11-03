@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { useConvexClient, useQuery } from 'convex-svelte';
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { api } from '#convex/_generated/api.js';
 	import { STORE_NAME } from '#convex/model/store/storeProfile.js';
 
 	import ShopPage from '#lib/store/ui/ShopPage.svelte';
 	import AddressForm from '#lib/store/ui/AddressForm.svelte';
 	import { strings } from '#lib/store/strings.js';
+	import { useRequireSignIn } from '#lib/store/requireSignIn.svelte.js';
 
-	const auth = useAuth();
+	const auth = useRequireSignIn();
 	const client = useConvexClient();
 
 	// Gating is UX only: the page is private by default (hooks.server.ts) and every function
