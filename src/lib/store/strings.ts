@@ -91,6 +91,22 @@ export const strings = {
 		removeLocation: 'Remove location',
 		locationDenied: "We couldn't get your location. You can still save the address without it.",
 		makeDefaultCheckbox: 'Use this as my default address',
+		receiver: 'Who will receive the order?',
+		myself: 'Myself',
+		someoneElse: 'Someone else',
+		mapsLink: 'Google Maps link (optional)',
+		mapsLinkHint: 'In Google Maps, share your place and paste the link here.',
+		setPin: 'Set delivery pin on the map (optional)',
+		changePin: 'Change pin',
+		openInMaps: 'Open pin in Maps',
+		pinTitle: 'Move the map so the pin is on your door',
+		usePin: 'Use this pin',
+		suggestFromPin: 'Suggest the address from my pin',
+		suggesting: 'Looking up...',
+		suggestionAdded: 'We filled in the address from your pin. Please check it and correct it if needed.',
+		suggestionNone: "We couldn't find an address for that spot. You can type it in.",
+		mapUnavailable: "The map isn't available right now. You can still save your address without it.",
+		mapLoading: 'Loading the map...',
 		errors: {
 			OUT_OF_AREA: "We don't deliver to that area yet.",
 			TOO_MANY_ADDRESSES: 'You can save up to 10 addresses. Delete one first.',
@@ -100,7 +116,8 @@ export const strings = {
 			line1: 'Please fill in the address.',
 			contactName: 'Please enter a name.',
 			contactPhone: 'Enter a valid 10-digit Indian mobile number.',
-			location: "That location doesn't look right. Try again or skip it."
+			location: "That location doesn't look right. Try again or skip it.",
+			mapsUrl: 'That is not a Google Maps link. Share your place from Google Maps and paste that link, or leave it empty.'
 		}
 	},
 	checkout: {

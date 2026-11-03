@@ -11,6 +11,13 @@ export const variables = defineEnvVars({
 		public: true,
 		static: true
 	},
+	PUBLIC_GOOGLE_MAPS_API_KEY: {
+		description:
+			'Google Maps browser key for the delivery pin. Public by design, so restrict it by HTTP referrer and to the Maps JavaScript and Geocoding APIs. Leave unset to hide the map; everything else still works',
+		public: true,
+		static: true,
+		schema: (value) => value || undefined
+	},
 	PUBLIC_APP_ENV: {
 		description: 'Set to `staging` on the staging site to show a "Staging" badge. Leave unset in production',
 		public: true,

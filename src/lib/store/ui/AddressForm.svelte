@@ -5,7 +5,11 @@
 	import { api } from '#convex/_generated/api.js';
 	import type { FunctionReturnType } from 'convex/server';
 
+	import { PUBLIC_GOOGLE_MAPS_API_KEY } from '$app/env/public';
+
+	import { loadGoogleMaps, suggestAddress } from '../maps.js';
 	import { strings } from '../strings.js';
+	import MapPinPicker from './MapPinPicker.svelte';
 
 	type SavedAddress = FunctionReturnType<typeof api.store.addresses.listAddresses>[number];
 	type Kind = SavedAddress['kind'];
@@ -39,7 +43,13 @@
 		contactName: address?.contactName ?? defaultName,
 		contactPhone: address?.contactPhone ?? defaultPhone,
 		lat: address?.lat,
-		lng: address?.lng
+		lng: address?.lng,
+		mapsUrl: address?.mapsUrl ?? '',
+		// A saved address with someone else's name or number was for someone else
+		receiver: (address &&
+		(address.contactName !== defaultName || address.contactPhone !== defaultPhone)
+			? 'other'
+			: 'myself') as 'myself' | 'other'
 	}));
 
 	let label = $state(seed.label);
@@ -51,14 +61,43 @@
 	let contactPhone = $state(seed.contactPhone);
 	let lat = $state<number | undefined>(seed.lat);
 	let lng = $state<number | undefined>(seed.lng);
+	let mapsUrl = $state(seed.mapsUrl);
+	let receiver = $state<'myself' | 'other'>(seed.receiver);
 	let makeDefault = $state(false);
 
 	let saving = $state(false);
 	let locating = $state(false);
 	let locationNote = $state('');
+	let pickingPin = $state(false);
+	let suggesting = $state(false);
 	let error = $state('');
 
 	const hasLocation = $derived(lat !== undefined && lng !== undefined);
+	// The map is an extra: without a key it is simply not offered
+	const mapsEnabled = Boolean(PUBLIC_GOOGLE_MAPS_API_KEY);
+
+	const chooseReceiver = (who: 'myself' | 'other') => {
+		receiver = who;
+		contactName = who === 'myself' ? defaultName : '';
+		contactPhone = who === 'myself' ? defaultPhone : '';
+	};
+
+	// Asks Google for a guess at the address of the pin and puts it in the empty address box. It is
+	// only ever a suggestion: the customer edits it, and only their edited text is saved.
+	const suggestFromPin = async () => {
+		if (lat === undefined || lng === undefined) return;
+		suggesting = true;
+		locationNote = '';
+		const api = await loadGoogleMaps(PUBLIC_GOOGLE_MAPS_API_KEY);
+		const text = api ? await suggestAddress(api, { lat, lng }) : null;
+		if (text && line1.trim() === '') {
+			line1 = text.slice(0, 200);
+			locationNote = strings.address.suggestionAdded;
+		} else if (!text) {
+			locationNote = strings.address.suggestionNone;
+		}
+		suggesting = false;
+	};
 
 	const useMyLocation = () => {
 		locationNote = '';
@@ -107,6 +146,7 @@
 				contactPhone,
 				lat,
 				lng,
+				mapsUrl: mapsUrl.trim() === '' ? undefined : mapsUrl,
 				makeDefault: makeDefault || undefined
 			});
 			onsaved(addressId);
@@ -154,6 +194,23 @@
 		<input class="input min-h-11" bind:value={landmark} maxlength="200" />
 	</label>
 
+	<fieldset class="flex flex-wrap gap-2">
+		<legend class="label-text mb-1">{strings.address.receiver}</legend>
+		{#each [['myself', strings.address.myself], ['other', strings.address.someoneElse]] as const as [who, text] (who)}
+			<label class="btn min-h-11 {receiver === who ? 'preset-filled' : 'preset-tonal'}">
+				<input
+					type="radio"
+					class="sr-only"
+					name="receiver"
+					value={who}
+					checked={receiver === who}
+					onchange={() => chooseReceiver(who)}
+				/>
+				{text}
+			</label>
+		{/each}
+	</fieldset>
+
 	<label class="label">
 		<span class="label-text">{strings.address.contactName}</span>
 		<input class="input min-h-11" bind:value={contactName} maxlength="80" autocomplete="name" required />
@@ -172,25 +229,69 @@
 	</label>
 
 	<div class="flex flex-col items-start gap-2">
-		{#if hasLocation}
-			<p class="text-success-600-400 text-sm" role="status">{strings.address.locationSaved}</p>
-			<button
-				type="button"
-				class="btn preset-tonal min-h-11"
-				onclick={() => {
-					lat = undefined;
-					lng = undefined;
-				}}>{strings.address.removeLocation}</button
-			>
+		{#if pickingPin}
+			<div class="w-full">
+				<MapPinPicker
+					start={hasLocation ? { lat: lat!, lng: lng! } : undefined}
+					onconfirm={(pin) => {
+						lat = pin.lat;
+						lng = pin.lng;
+						pickingPin = false;
+					}}
+					oncancel={() => (pickingPin = false)}
+				/>
+			</div>
 		{:else}
-			<button type="button" class="btn preset-tonal min-h-11" disabled={locating} onclick={useMyLocation}>
-				{locating ? strings.address.locating : strings.address.useLocation}
-			</button>
-		{/if}
-		{#if locationNote}
-			<p class="text-warning-700-300 text-sm" role="status">{locationNote}</p>
+			{#if hasLocation}
+				<p class="text-success-600-400 text-sm" role="status">{strings.address.locationSaved}</p>
+				<div class="flex flex-wrap gap-2">
+					{#if mapsEnabled}
+						<button type="button" class="btn preset-tonal min-h-11" onclick={() => (pickingPin = true)}>
+							{strings.address.changePin}
+						</button>
+						<button type="button" class="btn preset-tonal min-h-11" disabled={suggesting} onclick={suggestFromPin}>
+							{suggesting ? strings.address.suggesting : strings.address.suggestFromPin}
+						</button>
+					{/if}
+					<button
+						type="button"
+						class="btn preset-tonal min-h-11"
+						onclick={() => {
+							lat = undefined;
+							lng = undefined;
+						}}>{strings.address.removeLocation}</button
+					>
+				</div>
+			{:else}
+				<div class="flex flex-wrap gap-2">
+					{#if mapsEnabled}
+						<button type="button" class="btn preset-tonal min-h-11" onclick={() => (pickingPin = true)}>
+							{strings.address.setPin}
+						</button>
+					{/if}
+					<button type="button" class="btn preset-tonal min-h-11" disabled={locating} onclick={useMyLocation}>
+						{locating ? strings.address.locating : strings.address.useLocation}
+					</button>
+				</div>
+			{/if}
+			{#if locationNote}
+				<p class="text-warning-700-300 text-sm" role="status">{locationNote}</p>
+			{/if}
 		{/if}
 	</div>
+
+	<label class="label">
+		<span class="label-text">{strings.address.mapsLink}</span>
+		<input
+			class="input min-h-11"
+			type="url"
+			inputmode="url"
+			bind:value={mapsUrl}
+			maxlength="500"
+			placeholder="https://maps.app.goo.gl/..."
+		/>
+		<span class="text-surface-600-400 text-xs">{strings.address.mapsLinkHint}</span>
+	</label>
 
 	{#if !address?.isDefault}
 		<label class="flex items-center gap-2">
