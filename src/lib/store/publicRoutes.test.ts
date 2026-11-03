@@ -9,6 +9,7 @@ describe('storefront public routes', () => {
 		expect(isPublic('/c/dairy-eggs')).toBe(true);
 		expect(isPublic('/p/toned-milk-500ml')).toBe(true);
 		expect(isPublic('/search')).toBe(true);
+		expect(isPublic('/cart')).toBe(true);
 	});
 
 	it('does not open anything else', () => {
@@ -21,6 +22,7 @@ describe('storefront public routes', () => {
 			'/admin/products',
 			'/delivery',
 			'/cart/x',
+			'/carts',
 			'/cat',
 			'/product',
 			'/searching'

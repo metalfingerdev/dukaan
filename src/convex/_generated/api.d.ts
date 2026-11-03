@@ -25,6 +25,7 @@ import type * as model_organizations_index from "../model/organizations/index.js
 import type * as model_store_access from "../model/store/access.js";
 import type * as model_store_demoCatalog from "../model/store/demoCatalog.js";
 import type * as model_store_pricing from "../model/store/pricing.js";
+import type * as model_store_publicProjection from "../model/store/publicProjection.js";
 import type * as model_store_storeProfile from "../model/store/storeProfile.js";
 import type * as model_store_time from "../model/store/time.js";
 import type * as organizations_invitations_queries from "../organizations/invitations/queries.js";
@@ -45,6 +46,7 @@ import type * as otp_truecaller from "../otp/truecaller.js";
 import type * as otp_types from "../otp/types.js";
 import type * as storage from "../storage.js";
 import type * as store_access from "../store/access.js";
+import type * as store_cart from "../store/cart.js";
 import type * as store_catalog from "../store/catalog.js";
 import type * as store_seed from "../store/seed.js";
 import type * as store_validators from "../store/validators.js";
@@ -77,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   "model/store/access": typeof model_store_access;
   "model/store/demoCatalog": typeof model_store_demoCatalog;
   "model/store/pricing": typeof model_store_pricing;
+  "model/store/publicProjection": typeof model_store_publicProjection;
   "model/store/storeProfile": typeof model_store_storeProfile;
   "model/store/time": typeof model_store_time;
   "organizations/invitations/queries": typeof organizations_invitations_queries;
@@ -97,6 +100,7 @@ declare const fullApi: ApiFromModules<{
   "otp/types": typeof otp_types;
   storage: typeof storage;
   "store/access": typeof store_access;
+  "store/cart": typeof store_cart;
   "store/catalog": typeof store_catalog;
   "store/seed": typeof store_seed;
   "store/validators": typeof store_validators;

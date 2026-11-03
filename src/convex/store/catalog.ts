@@ -6,9 +6,13 @@
  * See .agents/skills/store-app/references/customer.md.
  */
 import { ConvexError, v } from 'convex/values';
-import type { Doc } from '../_generated/dataModel';
-import type { QueryCtx } from '../_generated/server';
 import { query } from '../_generated/server';
+import {
+	publicCategory,
+	publicProduct,
+	toPublicCategory,
+	toPublicProduct
+} from '../model/store/publicProjection';
 
 const MAX_CATEGORIES = 50;
 const MAX_FEATURED = 20;
@@ -18,55 +22,6 @@ const MAX_SEARCH_RESULTS = 24;
 const MAX_IDS = 50;
 const MIN_SEARCH_LENGTH = 2;
 const MAX_SEARCH_LENGTH = 64;
-
-const publicProduct = v.object({
-	_id: v.id('products'),
-	name: v.string(),
-	slug: v.string(),
-	unitLabel: v.string(),
-	pricePaise: v.number(),
-	mrpPaise: v.number(),
-	imageUrl: v.union(v.string(), v.null()),
-	inStock: v.boolean(),
-	lowStock: v.boolean(),
-	// The most a customer can add: min(stock, maxPerOrder). Shows "Only 3 available" without
-	// exposing stock beyond what the customer could buy anyway.
-	maxQuantity: v.number(),
-	// The real count, present only while `lowStock` is true ("Only 3 left"); never otherwise
-	stockLeft: v.optional(v.number())
-});
-
-const publicCategory = v.object({
-	_id: v.id('categories'),
-	name: v.string(),
-	slug: v.string(),
-	imageUrl: v.union(v.string(), v.null())
-});
-
-const toPublicProduct = async (ctx: QueryCtx, product: Doc<'products'>) => {
-	const lowStock =
-		product.stock > 0 && product.lowStockAt !== undefined && product.stock <= product.lowStockAt;
-	return {
-		_id: product._id,
-		name: product.name,
-		slug: product.slug,
-		unitLabel: product.unitLabel,
-		pricePaise: product.pricePaise,
-		mrpPaise: product.mrpPaise,
-		imageUrl: product.imageId ? await ctx.storage.getUrl(product.imageId) : null,
-		inStock: product.stock > 0,
-		lowStock,
-		maxQuantity: Math.max(0, Math.min(product.stock, product.maxPerOrder)),
-		...(lowStock ? { stockLeft: product.stock } : {})
-	};
-};
-
-const toPublicCategory = async (ctx: QueryCtx, category: Doc<'categories'>) => ({
-	_id: category._id,
-	name: category.name,
-	slug: category.slug,
-	imageUrl: category.imageId ? await ctx.storage.getUrl(category.imageId) : null
-});
 
 /** What the header and cart need: open switch, hours, ETA and the fees. No UPI id or legal details. */
 export const getStoreInfo = query({
