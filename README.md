@@ -1,56 +1,69 @@
-# sv
+# Dukaan
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Quick-commerce grocery app for a local store in Kothri Kalan, Madhya Pradesh, serving locals and
+college students. Customers browse and order, the store admin manages stock and orders, and
+delivery partners see only the orders assigned to them.
 
-## Creating a project
+> **Status:** early. Sign-in (phone OTP, email verification) is built; the storefront, admin and
+> delivery screens are being built. The Vercel deployment from this repo is **staging**, not the
+> real store.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Stack
 
-```sh
-# create a new project
-npx sv create my-app
-```
+SvelteKit 3 + Svelte 5, Convex (database, functions, storage, realtime), Better Auth running inside
+Convex, Tailwind CSS 4 + Skeleton UI 5, Resend for email, pnpm.
 
-To recreate this project with the same configuration:
+## Run it locally
 
-```sh
-# recreate this project
-pnpm dlx sv@1.2.0 create --template minimal --types ts --add tailwindcss="plugins:forms" --install pnpm dukaan
-```
-
-## Adding features
-
-Add features to your project with `sv add`:
+You need Node 22+, pnpm and a free [Convex](https://convex.dev) account.
 
 ```sh
-npx sv add
+pnpm install
+npx convex dev          # first run logs you in, creates a dev deployment, writes .env.local; keep it running
 ```
 
-For example, to add Tailwind CSS:
+In another terminal, set the backend's environment variables (they live on the Convex deployment,
+not in `.env.local`):
 
 ```sh
-npx sv add tailwindcss
+npx convex env set BETTER_AUTH_SECRET "$(openssl rand -base64 32)"
+npx convex env set BETTER_AUTH_ALLOWED_HOSTS "localhost:5173"
+npx convex env set BETTER_AUTH_FALLBACK_URL "http://localhost:5173"
+
+# Phone sign-in without a real SMS provider: codes are printed in `npx convex logs`
+npx convex env set OTP_CHANNELS console
+npx convex env set OTP_ALLOW_CONSOLE true
+
+# Email verification (Resend). Without a verified domain, mail only reaches your own Resend address
+npx convex env set RESEND_API_KEY re_...
+npx convex env set EMAIL_SEND_FROM "Dukaan <onboarding@resend.dev>"
 ```
 
-## Developing
+Then `pnpm dev` and open http://localhost:5173/signin.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Checks
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm check                         # Svelte + TypeScript
+npx tsc -p src/convex --noEmit     # Convex functions
+pnpm build                         # needs PUBLIC_CONVEX_URL and PUBLIC_CONVEX_SITE_URL set
 ```
 
-## Building
+These run on every pull request in CI and must pass before merging to `main`.
 
-To create a production version of your app:
+## Contributing
 
-```sh
-npm run build
-```
+Branch, open a PR, wait for CI to pass, merge to `main`. Merging to `main` deploys staging.
+Never commit secrets: this repository is public, and secrets belong in Convex or Vercel
+environment variables.
 
-You can preview the production build with `npm run preview`.
+## Docs
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+| | |
+| --- | --- |
+| [`docs/README.md`](./docs/README.md) | Index of the developer docs |
+| [`docs/02-getting-started.md`](./docs/02-getting-started.md) | Full local setup and env vars |
+| [`docs/06-phone-otp.md`](./docs/06-phone-otp.md) | Phone sign-in and SMS/WhatsApp delivery |
+| [`docs/07-email-verification.md`](./docs/07-email-verification.md) | Resend and email verification |
+| [`docs/08-environments-and-deployment.md`](./docs/08-environments-and-deployment.md) | Staging, CI/CD, moving to production |
+| [`AGENTS.md`](./AGENTS.md) | Conventions for AI coding agents and contributors |
