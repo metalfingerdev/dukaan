@@ -254,6 +254,10 @@ those come first. Ordered by what unblocks what.
    - *Account menu* (`AccountMenu.svelte`, Bits `Popover`) and the sign-in `Modal` replace
      `UserButton` on the storefront; `UserButton` and the profile dialog stay for the old header
      until the auth area is redesigned. Orders, Admin and Deliveries links stay visible on phones.
+   - *Rider screens* (`/delivery`): a slim `RiderHeader` (no search or cart), "Collect ₹…" as the
+     biggest line on every card and on the delivery page, big green Call / Delivered and red
+     Couldn't-deliver buttons, and the Delivered and Couldn't-deliver forms as bottom sheets
+     (Bits `Dialog`). Why: one hand, on a bike, in sunlight.
    - *Not built*: a "call your delivery partner" button on order tracking, because the customer's
      order does not expose the partner's name or phone (riders phone customers). It needs a
      privacy decision first.

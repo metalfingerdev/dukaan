@@ -6,18 +6,21 @@
   // A panel over the page: slides up from the bottom on a phone, in from the right from md up
   let {
     open = $bindable(false),
+    onOpenChange,
     title,
     closeLabel,
     children,
   }: {
     open?: boolean;
+    /** Called when the sheet opens or closes, for parents that hold `open` themselves */
+    onOpenChange?: (open: boolean) => void;
     title: string;
     closeLabel: string;
     children: Snippet;
   } = $props();
 </script>
 
-<Dialog.Root bind:open>
+<Dialog.Root bind:open {onOpenChange}>
   <Dialog.Portal>
     <Dialog.Overlay class="ui-sheet-overlay" />
     <Dialog.Content class="ui-sheet">

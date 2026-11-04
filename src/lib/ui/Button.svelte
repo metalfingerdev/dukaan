@@ -15,7 +15,7 @@
     children,
     ...rest
   }: {
-    variant?: "plain" | "primary" | "accent" | "danger";
+    variant?: "plain" | "primary" | "accent" | "danger" | "success";
     block?: boolean;
     /** A square button holding just an icon or a symbol */
     icon?: boolean;
@@ -65,6 +65,10 @@
   .accent {
     --fill: var(--color-secondary);
     @apply bg-secondary text-on-secondary;
+  }
+  .success {
+    --fill: var(--color-success);
+    @apply bg-success text-foreground;
   }
   .danger {
     --fill: var(--color-danger);

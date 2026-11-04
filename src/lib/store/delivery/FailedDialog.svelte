@@ -1,6 +1,8 @@
 <script lang="ts">
-	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	import { strings } from '#lib/store/strings.js';
+	import Sheet from '#lib/ui/Sheet.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Choice from '#lib/ui/Choice.svelte';
 
 	type Reason = keyof typeof strings.delivery.reasons;
 	type Props = {
@@ -19,37 +21,46 @@
 	});
 </script>
 
-<Dialog.Root {open} onOpenChange={(details) => !details.open && onclose()}>
-	<Dialog.Content class="w-[90%] max-w-md">
-		<form
-			class="flex w-full flex-col gap-4"
-			onsubmit={(event) => {
-				event.preventDefault();
-				onconfirm(reason);
-			}}
-		>
-			<Dialog.Header>
-				<Dialog.Title>{text.failedTitle}</Dialog.Title>
-				<Dialog.Description>{text.failedHint}</Dialog.Description>
-			</Dialog.Header>
+<Sheet {open} onOpenChange={(next) => !next && onclose()} title={text.failedTitle} closeLabel={strings.common.close}>
+	<form
+		class="form"
+		onsubmit={(event) => {
+			event.preventDefault();
+			onconfirm(reason);
+		}}
+	>
+		<p class="muted">{text.failedHint}</p>
 
-			<fieldset class="flex flex-col gap-2">
-				{#each reasons as value (value)}
-					<label
-						class="btn min-h-12 cursor-pointer justify-start {reason === value ? 'preset-filled-primary-500' : 'preset-tonal'}"
-					>
-						<input class="sr-only" type="radio" name="failure-reason" {value} bind:group={reason} />
-						{text.reasons[value]}
-					</label>
-				{/each}
-			</fieldset>
+		<fieldset class="reasons">
+			{#each reasons as value (value)}
+				<Choice name="failure-reason" {value} checked={reason === value} onchange={() => (reason = value)}>
+					{text.reasons[value]}
+				</Choice>
+			{/each}
+		</fieldset>
 
-			<Dialog.Footer class="w-full">
-				<Dialog.Close class="btn preset-tonal min-h-12" disabled={busy}>{text.keep}</Dialog.Close>
-				<button type="submit" class="btn preset-filled-error-500 min-h-12" disabled={busy}>
-					{busy ? text.working : text.confirmFailed}
-				</button>
-			</Dialog.Footer>
-		</form>
-	</Dialog.Content>
-</Dialog.Root>
+		<div class="actions">
+			<Button type="submit" variant="danger" large block disabled={busy}>
+				{busy ? text.working : text.confirmFailed}
+			</Button>
+			<Button block disabled={busy} onclick={onclose}>{text.keep}</Button>
+		</div>
+	</form>
+</Sheet>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.form {
+		@apply flex flex-col gap-4;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.reasons {
+		@apply flex flex-col gap-2;
+	}
+	.actions {
+		@apply flex flex-col gap-2;
+	}
+</style>

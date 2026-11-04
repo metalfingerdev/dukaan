@@ -46,13 +46,25 @@
 
 {#if !failed}
 	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an external Maps link -->
-	<a {href} target="_blank" rel="noopener noreferrer" class="relative block h-48 w-full overflow-hidden rounded" aria-label={strings.delivery.pinPreview}>
-		<div bind:this={element} class="bg-surface-100-900 pointer-events-none size-full"></div>
+	<a {href} target="_blank" rel="noopener noreferrer" class="preview" aria-label={strings.delivery.pinPreview}>
+		<div bind:this={element} class="canvas"></div>
 		{#if ready}
-			<MapPinIcon
-				class="text-error-500 pointer-events-none absolute top-1/2 left-1/2 size-9 -translate-x-1/2 -translate-y-full"
-				aria-hidden="true"
-			/>
+			<MapPinIcon class="pin" aria-hidden="true" />
 		{/if}
 	</a>
 {/if}
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.preview {
+		--fill: var(--color-background);
+		@apply edge-flat relative block h-48 w-full overflow-hidden rounded-base;
+	}
+	.canvas {
+		@apply pointer-events-none size-full bg-background;
+	}
+	.preview :global(.pin) {
+		@apply pointer-events-none absolute top-1/2 left-1/2 size-9 -translate-x-1/2 -translate-y-full text-primary;
+	}
+</style>

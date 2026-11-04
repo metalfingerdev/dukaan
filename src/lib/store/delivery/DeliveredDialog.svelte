@@ -1,7 +1,9 @@
 <script lang="ts">
-	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	import { formatPaise } from '#lib/store/format.js';
 	import { strings } from '#lib/store/strings.js';
+	import Sheet from '#lib/ui/Sheet.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Field from '#lib/ui/Field.svelte';
 
 	type Props = {
 		open: boolean;
@@ -42,44 +44,64 @@
 	};
 </script>
 
-<Dialog.Root {open} onOpenChange={(details) => !details.open && onclose()}>
-	<Dialog.Content class="w-[90%] max-w-md">
-		<form class="flex w-full flex-col gap-4" onsubmit={submit}>
-			<Dialog.Header>
-				<Dialog.Title>{text.deliveredTitle}</Dialog.Title>
-				<Dialog.Description>{text.codeHint}</Dialog.Description>
-			</Dialog.Header>
+<Sheet {open} onOpenChange={(next) => !next && onclose()} title={text.deliveredTitle} closeLabel={strings.common.close}>
+	<form class="form" onsubmit={submit}>
+		<p class="muted">{text.codeHint}</p>
 
-			<label class="flex flex-col gap-1">
-				<span class="text-sm font-medium">{text.codeLabel}</span>
-				<input
-					class="input min-h-14 text-center text-2xl tracking-widest"
-					type="text"
-					inputmode="numeric"
-					autocomplete="off"
-					maxlength="4"
-					bind:value={code}
-					aria-invalid={invalid !== '' || error !== ''}
-				/>
+		<Field label={text.codeLabel}>
+			<input
+				class="code"
+				type="text"
+				inputmode="numeric"
+				autocomplete="off"
+				maxlength="4"
+				bind:value={code}
+				aria-invalid={invalid !== '' || error !== ''}
+			/>
+		</Field>
+
+		{#if collectPaise > 0}
+			<label class="collected">
+				<input type="checkbox" bind:checked={collected} />
+				<span>{text.collectedCash(formatPaise(collectPaise))}</span>
 			</label>
+		{/if}
 
-			{#if collectPaise > 0}
-				<label class="flex min-h-12 items-center gap-3">
-					<input type="checkbox" class="checkbox size-6" bind:checked={collected} />
-					<span class="font-medium">{text.collectedCash(formatPaise(collectPaise))}</span>
-				</label>
-			{/if}
+		{#if invalid || error}
+			<p class="problem" role="alert">{error || invalid}</p>
+		{/if}
 
-			{#if invalid || error}
-				<p class="text-error-600-400 text-sm" role="alert">{error || invalid}</p>
-			{/if}
+		<div class="actions">
+			<Button type="submit" variant="success" large block disabled={busy}>
+				{busy ? text.confirming : text.confirmDelivered}
+			</Button>
+			<Button block disabled={busy} onclick={onclose}>{text.keep}</Button>
+		</div>
+	</form>
+</Sheet>
 
-			<Dialog.Footer class="w-full">
-				<Dialog.Close class="btn preset-tonal min-h-12" disabled={busy}>{text.keep}</Dialog.Close>
-				<button type="submit" class="btn preset-filled-success-500 min-h-12" disabled={busy}>
-					{busy ? text.confirming : text.confirmDelivered}
-				</button>
-			</Dialog.Footer>
-		</form>
-	</Dialog.Content>
-</Dialog.Root>
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.form {
+		@apply flex flex-col gap-4;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.code {
+		@apply min-h-14 text-center text-3xl tracking-[0.4em];
+	}
+	.collected {
+		@apply flex min-h-12 items-center gap-3 font-bold;
+	}
+	.collected input {
+		@apply size-6 text-primary;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.actions {
+		@apply flex flex-col gap-2;
+	}
+</style>
