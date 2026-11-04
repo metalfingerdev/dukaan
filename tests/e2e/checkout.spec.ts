@@ -80,8 +80,8 @@ test('order, see the delivery code, cancel', async ({ page }) => {
 	await expect(page.getByText('Order placed').first()).toBeVisible();
 	await expect(page.getByLabel('Delivery code')).toHaveText(/^\s*\d{4}\s*$/);
 
-	page.once('dialog', (dialog) => dialog.accept());
 	await page.getByRole('button', { name: 'Cancel order' }).click();
+	await page.getByRole('alertdialog').getByRole('button', { name: 'Cancel order' }).click();
 	await expect(page.getByText('This order was cancelled.')).toBeVisible();
 	await expect(page.getByLabel('Delivery code')).toHaveCount(0);
 });

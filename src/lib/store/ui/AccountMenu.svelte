@@ -1,0 +1,165 @@
+<script lang="ts">
+  import { page } from "$app/state";
+  import { resolve } from "$app/paths";
+  import { refreshAll } from "$app/navigation";
+  import { Popover, Avatar } from "bits-ui";
+  import { useAuth } from "@mmailaender/convex-better-auth-svelte/svelte";
+  import { useQuery } from "convex-svelte";
+  import { api } from "#convex/_generated/api.js";
+
+  import { getAuthContext } from "#lib/auth/context.svelte.js";
+  import type { GetActiveUserType } from "#lib/auth/types.js";
+  import SignIn from "#lib/auth/ui/SignIn.svelte";
+  import { gotoApp } from "#lib/primitives/utils/navigation.js";
+  import { DIALOG_KEY } from "#lib/users/utils/user.constants.js";
+  import Button from "#lib/ui/Button.svelte";
+  import Modal from "#lib/ui/Modal.svelte";
+
+  import { strings } from "../strings.js";
+
+  // The signed-in customer's menu (or the Sign in button). The profile dialog it opens is the
+  // existing one, reached through the `?dialog=` URL, until the auth screens are redesigned.
+  let {
+    initialData,
+  }: { initialData?: { activeUser?: GetActiveUserType } } = $props();
+
+  const auth = useAuth();
+  const { authClient } = getAuthContext();
+
+  const activeUserResponse = useQuery(
+    api.users.queries.getActiveUser,
+    () => (auth.isAuthenticated ? {} : "skip"),
+    () => ({ initialData: initialData?.activeUser }),
+  );
+  const user = $derived(activeUserResponse?.data);
+
+  let menuOpen = $state(false);
+  let signInOpen = $state(false);
+
+  const initials = $derived(
+    (user?.name ?? "")
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0]?.toUpperCase())
+      .join("") || "?",
+  );
+  // A phone-only sign-up has no email, only a placeholder one
+  const secondLine = $derived(
+    user?.email && !user.email.endsWith(".invalid") ? user.email : "",
+  );
+
+  const openProfile = () => {
+    menuOpen = false;
+    const url = new URL(page.url.href);
+    if (url.searchParams.get("dialog") !== DIALOG_KEY) {
+      url.searchParams.set("dialog", DIALOG_KEY);
+      void gotoApp(url, { replace: false, reset: false });
+    }
+  };
+
+  const signOut = async () => {
+    const result = await authClient.signOut();
+    if (result.data?.success) {
+      menuOpen = false;
+      // Refreshes all data and runs the server hooks again
+      refreshAll();
+    }
+  };
+</script>
+
+{#if auth.isAuthenticated && user}
+  <Popover.Root bind:open={menuOpen}>
+    <Popover.Trigger class="ui-account-trigger" aria-label={strings.header.account}>
+      <Avatar.Root class="ui-avatar">
+        <Avatar.Image src={user.image} alt="" class="ui-avatar-image" />
+        <Avatar.Fallback class="ui-avatar-fallback">{initials}</Avatar.Fallback>
+      </Avatar.Root>
+    </Popover.Trigger>
+    <Popover.Portal>
+      <Popover.Content class="ui-account-menu" align="end" sideOffset={8}>
+        <button type="button" class="who" onclick={openProfile}>
+          <Avatar.Root class="ui-avatar big">
+            <Avatar.Image src={user.image} alt="" class="ui-avatar-image" />
+            <Avatar.Fallback class="ui-avatar-fallback">{initials}</Avatar.Fallback>
+          </Avatar.Root>
+          <span class="names">
+            <b>{user.name}</b>
+            {#if secondLine}<span class="small">{secondLine}</span>{/if}
+          </span>
+        </button>
+        <a href={resolve("/orders")} class="item" onclick={() => (menuOpen = false)}>
+          {strings.header.orders}
+        </a>
+        <a
+          href={resolve("/account/addresses")}
+          class="item"
+          onclick={() => (menuOpen = false)}
+        >
+          {strings.header.addresses}
+        </a>
+        <button type="button" class="item" onclick={signOut}>
+          {strings.header.signOut}
+        </button>
+      </Popover.Content>
+    </Popover.Portal>
+  </Popover.Root>
+{:else if auth.isLoading || auth.isAuthenticated}
+  <span class="waiting bone" aria-hidden="true"></span>
+{:else}
+  <Button onclick={() => (signInOpen = true)}>{strings.header.signIn}</Button>
+{/if}
+
+<Modal
+  bind:open={signInOpen}
+  title={strings.header.signIn}
+  closeLabel={strings.common.close}
+>
+  <SignIn onSignIn={() => (signInOpen = false)} />
+</Modal>
+
+<style lang="postcss">
+  @reference 'src/app.css';
+
+  .waiting {
+    @apply block size-10 rounded-full;
+  }
+  .who {
+    @apply flex items-center gap-3 rounded-base p-2 text-left;
+  }
+  .names {
+    @apply flex min-w-0 flex-1 flex-col;
+  }
+  .names b {
+    @apply truncate;
+  }
+  .small {
+    @apply truncate text-xs text-text-muted;
+  }
+  .item {
+    @apply flex min-h-11 items-center rounded-base px-2 text-left font-semibold;
+  }
+
+  /* Bits renders these elements itself, so they are styled with :global */
+  :global(.ui-account-trigger) {
+    @apply grid size-11 place-items-center rounded-full;
+  }
+  :global(.ui-avatar) {
+    --fill: var(--color-secondary);
+    @apply edge-flat relative grid size-9 place-items-center overflow-hidden rounded-full bg-secondary text-sm font-extrabold text-on-secondary;
+  }
+  :global(.ui-avatar.big) {
+    @apply size-12 shrink-0;
+  }
+  :global(.ui-avatar-image) {
+    @apply size-full object-cover;
+  }
+  :global(.ui-account-menu) {
+    --fill: var(--color-foreground);
+    @apply edge z-30 flex w-72 max-w-[calc(100vw-1rem)] flex-col gap-1 rounded-container bg-foreground p-2 text-text;
+  }
+  :global(.ui-account-menu .who:hover),
+  :global(.ui-account-menu .item:hover) {
+    @apply bg-midground;
+  }
+</style>

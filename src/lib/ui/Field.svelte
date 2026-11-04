@@ -19,7 +19,7 @@
 
 <div class="field">
   <label>
-    <span class="label" class:sr-only={hideLabel}>{label}</span>
+    <span class="caption" class:sr-only={hideLabel}>{label}</span>
     {@render children()}
   </label>
   {#if hint}<p class="hint">{hint}</p>{/if}
@@ -34,7 +34,7 @@
   label {
     @apply flex flex-col gap-1;
   }
-  .label {
+  .caption {
     @apply text-sm font-bold;
   }
   .hint {

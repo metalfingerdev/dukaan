@@ -24,6 +24,9 @@ export const strings = {
 		stagingHint: 'This is the staging site, not the real store',
 		signIn: 'Sign in',
 		orders: 'Orders',
+		addresses: 'Saved addresses',
+		account: 'Your account',
+		signOut: 'Sign out',
 		myCart: 'My cart'
 	},
 	home: {

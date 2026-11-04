@@ -8,11 +8,10 @@
 
   import { AUTH_CONSTANTS } from "#convex/auth.constants.js";
   import { STORE_NAME } from "#convex/model/store/storeProfile.js";
-  import UserButton from "#lib/users/ui/UserButton.svelte";
+  import AccountMenu from "./AccountMenu.svelte";
   import OrganizationSwitcher from "#lib/organizations/ui/OrganizationSwitcher.svelte";
   import AdminButton from "#lib/admin/ui/AdminButton.svelte";
   import DeliveryLink from "../delivery/DeliveryLink.svelte";
-  import Button from "#lib/ui/Button.svelte";
 
   import { getCartContext } from "../cart.context.js";
   import { formatPaise } from "../format.js";
@@ -25,7 +24,7 @@
     initialData,
     orgInitialData,
   }: {
-    initialData: ComponentProps<typeof UserButton>["initialData"];
+    initialData: ComponentProps<typeof AccountMenu>["initialData"];
     orgInitialData: ComponentProps<typeof OrganizationSwitcher>["initialData"];
   } = $props();
 
@@ -63,11 +62,7 @@
         {#if AUTH_CONSTANTS.organizations}
           <OrganizationSwitcher initialData={orgInitialData} />
         {/if}
-        <UserButton {initialData}>
-          {#snippet signInTrigger({ open })}
-            <Button onclick={open}>{strings.header.signIn}</Button>
-          {/snippet}
-        </UserButton>
+        <AccountMenu {initialData} />
       </nav>
     </div>
   </div>

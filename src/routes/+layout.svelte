@@ -29,7 +29,7 @@
 
   // The designed look applies to the storefront; admin, delivery and sign-in keep the old one
   // until their turn in the redesign
-  const shop = $derived(!/^\/(admin|delivery|\(auth\))/.test(page.route.id ?? ""));
+  const shop = $derived(!/^\/(admin|delivery|\(auth\)\/(reset-password|device))/.test(page.route.id ?? ""));
 
   createSvelteAuthClient({ authClient, getServerState: () => data.authState });
   const auth = useAuth();
