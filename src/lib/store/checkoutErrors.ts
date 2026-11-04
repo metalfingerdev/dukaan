@@ -66,6 +66,7 @@ export function describeCheckoutError(
 			return { message: errors.TOO_MANY_OPEN_ORDERS(Number(data.max)), lines: [], fix: 'none' };
 		case 'OUT_OF_AREA':
 		case 'ADDRESS_NOT_FOUND':
+		case 'PIN_REQUIRED':
 			return { message: errors[data.code], lines: [], fix: 'address' };
 		case 'INVALID_SLOT':
 			return { message: errors.INVALID_SLOT, lines: [], fix: 'slot' };

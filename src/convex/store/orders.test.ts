@@ -35,6 +35,8 @@ const saveAddress = async (client: Client, overrides: Record<string, unknown> = 
 			area: 'Main Market (placeholder)',
 			contactName: 'Test Customer',
 			contactPhone: '9876543210',
+			lat: 23.2,
+			lng: 77.4,
 			...overrides
 		})
 	).addressId;

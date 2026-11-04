@@ -5,12 +5,29 @@
  * Needs the store open. With an admin test account the spec opens it all day and restores the
  * hours afterwards; without one it runs only during the dev deployment's opening hours.
  */
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { hasRole, skipReason, statePath } from './env';
 import { addFromCategory, clearCart, openAllDay } from './store';
 
 test.skip(!hasRole('customer'), skipReason('customer'));
-test.use({ storageState: statePath('customer') });
+// The pin is required: the browser "stands" at a fixed spot in Madhya Pradesh
+test.use({
+	storageState: statePath('customer'),
+	permissions: ['geolocation'],
+	geolocation: { latitude: 23.2, longitude: 77.4 }
+});
+
+/** Sets the pin on the open address form, with the map when a Maps key is set, else the location */
+const setPin = async (page: Page) => {
+	const usePin = page.getByRole('button', { name: 'Use this pin' });
+	if (await usePin.isVisible()) {
+		await expect(usePin).toBeEnabled();
+		await usePin.click();
+	} else {
+		await page.getByRole('button', { name: 'Use my current location' }).click();
+	}
+	await expect(page.getByText('Pin saved.')).toBeVisible();
+};
 
 let restoreHours: (() => Promise<void>) | undefined;
 test.beforeAll(async ({ browser }) => {
@@ -41,8 +58,15 @@ test('order, see the delivery code, cancel', async ({ page }) => {
 	const saved = page.getByRole('radio', { name: /.+/ }).and(page.locator('input[name=address]'));
 	if ((await saved.count()) > 0) {
 		await saved.first().check();
+		// An address saved before pins were required must get one before the order
+		if (await page.getByRole('button', { name: 'Add the pin' }).isVisible()) {
+			await page.getByRole('button', { name: 'Add the pin' }).click();
+			await setPin(page);
+			await page.getByRole('button', { name: 'Save address' }).click();
+		}
 	} else {
 		await page.getByRole('button', { name: 'Add a new address' }).click();
+		await setPin(page);
 		await page.getByLabel('Name this address').fill('E2E home');
 		await page.getByLabel('House or flat number and street').fill('E2E test house');
 		await page.getByLabel('Area').selectOption({ index: 1 });

@@ -44,7 +44,8 @@ const runSummary = v.object({
 	area: v.string(),
 	itemCount: v.number(),
 	paymentMethod,
-	collectPaise: v.number()
+	collectPaise: v.number(),
+	hasPin: v.boolean()
 });
 
 const toRunSummary = async (ctx: Pick<QueryCtx, 'db'>, order: Doc<'orders'>) => {
@@ -59,7 +60,8 @@ const toRunSummary = async (ctx: Pick<QueryCtx, 'db'>, order: Doc<'orders'>) => 
 		area: order.address.area,
 		itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
 		paymentMethod: order.paymentMethod,
-		collectPaise: amountToCollect(order)
+		collectPaise: amountToCollect(order),
+		hasPin: order.address.lat !== undefined && order.address.lng !== undefined
 	};
 };
 
@@ -133,6 +135,8 @@ const runDetail = v.object({
 			mapsUrl: v.optional(v.string())
 		})
 	),
+	/** When the customer last moved the pin after ordering */
+	pinUpdatedAt: v.optional(v.number()),
 	/** After delivery the phone is only recognisable, not dialable */
 	phoneLast4: v.optional(v.string()),
 	customerNote: v.optional(v.string()),
@@ -184,6 +188,7 @@ export const getRun = query({
 						}
 					}
 				: {}),
+			pinUpdatedAt: open ? order.pinUpdatedAt : undefined,
 			...(order.status === 'delivered' ? { phoneLast4: address.contactPhone.slice(-4) } : {}),
 			customerNote: open ? order.customerNote : undefined,
 			slotStartMs: open ? order.slotStartMs : undefined,

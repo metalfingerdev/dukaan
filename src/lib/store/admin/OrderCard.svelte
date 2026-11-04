@@ -52,6 +52,10 @@
 		</span>
 	</header>
 
+	{#if !order.hasPin}
+		<p class="badge preset-tonal-warning self-start">{text.noPin}</p>
+	{/if}
+
 	<p class="text-sm">
 		{text.items(order.itemCount)} · {order.area}
 		{#if order.landmark}<span class="text-surface-600-400 block">{text.landmark(order.landmark)}</span>{/if}

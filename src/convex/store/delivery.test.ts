@@ -33,7 +33,9 @@ const setupRun = async () => {
 		line1: '12, Test Street',
 		area: 'Main Market (placeholder)',
 		contactName: 'Test Customer',
-		contactPhone: '9876501234'
+		contactPhone: '9876501234',
+		lat: 23.2,
+		lng: 77.4
 	});
 	const { orderId } = await s.alice.mutation(api.store.orders.placeOrder, {
 		addressId,
@@ -192,5 +194,54 @@ describe('a failed delivery', () => {
 		expect(gone.status).toBe('cancelled');
 		expect(gone).not.toHaveProperty('customer');
 		expect(gone).not.toHaveProperty('area');
+	});
+});
+
+describe('finding the door', () => {
+	it('lets the customer move the pin of an open order, the rider sees it, and nobody else can', async () => {
+		const s = await setupRun();
+		await s.ravi.mutation(pickUp, { orderId: s.orderId });
+		await s.alice.mutation(api.store.orders.updateOrderPin, { orderId: s.orderId, lat: 23.25, lng: 77.45 });
+
+		const run = (await s.ravi.query(getRun, { orderId: s.orderId }))!;
+		expect(run.customer).toMatchObject({ lat: 23.25, lng: 77.45 });
+		expect(run.pinUpdatedAt).toBeGreaterThanOrEqual(NOON_IST);
+
+		expect((await failure(s.bob.mutation(api.store.orders.updateOrderPin, { orderId: s.orderId, lat: 1, lng: 1 }))).code).toBe(
+			'ORDER_NOT_FOUND'
+		);
+		expect((await failure(s.alice.mutation(api.store.orders.updateOrderPin, { orderId: s.orderId, lat: 0, lng: 0 }))).code).toBe(
+			'INVALID_ADDRESS'
+		);
+
+		await s.ravi.mutation(markDelivered, { orderId: s.orderId, code: s.code, paidWith: 'cash' });
+		expect(
+			(await failure(s.alice.mutation(api.store.orders.updateOrderPin, { orderId: s.orderId, lat: 23.3, lng: 77.5 }))).code
+		).toBe('ORDER_CLOSED');
+	});
+
+	it('refuses to place an order to an address saved before pins were required', async () => {
+		const s = await setup();
+		const productId = await idOf(s.t, 'toned-milk-500ml');
+		await s.alice.mutation(api.store.cart.setQuantity, { productId, quantity: 4 });
+		const addressId = await s.t.run((ctx) =>
+			ctx.db.insert('addresses', {
+				userId: 'alice',
+				label: 'Old',
+				kind: 'house',
+				line1: '12, Test Street',
+				area: 'Main Market (placeholder)',
+				contactName: 'Test Customer',
+				contactPhone: '+919876501234',
+				isDefault: true
+			})
+		);
+		const placing = s.alice.mutation(api.store.orders.placeOrder, {
+			addressId,
+			paymentMethod: 'cod',
+			idempotencyKey: 'old-address-key-abcdef',
+			expectedTotalPaise: ORDER_TOTAL
+		});
+		expect((await failure(placing)).code).toBe('PIN_REQUIRED');
 	});
 });

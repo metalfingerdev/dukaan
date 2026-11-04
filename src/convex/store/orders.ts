@@ -16,6 +16,7 @@ import { randomDeliveryCode } from '../model/store/deliveryCode';
 import { isOpenStatus, transitionOrder } from '../model/store/orderStatus';
 import { priceCart } from '../model/store/pricing';
 import { isProductVisible, maxQuantityFor } from '../model/store/publicProjection';
+import { isInIndia } from '../model/store/address';
 import { isValidSlot } from '../model/store/slots';
 import { adjustStock } from '../model/store/stock';
 import { isOpenNow } from '../model/store/time';
@@ -39,7 +40,8 @@ type CartProblem = {
  * Turns the customer's saved cart into an order, or throws `ConvexError({ code })`:
  *
  * - `STORE_NOT_SET_UP`, `STORE_CLOSED`, `TOO_MANY_OPEN_ORDERS`
- * - `ADDRESS_NOT_FOUND` (missing or not theirs), `OUT_OF_AREA`, `INVALID_SLOT`, `INVALID_NOTE`
+ * - `ADDRESS_NOT_FOUND` (missing or not theirs), `OUT_OF_AREA`, `PIN_REQUIRED` (saved before pins
+ *   were required), `INVALID_SLOT`, `INVALID_NOTE`
  * - `EMPTY_CART`
  * - `CART_CHANGED` with `problems`: every line that can no longer be ordered as it is
  * - `PRICE_CHANGED` with `totalPaise`: the total differs from the one the customer saw
@@ -104,6 +106,7 @@ export const placeOrder = mutation({
 		const address = await ctx.db.get(args.addressId);
 		if (!address || address.userId !== userId) throw new ConvexError({ code: 'ADDRESS_NOT_FOUND' });
 		if (!settings.deliveryAreas.includes(address.area)) throw new ConvexError({ code: 'OUT_OF_AREA' });
+		if (address.lat === undefined || address.lng === undefined) throw new ConvexError({ code: 'PIN_REQUIRED' });
 
 		if (args.slotStartMs !== undefined && !isValidSlot(settings, now, args.slotStartMs)) {
 			throw new ConvexError({ code: 'INVALID_SLOT' });
@@ -268,7 +271,8 @@ const orderDetail = v.object({
 		area: v.string(),
 		landmark: v.optional(v.string()),
 		contactName: v.string(),
-		contactPhone: v.string()
+		contactPhone: v.string(),
+		hasPin: v.boolean()
 	}),
 	slotStartMs: v.optional(v.number()),
 	customerNote: v.optional(v.string()),
@@ -343,7 +347,8 @@ export const getOrder = query({
 				area: order.address.area,
 				landmark: order.address.landmark,
 				contactName: order.address.contactName,
-				contactPhone: order.address.contactPhone
+				contactPhone: order.address.contactPhone,
+				hasPin: order.address.lat !== undefined && order.address.lng !== undefined
 			},
 			slotStartMs: order.slotStartMs,
 			customerNote: order.customerNote,
@@ -397,5 +402,32 @@ export const listMyOrders = query({
 				placedAt: order._creationTime
 			}))
 		};
+	}
+});
+
+/** Statuses in which the customer can still move the pin: the order hasn't reached them yet */
+const PIN_MOVABLE = ['placed', 'accepted', 'packed', 'out_for_delivery', 'delivery_failed'];
+
+/**
+ * Moves the pin of one of the customer's open orders, for when the rider can't find them: they
+ * stand at the door and send their current location. Only the order's snapshot changes, and the
+ * rider's screen follows live. Throws `ORDER_NOT_FOUND` (missing or not theirs), `ORDER_CLOSED` or
+ * `INVALID_ADDRESS` with `field: 'location'`.
+ */
+export const updateOrderPin = mutation({
+	args: { orderId: v.string(), lat: v.number(), lng: v.number() },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const user = await requireCustomer(ctx);
+		const id = ctx.db.normalizeId('orders', args.orderId);
+		const order = id ? await ctx.db.get(id) : null;
+		if (!order || order.userId !== user._id) throw new ConvexError({ code: 'ORDER_NOT_FOUND' });
+		if (!PIN_MOVABLE.includes(order.status)) throw new ConvexError({ code: 'ORDER_CLOSED' });
+		if (!isInIndia(args)) throw new ConvexError({ code: 'INVALID_ADDRESS', field: 'location' });
+		await ctx.db.patch(order._id, {
+			address: { ...order.address, lat: args.lat, lng: args.lng },
+			pinUpdatedAt: Date.now()
+		});
+		return null;
 	}
 });

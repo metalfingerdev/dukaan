@@ -41,6 +41,8 @@ const boardOrder = v.object({
 	contactPhone: v.string(),
 	slotStartMs: v.optional(v.number()),
 	customerNote: v.optional(v.string()),
+	/** False only for orders placed before pins were required: the rider must call to find them */
+	hasPin: v.boolean(),
 	assignedPartnerId: v.optional(v.id('deliveryPartners')),
 	assignedPartnerName: v.optional(v.string()),
 	/** Why the delivery failed, for orders in the Failed column */
@@ -82,6 +84,7 @@ const toBoardOrder = async (
 		contactPhone: order.address.contactPhone,
 		slotStartMs: order.slotStartMs,
 		customerNote: order.customerNote,
+		hasPin: order.address.lat !== undefined && order.address.lng !== undefined,
 		assignedPartnerId: order.assignedPartnerId,
 		assignedPartnerName: partner?.name,
 		failureNote,

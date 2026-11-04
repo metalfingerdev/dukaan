@@ -135,19 +135,22 @@ delivery").
 One page, four blocks, a single primary button:
 
 1. **Address** (built, `store/addresses.ts` and `/account/addresses`; validation in
-   `model/store/address.ts`): the customer picks an **area** from `storeSettings.deliveryAreas` and may
-   tap "use my current location" to save `lat`/`lng` (no map widget, no Google Maps key; the
-   partner's Maps button uses those coordinates). The admin edits the list in `/admin/settings`. A
-   Google Maps **pin picker** is also offered when `PUBLIC_GOOGLE_MAPS_API_KEY` is set (lazy-loaded
-   only on the address form, never required: the delivery person is a store employee who phones the
-   customer, and a failed map load must not block an order). Rules: coverage is still the named
-   areas, not the pin; only the customer's confirmed pin and their own edited text are stored (not
-   the geocoder's raw results; check Google's terms on caching before launch); the optional "Google
+   `model/store/address.ts`): **the pin comes first and is required** (`store-profile.md`, Maps).
+   The form opens with "Where should we come?": the Google Maps pin picker in satellite view,
+   starting at the customer's location, when `PUBLIC_GOOGLE_MAPS_API_KEY` is set; otherwise "Use my
+   current location" plus a link to check the pin on Google Maps. The server refuses an address
+   without a pin (`PIN_REQUIRED`) or with one outside India (which also catches the 0,0 a failing
+   phone reports). The customer also picks an **area** from `storeSettings.deliveryAreas` (coverage
+   is the named areas, not the pin; an area not in the list can't be saved: "We don't deliver
+   there yet"). Rules: never block an order on the map loading, since current location works
+   without it; only the customer's confirmed pin and their own edited text are stored (not the
+   geocoder's raw results; check Google's terms on caching before launch); the optional "Google
    Maps link" is only accepted for https Google Maps hosts, because the rider taps it
-   (`isAllowedMapsUrl`). Pick a saved one or add one. The form adapts to `kind` (house: house/street +
-   landmark; hostel: hostel/PG name, block, room; shop). `area` is a select from
-   `storeSettings.deliveryAreas`; an address outside them can't be saved ("We don't deliver there
-   yet"). Phone is required and defaults to the signed-in number.
+   (`isAllowedMapsUrl`). The form adapts to `kind` (house: house/street + landmark; hostel:
+   hostel/PG name, block, room; shop). Phone is required and defaults to the signed-in number. An
+   address saved before pins were required gets "Add the pin" at checkout, and `placeOrder`
+   refuses it. From an open order the customer can "Send my current location"
+   (`updateOrderPin`), which moves the order's pin and shows the rider when it moved.
 2. **Delivery**: "As soon as possible (~N min)" or a slot list generated from the store's hours.
 3. **Payment**: cash on delivery or UPI on delivery (the partner shows the store's UPI QR/VPA, or
    the customer pays by UPI app at the door). Online payment is a later step.

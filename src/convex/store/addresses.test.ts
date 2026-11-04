@@ -8,7 +8,9 @@ const home = {
 	line1: '12, Test Street',
 	area: 'Main Market (placeholder)',
 	contactName: 'Test Customer',
-	contactPhone: '9876543210'
+	contactPhone: '9876543210',
+	lat: 23.2,
+	lng: 77.4
 };
 
 describe('signed out', () => {
@@ -51,7 +53,7 @@ describe('saveAddress', () => {
 		expect(await alice.query(api.store.addresses.listAddresses, {})).toHaveLength(0);
 	});
 
-	it('updates in place and really removes a cleared landmark and location', async () => {
+	it('updates in place, moves the pin and really removes a cleared landmark', async () => {
 		const { alice } = await setup();
 		const { addressId } = await alice.mutation(api.store.addresses.saveAddress, {
 			...home,
@@ -59,12 +61,11 @@ describe('saveAddress', () => {
 			lat: 23.2,
 			lng: 77.4
 		});
-		await alice.mutation(api.store.addresses.saveAddress, { ...home, id: addressId, line1: 'New line' });
+		await alice.mutation(api.store.addresses.saveAddress, { ...home, id: addressId, line1: 'New line', lat: 23.3 });
 		const list = await alice.query(api.store.addresses.listAddresses, {});
 		expect(list).toHaveLength(1);
-		expect(list[0]).toMatchObject({ line1: 'New line', isDefault: true });
+		expect(list[0]).toMatchObject({ line1: 'New line', isDefault: true, lat: 23.3, lng: 77.4 });
 		expect(list[0].landmark).toBeUndefined();
-		expect(list[0].lat).toBeUndefined();
 	});
 
 	it('moves the default when asked, keeping exactly one', async () => {

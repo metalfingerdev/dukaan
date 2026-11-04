@@ -41,7 +41,10 @@ What is special to partners, in the order they need it:
 
 - **Amount to collect**, large: "Collect ₹X cash" / "Collect ₹X by UPI" / "Already paid".
 - **Customer**: first name and a **tap-to-call** button (`tel:`).
-- **Address**: hostel/house line, area, **landmark**, and a **Maps** button. With coordinates use
+- **Address**: hostel/house line, area, **landmark**, a small fixed satellite view of the pin
+  (`PinPreview`, only with a Maps key; it follows the pin if the customer moves it, with a note of
+  when) and a **Maps** button. An order without a pin (placed before pins were required) says so:
+  call first. With coordinates use
   `https://www.google.com/maps/dir/?api=1&destination=<lat>,<lng>`; without, search the address
   text. Urlencode everything.
 - **Customer's note** (for example "Call at the gate").
