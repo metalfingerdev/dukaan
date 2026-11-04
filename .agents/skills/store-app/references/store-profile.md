@@ -151,14 +151,18 @@ those come first. Ordered by what unblocks what.
    On the board a packed card has a partner select and an "Out for delivery" button
    (`assignPartner`, `startDelivery`). Cash only appears once step 4 records `cashCollectedPaise`
    on delivery. *Needs:* the partners' real phone numbers, added in `/admin/delivery` on staging.
-4. **Delivery-partner screens** (`delivery.md`). Only their own orders; the customer's phone as a
-   big tap-to-call button first (the main way a rider finds the door), the address, landmark and a
-   Maps button (from the saved pin or Maps link, else a search on the address text); "Picked up",
-   "Delivered" (types the customer's 4-digit code; rate-limited), "Couldn't deliver" with a reason.
-5. **UPI on delivery**. Show the store's UPI id and a scannable QR on the order page for UPI
-   orders (never expose the UPI id in public queries; return it through the order projection); the
-   rider records how it was actually paid (cash or UPI) so the admin can reconcile; `paymentStatus`
-   becomes `paid` on delivery. *Needs:* the real UPI id.
+4. **Delivery-partner screens** (**built**, `delivery.md`). `/delivery` (to pick up, on the way,
+   today's tally and cash to hand over) and `/delivery/orders/[id]`: big Collect line, tap-to-call,
+   Maps button (saved pin, else the customer's Google Maps link, else a search on the address),
+   items checklist, timeline, "Picked up", "Delivered" (the customer's 4-digit code, at most 5
+   guesses per order per 10 minutes, and how the partner was paid) and "Couldn't deliver" with a
+   reason. A failed delivery lands in a "Needs you" section on the admin board (Pack again or
+   Cancel). The header shows a "Deliveries" link to partners. *Needs:* a partner signed in on a real
+   phone to try it end to end.
+5. **UPI on delivery** (partly built: the rider already records `paidWith` cash or UPI on delivery,
+   and only cash counts toward `cashCollectedPaise`). Still to do: show the store's UPI id and a scannable QR on the order page for UPI
+   orders (never expose the UPI id in public queries; return it through the order projection), and
+   an admin view to reconcile UPI against cash. *Needs:* the real UPI id.
 6. **Invoices** (`admin.md`). Numbered only when an order is delivered, immutable, printable.
    *Needs:* a decision with the founder's accountant on GST (registered? GSTIN? composition
    scheme?), the legal name and address. Don't assert tax rules in code or copy.

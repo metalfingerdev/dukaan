@@ -18,8 +18,9 @@
 		partners: { _id: Id<'deliveryPartners'>; name: string }[];
 		onassign: (partnerId: Id<'deliveryPartners'>) => void;
 		onstart: () => void;
+		onrepack: () => void;
 	};
-	let { order, now, busy, onaccept, onpack, onreject, partners, onassign, onstart }: Props = $props();
+	let { order, now, busy, onaccept, onpack, onreject, partners, onassign, onstart, onrepack }: Props = $props();
 
 	const text = strings.admin.board;
 	const SHOWN_ITEMS = 4;
@@ -108,6 +109,19 @@
 		</button>
 	{:else if order.status === 'out_for_delivery' && order.assignedPartnerName}
 		<p class="text-sm font-medium">{text.withPartner(order.assignedPartnerName)}</p>
+	{/if}
+
+	{#if order.status === 'delivery_failed'}
+		{#if order.failureNote}<p class="text-sm font-medium">{text.failedBecause(order.failureNote)}</p>{/if}
+		{#if order.assignedPartnerName}<p class="text-sm">{text.assignedTo(order.assignedPartnerName)}</p>{/if}
+		<div class="mt-1 flex gap-2">
+			<button type="button" class="btn preset-filled-primary-500 min-h-12 flex-1" disabled={busy} onclick={onrepack}>
+				{text.packAgain}
+			</button>
+			<button type="button" class="btn preset-tonal-error min-h-12" disabled={busy} onclick={onreject}>
+				{text.cancel}
+			</button>
+		</div>
 	{/if}
 
 	{#if order.status === 'placed' || order.status === 'accepted' || order.status === 'packed'}

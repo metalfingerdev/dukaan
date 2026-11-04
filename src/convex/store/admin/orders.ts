@@ -23,7 +23,8 @@ const boardStatus = v.union(
 	v.literal('placed'),
 	v.literal('accepted'),
 	v.literal('packed'),
-	v.literal('out_for_delivery')
+	v.literal('out_for_delivery'),
+	v.literal('delivery_failed')
 );
 
 const boardOrder = v.object({
@@ -42,6 +43,8 @@ const boardOrder = v.object({
 	customerNote: v.optional(v.string()),
 	assignedPartnerId: v.optional(v.id('deliveryPartners')),
 	assignedPartnerName: v.optional(v.string()),
+	/** Why the delivery failed, for orders in the Failed column */
+	failureNote: v.optional(v.string()),
 	itemCount: v.number(),
 	items: v.array(v.object({ name: v.string(), unitLabel: v.string(), quantity: v.number() }))
 });
@@ -55,6 +58,16 @@ const toBoardOrder = async (
 		.withIndex('by_orderId', (q) => q.eq('orderId', order._id))
 		.take(MAX_ITEMS_PER_ORDER);
 	const partner = order.assignedPartnerId ? await ctx.db.get(order.assignedPartnerId) : null;
+	const failureNote =
+		order.status === 'delivery_failed'
+			? (
+					await ctx.db
+						.query('orderEvents')
+						.withIndex('by_orderId', (q) => q.eq('orderId', order._id))
+						.order('desc')
+						.first()
+				)?.note
+			: undefined;
 	return {
 		_id: order._id,
 		orderNumber: order.orderNumber,
@@ -71,6 +84,7 @@ const toBoardOrder = async (
 		customerNote: order.customerNote,
 		assignedPartnerId: order.assignedPartnerId,
 		assignedPartnerName: partner?.name,
+		failureNote,
 		itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
 		items: items.map((item) => ({
 			name: item.name,
@@ -125,8 +139,8 @@ export const packOrder = mutation({
 });
 
 /**
- * Rejects or cancels an order that has not left the store (New, Accepted or Packed) and puts its
- * stock back. The reason is required and is shown to the customer on their order timeline.
+ * Rejects or cancels an order that is not out on the road (New, Accepted, Packed, or Failed after
+ * a delivery attempt) and puts its stock back. The reason is required and is shown to the customer on their order timeline.
  */
 export const cancelOrder = mutation({
 	args: { orderId: v.id('orders'), reason: v.string() },
@@ -176,6 +190,21 @@ export const startDelivery = mutation({
 		await transitionOrder(ctx, {
 			orderId: order._id,
 			to: 'out_for_delivery',
+			actor: { kind: 'admin', id: admin._id }
+		});
+		return null;
+	}
+});
+
+/** Failed → Packed: try the delivery again (with the same or another partner) */
+export const repackOrder = mutation({
+	args: { orderId: v.id('orders') },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const admin = await requireAppAdmin(ctx);
+		await transitionOrder(ctx, {
+			orderId: args.orderId,
+			to: 'packed',
 			actor: { kind: 'admin', id: admin._id }
 		});
 		return null;
