@@ -60,6 +60,7 @@ export const strings = {
 		empty: 'Your cart is empty.',
 		keepShopping: 'Keep shopping',
 		viewCart: 'View cart',
+		openFull: 'Open the full cart page',
 		items: (count: number) => `${count} ${count === 1 ? 'item' : 'items'}`,
 		removeOne: 'Remove one',
 		addOne: 'Add one',
@@ -769,6 +770,7 @@ export const strings = {
 	common: {
 		backHome: 'Back to home',
 		loading: 'Loading',
+		close: 'Close',
 		error: 'Something went wrong. Please try again.'
 	}
 } as const;

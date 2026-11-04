@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import { PUBLIC_APP_ENV } from "$app/env/public";
   import type { ComponentProps } from "svelte";
   import { useAuth } from "@mmailaender/convex-better-auth-svelte/svelte";
@@ -16,6 +17,7 @@
   import { getCartContext } from "../cart.context.js";
   import { formatPaise } from "../format.js";
   import { strings } from "../strings.js";
+  import { cartDrawer } from "../cartDrawer.svelte.js";
   import SearchBox from "./SearchBox.svelte";
   import StoreStatus from "./StoreStatus.svelte";
 
@@ -73,7 +75,16 @@
   <div class="bar">
     <div class="inner bar-inner">
       <div class="search"><SearchBox /></div>
-      <a href={resolve("/cart")} class="cart">
+      <a
+      href={resolve("/cart")}
+      class="cart"
+      onclick={(event) => {
+        // The cart page is the full cart; elsewhere the cart opens over the page
+        if (page.url.pathname === resolve("/cart")) return;
+        event.preventDefault();
+        cartDrawer.open = true;
+      }}
+    >
         <ShoppingCartIcon class="size-5" aria-hidden="true" />
         {#if cart.count > 0}
           <span class="cart-text">

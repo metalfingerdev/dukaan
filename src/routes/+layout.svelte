@@ -23,6 +23,7 @@
   import AdminButton from "#lib/admin/ui/AdminButton.svelte";
   import DeliveryLink from "#lib/store/delivery/DeliveryLink.svelte";
   import ShopHeader from "#lib/store/ui/ShopHeader.svelte";
+  import CartDrawer from "#lib/store/ui/CartDrawer.svelte";
 
   let { children, data } = $props();
 
@@ -75,6 +76,9 @@
     <main>
       {@render children()}
     </main>
+    {#if shop}
+      <CartDrawer />
+    {/if}
   </div>
 
   <UserProfileHost initialData={data.initialData} />
