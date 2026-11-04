@@ -36,7 +36,7 @@ const productFields = {
 	hsn: v.optional(v.string())
 };
 
-const adminProduct = v.object({
+export const adminProduct = v.object({
 	_id: v.id('products'),
 	...productFields,
 	slug: v.string(),
@@ -44,7 +44,7 @@ const adminProduct = v.object({
 	imageUrl: v.union(v.string(), v.null())
 });
 
-const toAdminProduct = async (ctx: QueryCtx, product: Doc<'products'>) => ({
+export const toAdminProduct = async (ctx: QueryCtx, product: Doc<'products'>) => ({
 	_id: product._id,
 	categoryId: product.categoryId,
 	name: product.name,

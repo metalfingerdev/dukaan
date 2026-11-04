@@ -269,6 +269,36 @@ export const strings = {
 			featured: 'Featured',
 			inStock: (count: number) => `${count} in stock`,
 			outOfStock: 'Out of stock',
+			filters: { all: 'All', low: 'Low stock', out: 'Out of stock' },
+			stock: {
+				open: 'Stock',
+				close: 'Close',
+				quantity: 'How many',
+				received: 'Received',
+				damaged: 'Damaged',
+				counted: 'Counted on the shelf',
+				setCount: 'Set count',
+				countHint: 'Count the goods on the shelf, including orders not picked yet.',
+				held: (count: number) => `${count} in orders not yet picked, counted into the shelf total.`,
+				history: 'History',
+				noHistory: 'No changes yet.',
+				done: 'Stock updated.',
+				reason: {
+					received: 'Received',
+					sold: 'Sold',
+					order_cancelled: 'Order cancelled',
+					damaged: 'Damaged',
+					correction: 'Counted'
+				},
+				errors: {
+					quantity: 'Enter a whole number, 1 or more.',
+					count: 'Enter a whole number, 0 or more.',
+					outOfStock: 'There is not that much in stock.',
+					changed: 'Stock changed while you were counting. Check the new number and count again.',
+					belowHeld: (held: number) =>
+						`That is fewer than the ${held} in orders not yet picked. Count again.`
+				}
+			},
 			limited: (count: number) => `Showing the first ${count}. Search or pick a category to narrow it down.`,
 			noPhoto: 'No photo',
 			form: {
