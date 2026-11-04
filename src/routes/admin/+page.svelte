@@ -29,6 +29,18 @@
 <p class="text-surface-600-400 text-sm">{text.home.intro}</p>
 <ul class="flex flex-col gap-2">
 	<li>
+		<a href={resolve('/admin/products')} class="card preset-outlined-surface-300-700 block p-4">
+			<span class="font-semibold">{text.nav.products}</span>
+			<span class="text-surface-600-400 block text-sm">{text.home.productsLink}</span>
+		</a>
+	</li>
+	<li>
+		<a href={resolve('/admin/categories')} class="card preset-outlined-surface-300-700 block p-4">
+			<span class="font-semibold">{text.nav.categories}</span>
+			<span class="text-surface-600-400 block text-sm">{text.home.categoriesLink}</span>
+		</a>
+	</li>
+	<li>
 		<a href={resolve('/admin/settings')} class="card preset-outlined-surface-300-700 block p-4">
 			<span class="font-semibold">{text.nav.settings}</span>
 			<span class="text-surface-600-400 block text-sm">{text.home.settingsLink}</span>

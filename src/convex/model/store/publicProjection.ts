@@ -34,6 +34,26 @@ export const publicCategory = v.object({
 export const maxQuantityFor = (product: Pick<Doc<'products'>, 'stock' | 'maxPerOrder'>) =>
 	Math.max(0, Math.min(product.stock, product.maxPerOrder));
 
+/**
+ * Whether customers may see and buy a product: it is active and so is its category. Hiding a
+ * category hides everything in it without touching each product, so showing the category again
+ * brings back exactly what was on sale before.
+ */
+export const isProductVisible = async (ctx: Pick<QueryCtx, 'db'>, product: Doc<'products'>) => {
+	if (!product.isActive) return false;
+	const category = await ctx.db.get(product.categoryId);
+	return category !== null && category.isActive;
+};
+
+/** The products customers may see, in the same order. Reads each category once. */
+export const visibleProducts = async (ctx: Pick<QueryCtx, 'db'>, products: Doc<'products'>[]) => {
+	const active = products.filter((product) => product.isActive);
+	const categoryIds = [...new Set(active.map((product) => product.categoryId))];
+	const categories = await Promise.all(categoryIds.map((id) => ctx.db.get(id)));
+	const shown = new Set(categories.filter((c) => c?.isActive).map((c) => c!._id));
+	return active.filter((product) => shown.has(product.categoryId));
+};
+
 export const toPublicProduct = async (ctx: QueryCtx, product: Doc<'products'>) => {
 	const lowStock =
 		product.stock > 0 && product.lowStockAt !== undefined && product.stock <= product.lowStockAt;

@@ -13,7 +13,7 @@ function here starts with `requireAppAdmin(ctx)` (`roles-and-access.md`).
 | `/admin/orders/[id]` | one order: items, address, payment, timeline, actions, invoice |
 | `/admin/orders/[id]/invoice` | printable invoice |
 | `/admin/products` | stock and price editing, create/edit product |
-| `/admin/categories` | create/reorder/hide categories |
+| `/admin/categories` | create/rename/reorder/hide categories (built) |
 | `/admin/delivery` | partners, who is out, cash to settle |
 | `/admin/settings` | hours, open/closed switch, fees, areas, invoice details |
 | `/admin/users` | the existing user and organization dashboard |
