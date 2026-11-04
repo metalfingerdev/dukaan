@@ -11,7 +11,8 @@ import {
 	publicCategory,
 	publicProduct,
 	toPublicCategory,
-	toPublicProduct
+	toPublicProduct,
+	visibleProducts
 } from '../model/store/publicProjection';
 
 const MAX_CATEGORIES = 50;
@@ -83,7 +84,8 @@ export const listFeatured = query({
 			.query('products')
 			.withIndex('by_isFeatured_and_isActive', (q) => q.eq('isFeatured', true).eq('isActive', true))
 			.take(MAX_FEATURED);
-		return await Promise.all(products.map((product) => toPublicProduct(ctx, product)));
+		const shown = await visibleProducts(ctx, products);
+		return await Promise.all(shown.map((product) => toPublicProduct(ctx, product)));
 	}
 });
 
@@ -131,7 +133,8 @@ export const getProduct = query({
 			.unique();
 		if (!product || !product.isActive) return null;
 		const category = await ctx.db.get(product.categoryId);
-		if (!category) return null;
+		// A hidden category hides its products
+		if (!category || !category.isActive) return null;
 		// One extra row, since the product itself may be among them
 		const siblings = await ctx.db
 			.query('products')
@@ -161,11 +164,14 @@ export const getProductsByIds = query({
 		const found = await Promise.all(
 			args.ids.map(async (raw) => {
 				const id = ctx.db.normalizeId('products', raw);
-				const product = id ? await ctx.db.get(id) : null;
-				return product && product.isActive ? await toPublicProduct(ctx, product) : null;
+				return id ? await ctx.db.get(id) : null;
 			})
 		);
-		return found.filter((product) => product !== null);
+		const shown = await visibleProducts(
+			ctx,
+			found.filter((product) => product !== null)
+		);
+		return await Promise.all(shown.map((product) => toPublicProduct(ctx, product)));
 	}
 });
 
@@ -179,6 +185,7 @@ export const searchProducts = query({
 			.query('products')
 			.withSearchIndex('search_name', (q) => q.search('name', text).eq('isActive', true))
 			.take(MAX_SEARCH_RESULTS);
-		return await Promise.all(products.map((product) => toPublicProduct(ctx, product)));
+		const shown = await visibleProducts(ctx, products);
+		return await Promise.all(shown.map((product) => toPublicProduct(ctx, product)));
 	}
 });

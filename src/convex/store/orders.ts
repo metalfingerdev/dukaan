@@ -15,7 +15,7 @@ import { nextCounterValue } from '../model/store/counters';
 import { randomDeliveryCode } from '../model/store/deliveryCode';
 import { isOpenStatus, transitionOrder } from '../model/store/orderStatus';
 import { priceCart } from '../model/store/pricing';
-import { maxQuantityFor } from '../model/store/publicProjection';
+import { isProductVisible, maxQuantityFor } from '../model/store/publicProjection';
 import { isValidSlot } from '../model/store/slots';
 import { adjustStock } from '../model/store/stock';
 import { isOpenNow } from '../model/store/time';
@@ -125,7 +125,7 @@ export const placeOrder = mutation({
 		const problems: CartProblem[] = [];
 		for (const cartLine of cartLines) {
 			const product = await ctx.db.get(cartLine.productId);
-			if (!product || !product.isActive) {
+			if (!product || !(await isProductVisible(ctx, product))) {
 				problems.push({ productId: cartLine.productId, reason: 'unavailable', available: 0 });
 			} else if (cartLine.quantity > product.stock) {
 				problems.push({
