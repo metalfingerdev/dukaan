@@ -41,13 +41,13 @@ const MAX_HELD_ORDERS = 200;
 const MAX_ORDER_LINES = 200;
 
 /**
- * How many units of a product are in `placed` or `accepted` orders. Their stock was already taken
- * off `products.stock` when the order was placed, but nobody has picked the goods yet, so they are
- * still physically on the shelf: a shelf count of N means `stock` should be N minus this.
+ * How many units of each product are in `placed` or `accepted` orders. Their stock was already
+ * taken off `products.stock` when the order was placed, but nobody has picked the goods yet, so
+ * they are still physically on the shelf: a shelf count of N means `stock` should be N minus this.
  * Packed orders are not counted, because their goods are already off the shelf.
  */
-export async function heldByOpenOrders(ctx: QueryCtx | MutationCtx, productId: Id<'products'>) {
-	let held = 0;
+export async function heldByProduct(ctx: QueryCtx | MutationCtx) {
+	const held = new Map<Id<'products'>, number>();
 	for (const status of ['placed', 'accepted'] as const) {
 		const orders = await ctx.db
 			.query('orders')
@@ -59,8 +59,13 @@ export async function heldByOpenOrders(ctx: QueryCtx | MutationCtx, productId: I
 				.query('orderItems')
 				.withIndex('by_orderId', (q) => q.eq('orderId', order._id))
 				.take(MAX_ORDER_LINES);
-			for (const item of items) if (item.productId === productId) held += item.quantity;
+			for (const item of items) held.set(item.productId, (held.get(item.productId) ?? 0) + item.quantity);
 		}
 	}
 	return held;
+}
+
+/** The same for one product */
+export async function heldByOpenOrders(ctx: QueryCtx | MutationCtx, productId: Id<'products'>) {
+	return (await heldByProduct(ctx)).get(productId) ?? 0;
 }

@@ -257,6 +257,52 @@ export const strings = {
 				tooMany: 'You can have at most 50 categories.'
 			}
 		},
+		import: {
+			title: 'Import or export products',
+			back: 'Back to products',
+			exportTitle: 'Export',
+			exportHint: 'Download every product as a CSV file you can open in Excel or Google Sheets, edit, and import back.',
+			exportButton: 'Download products',
+			exportTruncated: (max: number) => `The file has only the first ${max} products.`,
+			importTitle: 'Import',
+			importHint:
+				'Choose a CSV with the same columns as the export. A blank cell keeps the current value (a new product gets a default). Unknown categories are created.',
+			chooseFile: 'Choose a CSV file',
+			columnsNote: 'Columns: slug, name, category, unit, price, mrp, stock, low_stock_at, max_per_order, featured, active, gst_rate, hsn.',
+			tooMany: (max: number) => `A file can have at most ${max} products.`,
+			unreadable: 'That file could not be read as a CSV.',
+			noColumns: 'The first line must name the columns, including name or slug.',
+			modeTitle: 'What should the stock column do for existing products?',
+			modes: {
+				keep: { label: 'Leave stock as it is', hint: 'Safest. New products still start with their stock column.' },
+				add: { label: 'Add as received', hint: 'The number is added to the shelf, like a delivery.' },
+				set: {
+					label: 'Set to a counted number',
+					hint: 'The number is what you counted. Goods in orders not yet picked are taken off it.'
+				}
+			},
+			previewing: 'Checking the file…',
+			summary: (created: number, updated: number, errors: number) =>
+				`${created} new, ${updated} to update, ${errors} with problems.`,
+			newCategories: (names: string) => `New categories to create: ${names}`,
+			row: (n: number) => `Row ${n}`,
+			kind: { new: 'New', update: 'Update', error: 'Problem' },
+			stockChange: (from: number, to: number) => `Stock ${from} → ${to}`,
+			openingStock: (stock: number) => `Opening stock ${stock}`,
+			problems: {
+				missing: (field: string) => `${field} is needed`,
+				invalid: (field: string) => `${field} is not valid`,
+				duplicate: () => 'The same product appears twice in this file',
+				below_held: () => 'The count is lower than the goods in orders not yet picked',
+				too_many_categories: () => 'There are already 50 categories'
+			},
+			apply: 'Apply import',
+			applying: 'Importing…',
+			fixFirst: 'Fix the problems in your file and choose it again. Nothing is imported until every row is fine.',
+			done: (created: number, updated: number) => `Done: ${created} added, ${updated} updated.`,
+			stockChanged: 'Stock changed since the preview, so nothing was imported. Check the new numbers below and apply again.',
+			applyFailed: 'Nothing was imported because the file no longer passes. Check the preview and try again.'
+		},
 		products: {
 			title: 'Products',
 			add: 'Add a product',
@@ -269,6 +315,7 @@ export const strings = {
 			featured: 'Featured',
 			inStock: (count: number) => `${count} in stock`,
 			outOfStock: 'Out of stock',
+			importLink: 'Import / export',
 			filters: { all: 'All', low: 'Low stock', out: 'Out of stock' },
 			stock: {
 				open: 'Stock',
