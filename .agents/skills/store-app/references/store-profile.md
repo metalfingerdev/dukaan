@@ -86,7 +86,7 @@ saved addresses with optional pin, Maps link and Myself/Someone else; checkout w
 order engine (`placeOrder`, `cancelOrder`, stock and status helpers, rate limits); `/orders` and
 live `/orders/[id]` with the delivery code.
 
-Step 1 in progress: the admin area has a layout and nav, `/admin` (home with the open/closed
+Step 1 is **complete** (PRs #10, #12, #13, #14). The admin area has a layout and nav, `/admin` (home with the open/closed
 switch, until the order board), `/admin/settings` (hours, ETA, fees, minimum order, delivery areas,
 store phone, UPI id), `/admin/users` (the user dashboard, moved from `/admin`),
 `/admin/categories` (add, rename, hide, reorder) and `/admin/products` (list by category or name,
@@ -105,9 +105,49 @@ one); unknown categories are created; the stock column follows a per-import mode
 (default), add as received, or set to a counted number (count minus held), and `set` is refused if
 stock moved since the preview.
 
+End-to-end tests run against dev: the admin test user is in `ADMIN_USER_IDS` on the dev
+deployment and `E2E_ADMIN_PHONE` / `E2E_CUSTOMER_PHONE` are in `.env.local` (never committed), so
+`pnpm test:e2e` runs all specs, including `admin-products.spec.ts`. Playwright is **not** run on
+every change: it is slow (~2 min) and has found only test bugs so far, so run it when a change
+touches a screen it covers, or when asked.
+
 **Not built**: the order board and anything for the
 delivery partner, so **an order stays at "Order placed" forever**; payments beyond cash; invoices;
 the designed UI.
+
+## Step 2 in progress: the live order board (pick up here)
+
+Branch `admin/order-board`, worktree `.claude/worktrees/order-board`, off `main`. **The backend is
+written, committed on that branch and deployed to dev; the UI is not started.**
+
+Done, in `src/convex/store/admin/orders.ts` (each calls `requireAppAdmin`, every status change goes
+through `transitionOrder`, so a cancel restores stock and writes the timeline event):
+
+- `listOrders({ status })` -- one board column, oldest first (the one to pack next on top),
+  `.take(50)` on `by_status`. Returns a purpose-built projection: number, placed-at, total, payment
+  method and status, area, landmark, contact name and phone, slot, customer note, item count and
+  the item lines. No user id, idempotency key or delivery code.
+- `acceptOrder`, `packOrder`, and `cancelOrder({ reason })` for New/Accepted/Packed. The reason is
+  required (1-200 chars) and shows on the customer's timeline. Two admins racing is safe: the
+  second move is no longer a valid transition and is refused with `INVALID_TRANSITION`.
+
+Still to build:
+
+- `/admin/+page.svelte` becomes the board (today it is the home with the open/closed switch; keep
+  the switch somewhere). Four columns -- New (`placed`), Accepted, Packed, Out for delivery -- one
+  `useQuery` each, so it is live without polling. On a phone, make the columns tabs or stacked
+  sections; the admin works one-handed behind the counter.
+- Order card: number, age ("4 min ago", via `createClock` in `src/lib/store/now.svelte.ts`), item
+  count, total, area, payment method, COD amount; highlight an order sitting over 5 minutes in New.
+- One-tap Accept / Mark packed / Reject with a reason (a dialog; `src/lib/primitives/ui/` has one).
+- New-order alert: a toast (`svelte-sonner`, already used in auth flows), the tab title flashing
+  "(2) New order", and an optional sound behind an "Enable alerts" switch remembered in
+  `localStorage` inside `try/catch` (browsers block audio until the user interacts).
+- All strings under a new `admin.board` group in `src/lib/store/strings.ts`.
+- **Assign partner is not part of this step**: it needs the `deliveryPartners` table from step 3,
+  so the Out-for-delivery column stays empty until then. Don't invent a partner flow here.
+- Tests: only what can fail -- a Vitest refusal for customers on the board mutations, and that an
+  admin cancel restores stock. The existing suite already covers `transitionOrder`.
 
 ## Roadmap (agreed order; each step is its own PR or small series)
 
@@ -120,8 +160,9 @@ those come first. Ordered by what unblocks what.
    The user dashboard moved from `/admin` to `/admin/users` (**built**). Categories, products with photos and the
    stock panel are **built**. CSV export and import with the stock modes above are **built**; step 1 is complete. *Needs from the founder:* real products with
    prices and stock, real hours and fees, the real delivery areas, the store phone number.
-2. **Admin: the live order board**. Columns by status, one-tap Accept, Reject (with a reason), Mark
-   packed, Assign partner; new-order alert; all moves through `transitionOrder`. Orders finally move.
+2. **Admin: the live order board** (**in progress**, see the section above: backend done on
+   `admin/order-board`, UI to build). Columns by status, one-tap Accept, Reject (with a reason), Mark
+   packed, Assign partner (step 3); new-order alert; all moves through `transitionOrder`. Orders finally move.
 3. **Admin: delivery partners and cash settlement**. Add a partner by phone number (matched to
    their verified sign-in phone), activate or deactivate, cash to settle per partner per day.
    *Needs:* the partners' phone numbers.
