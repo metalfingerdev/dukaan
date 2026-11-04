@@ -4,6 +4,7 @@
   import type { api } from "#convex/_generated/api.js";
 
   import Card from "#lib/ui/Card.svelte";
+  import { categoryEmoji } from "../emoji.js";
 
   type Category = FunctionReturnType<
     typeof api.store.catalog.listCategories
@@ -35,6 +36,10 @@
                   height="64"
                   loading="lazy"
                 />
+              {:else}
+                <span class="emoji" aria-hidden="true">
+                  {categoryEmoji(category.name)}
+                </span>
               {/if}
             </span>
             <b class="name">{category.name}</b>
@@ -82,6 +87,10 @@
   }
   .picture img {
     @apply size-full object-cover;
+  }
+  /* Stand-in until the category has a photo */
+  .emoji {
+    @apply flex size-full items-center justify-center text-4xl leading-none select-none md:text-5xl;
   }
   .name {
     @apply line-clamp-2 min-h-[2lh] text-xs leading-tight font-bold sm:text-sm;

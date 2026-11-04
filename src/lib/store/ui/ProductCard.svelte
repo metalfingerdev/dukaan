@@ -5,6 +5,7 @@
   import { strings } from "../strings.js";
   import type { PublicProduct } from "../types.js";
   import AddToCart from "./AddToCart.svelte";
+  import { productEmoji } from "../emoji.js";
   import Card from "#lib/ui/Card.svelte";
   import Pill from "#lib/ui/Pill.svelte";
 
@@ -36,6 +37,8 @@
               height="300"
               loading="lazy"
             />
+          {:else}
+            <span class="emoji" aria-hidden="true">{productEmoji(product.name)}</span>
           {/if}
           <!-- On the photo, not in the price row, so the price row never wraps -->
           {#if off !== null}
@@ -97,6 +100,10 @@
   }
   .photo img {
     @apply size-full object-cover;
+  }
+  /* Stand-in until the product has a photo */
+  .emoji {
+    @apply flex size-full items-center justify-center text-6xl leading-none select-none;
   }
   .name {
     @apply line-clamp-2 min-h-[2lh] leading-snug font-semibold;

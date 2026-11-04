@@ -221,6 +221,29 @@ those come first. Ordered by what unblocks what.
    from its mock. It 404s on the real production site; delete it, Skeleton and Ark when the last
    area is done.
 
+   **Storefront design, decided with the founder (2026-11-04)**. Why each: the founder reviewed
+   screenshots at phone, tablet and 1920px and asked for these.
+   - *Header* (`src/lib/store/ui/ShopHeader.svelte`), Blinkit-style mechanics with our branding.
+     Laptop (lg up): one **full-width** sticky row, not held to the page content's width: brand |
+     delivery time + open pill | search taking all free space | account links | cart button.
+     Phone and tablet: two halves; the top (brand, delivery time, account) scrolls away, the bar
+     with search (and cart from md) sticks. Why: a narrow search bar on wide screens looked empty,
+     and a single crowded row overlapped on tablets.
+   - *Colours*: appetite palette (tomato red-orange actions, turmeric gold accents, warm cream /
+     warm brown-black neutrals, green only for open / fresh / in stock). Why: the founder asked for
+     hunger-triggering colours; red, orange and yellow are the hues tied to appetite in
+     food-delivery research.
+   - *Borders are never black*; black is for text (`edge` utilities).
+   - *Grids are fluid* (`auto-fill`), two product columns on a small phone up to seven or eight on
+     a wide screen; the page content stops at 1536px, the header does not.
+   - *Product cards are all the same height*: the stock line is always reserved and the "% off"
+     pill sits on the photo, so the price row never wraps.
+   - *Skeletons are drawn by the real components* (`ProductCard` with no product, `CategoryTiles`
+     with no categories, the `bone` utility), never separate placeholder boxes. Why: the old
+     skeletons had drifted away from the real layout.
+   - *Emoji stand-ins* for products and categories without a photo (`src/lib/store/emoji.ts`,
+     matched on words in the name). Real photos replace them.
+
 **Smaller items, any time**: the founder enters the real delivery areas, hours, fees and store
 phone in `/admin/settings` on staging; create the Maps key (`docs/08-environments-and-deployment.md`); push or SMS
 notifications (SMS to Indian numbers at scale needs TRAI DLT registration); bump the GitHub Actions versions that warn about Node 20;
