@@ -52,7 +52,7 @@ test.describe('admin', () => {
 	test('reaches every admin page from the header', async ({ page }) => {
 		await page.goto('/');
 		await page.getByRole('link', { name: 'Admin' }).click();
-		await expect(page.getByRole('heading', { name: 'Store admin' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Orders', exact: true })).toBeVisible();
 		await page.getByRole('navigation').getByRole('link', { name: 'Settings' }).click();
 		await expect(page.getByRole('heading', { name: 'Store settings' })).toBeVisible();
 		await page.getByRole('navigation').getByRole('link', { name: 'Users' }).click();

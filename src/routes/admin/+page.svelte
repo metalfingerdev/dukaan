@@ -1,22 +1,19 @@
 <script lang="ts">
-	// The admin home until the live order board (roadmap step 2) takes this route. Access is
-	// checked by ./+layout.svelte (UX) and by every admin Convex function (security).
-	import { resolve } from '$app/paths';
+	// The live order board. Access is checked by ./+layout.svelte (UX) and by every admin Convex
+	// function (security). The other admin pages are in the layout's nav.
 	import { useQuery } from 'convex-svelte';
 	import { api } from '#convex/_generated/api.js';
 
+	import OrderBoard from '#lib/store/admin/OrderBoard.svelte';
 	import StoreOpenSwitch from '#lib/store/admin/StoreOpenSwitch.svelte';
 	import { strings } from '#lib/store/strings.js';
 
 	const settings = useQuery(api.store.admin.settings.getSettings, {});
-	const text = strings.admin;
 </script>
 
 <svelte:head>
-	<title>{text.title}</title>
+	<title>{strings.admin.board.title}</title>
 </svelte:head>
-
-<h1 class="h3">{text.title}</h1>
 
 {#if settings.error}
 	<p class="text-error-600-400 text-sm">{strings.common.error}</p>
@@ -26,30 +23,4 @@
 	<StoreOpenSwitch hours={settings.data.settings} />
 {/if}
 
-<p class="text-surface-600-400 text-sm">{text.home.intro}</p>
-<ul class="flex flex-col gap-2">
-	<li>
-		<a href={resolve('/admin/products')} class="card preset-outlined-surface-300-700 block p-4">
-			<span class="font-semibold">{text.nav.products}</span>
-			<span class="text-surface-600-400 block text-sm">{text.home.productsLink}</span>
-		</a>
-	</li>
-	<li>
-		<a href={resolve('/admin/categories')} class="card preset-outlined-surface-300-700 block p-4">
-			<span class="font-semibold">{text.nav.categories}</span>
-			<span class="text-surface-600-400 block text-sm">{text.home.categoriesLink}</span>
-		</a>
-	</li>
-	<li>
-		<a href={resolve('/admin/settings')} class="card preset-outlined-surface-300-700 block p-4">
-			<span class="font-semibold">{text.nav.settings}</span>
-			<span class="text-surface-600-400 block text-sm">{text.home.settingsLink}</span>
-		</a>
-	</li>
-	<li>
-		<a href={resolve('/admin/users')} class="card preset-outlined-surface-300-700 block p-4">
-			<span class="font-semibold">{text.nav.users}</span>
-			<span class="text-surface-600-400 block text-sm">{text.home.usersLink}</span>
-		</a>
-	</li>
-</ul>
+<OrderBoard />

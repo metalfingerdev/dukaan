@@ -211,18 +211,66 @@ export const strings = {
 		accessDenied: 'Access denied',
 		accessDeniedHint: "You don't have permission to view this page.",
 		nav: {
-			home: 'Home',
+			home: 'Orders',
 			products: 'Products',
 			categories: 'Categories',
 			settings: 'Settings',
 			users: 'Users'
 		},
-		home: {
-			intro: 'Products, stock and the live order board are on their way. For now:',
-			productsLink: 'Add and edit products, prices and photos',
-			categoriesLink: 'Add, rename, hide and reorder categories',
-			settingsLink: 'Hours, fees, delivery areas, phone and UPI id',
-			usersLink: 'Users and sign-ins'
+		board: {
+			title: 'Orders',
+			columns: {
+				placed: 'New',
+				accepted: 'Accepted',
+				packed: 'Packed',
+				out_for_delivery: 'Out for delivery'
+			},
+			empty: {
+				placed: 'No new orders.',
+				accepted: 'Nothing accepted and waiting.',
+				packed: 'Nothing packed and waiting.',
+				out_for_delivery: 'Nothing out for delivery.'
+			},
+			orderNumber: (n: number) => `Order #${n}`,
+			items: (n: number) => (n === 1 ? '1 item' : `${n} items`),
+			moreItems: (n: number) => `and ${n} more`,
+			age: {
+				now: 'just now',
+				minutes: (n: number) => `${n} min ago`,
+				hours: (h: number, m: number) => (m === 0 ? `${h} h ago` : `${h} h ${m} min ago`)
+			},
+			waitingLong: 'Waiting',
+			collect: (amount: string) => `Collect ${amount}`,
+			upi: (amount: string) => `UPI on delivery, ${amount}`,
+			paid: (amount: string) => `Paid, ${amount}`,
+			landmark: (text: string) => `Near ${text}`,
+			note: (text: string) => `Customer note: ${text}`,
+			call: (name: string) => `Call ${name}`,
+			accept: 'Accept',
+			markPacked: 'Mark packed',
+			reject: 'Reject',
+			cancel: 'Cancel order',
+			rejectTitle: (n: number) => `Reject order #${n}?`,
+			cancelTitle: (n: number) => `Cancel order #${n}?`,
+			rejectHint: 'The customer sees this reason. Items go back on the shelf.',
+			reasonLabel: 'Reason',
+			reasonPlaceholder: 'For example: out of stock',
+			reasonRequired: 'Write a reason up to 200 characters.',
+			quickReasons: ['Out of stock', 'Too far to deliver', 'Store is closing'],
+			confirmReject: 'Reject order',
+			confirmCancel: 'Cancel order',
+			back: 'Keep order',
+			working: 'Working…',
+			alreadyMoved: 'Someone already moved that order. The board is up to date.',
+			failed: 'That did not go through. Please try again.',
+			newOrder: (n: number) => (n === 1 ? 'New order' : `${n} new orders`),
+			newOrderTitle: (n: number) => `(${n}) New order`,
+			alerts: {
+				label: 'Sound for new orders',
+				on: 'Sound on',
+				off: 'Sound off',
+				hint: 'Plays a short tone when an order arrives. Keep this page open.'
+			}
 		},
 		openSwitch: {
 			label: 'Taking orders',

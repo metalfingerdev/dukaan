@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateTime, formatPaise } from './format';
+import { formatAge, formatDateTime, formatPaise } from './format';
 
 describe('formatPaise', () => {
 	it('drops the decimals for whole rupees and keeps them otherwise', () => {
@@ -18,4 +18,14 @@ describe('IST time formatting', () => {
 		expect(formatDateTime(Date.UTC(2026, 10, 3, 19, 0)).toLowerCase()).toBe('4 nov, 12:30 am');
 	});
 
+});
+
+describe('formatAge', () => {
+	it('reads as just now, minutes, then hours and minutes', () => {
+		expect(formatAge(59_000)).toBe('just now');
+		expect(formatAge(4 * 60_000 + 59_000)).toBe('4 min ago');
+		expect(formatAge(60 * 60_000)).toBe('1 h ago');
+		expect(formatAge(65 * 60_000)).toBe('1 h 5 min ago');
+		expect(formatAge(-5000)).toBe('just now');
+	});
 });

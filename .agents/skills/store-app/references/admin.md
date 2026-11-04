@@ -8,7 +8,7 @@ function here starts with `requireAppAdmin(ctx)` (`roles-and-access.md`).
 
 | Route | Shows |
 | --- | --- |
-| `/admin` | **Live order board** (the page an admin lands on); until it exists, an admin home with the open/closed switch |
+| `/admin` | **Live order board** (the page an admin lands on) with the open/closed switch above it |
 | `/admin/orders` | all orders, filter by status/date, paginated |
 | `/admin/orders/[id]` | one order: items, address, payment, timeline, actions, invoice |
 | `/admin/orders/[id]/invoice` | printable invoice |
