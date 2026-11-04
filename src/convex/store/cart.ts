@@ -10,7 +10,12 @@ import type { Doc } from '../_generated/dataModel';
 import type { MutationCtx } from '../_generated/server';
 import { mutation, query } from '../_generated/server';
 import { requireCustomer } from '../model/store/access';
-import { maxQuantityFor, publicProduct, toPublicProduct } from '../model/store/publicProjection';
+import {
+	isProductVisible,
+	maxQuantityFor,
+	publicProduct,
+	toPublicProduct
+} from '../model/store/publicProjection';
 
 const MAX_CART_LINES = 100;
 const MAX_MERGE_LINES = 50;
@@ -46,7 +51,7 @@ export const getCart = query({
 		const resolved = await Promise.all(
 			lines.map(async (line) => {
 				const product = await ctx.db.get(line.productId);
-				if (!product || !product.isActive) return null;
+				if (!product || !(await isProductVisible(ctx, product))) return null;
 				return {
 					productId: line.productId,
 					quantity: line.quantity,
@@ -86,7 +91,7 @@ export const setQuantity = mutation({
 		}
 
 		const product = await ctx.db.get(args.productId);
-		if (!product || !product.isActive) {
+		if (!product || !(await isProductVisible(ctx, product))) {
 			if (existing) await ctx.db.delete(existing._id);
 			return { quantity: 0, status: 'unavailable' as const };
 		}
@@ -143,7 +148,7 @@ export const mergeGuestCart = mutation({
 			seen.add(productId);
 
 			const product = await ctx.db.get(productId);
-			if (!product || !product.isActive) continue;
+			if (!product || !(await isProductVisible(ctx, product))) continue;
 			const limit = maxQuantityFor(product);
 			if (limit === 0) continue;
 

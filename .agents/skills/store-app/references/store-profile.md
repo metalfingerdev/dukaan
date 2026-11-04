@@ -88,9 +88,14 @@ live `/orders/[id]` with the delivery code.
 
 Step 1 in progress: the admin area has a layout and nav, `/admin` (home with the open/closed
 switch, until the order board), `/admin/settings` (hours, ETA, fees, minimum order, delivery areas,
-store phone, UPI id) and `/admin/users` (the user dashboard, moved from `/admin`).
+store phone, UPI id), `/admin/users` (the user dashboard, moved from `/admin`),
+`/admin/categories` (add, rename, hide, reorder) and `/admin/products` (list by category or name,
+add, edit, photo; opening stock only on creation). A hidden category hides its products from
+customers everywhere (`isProductVisible` in `model/store/publicProjection.ts`), and `placeOrder`
+treats such a line as unavailable. Products and categories are hidden, never deleted. Category
+photos are not built.
 
-**Not built**: products, categories and stock screens, the order board and anything for the
+**Not built**: the stock screen (after creation, stock changes only through orders), the order board and anything for the
 delivery partner, so **an order stays at "Order placed" forever**; payments beyond cash; invoices;
 the designed UI.
 
@@ -103,7 +108,7 @@ those come first. Ordered by what unblocks what.
    (stock through `adjustStock` only), and a settings page that replaces the placeholders: hours,
    fees, delivery areas, store phone, UPI id (**built**; `store/seed:setDeliveryAreas` is gone).
    The user dashboard moved from `/admin` to `/admin/users` (**built**). Still to come, one PR
-   each: categories and products with images; the stock screen (received, counted, damaged,
+   each: the stock screen (received, counted, damaged,
    history); CSV export and import with the stock modes above. *Needs from the founder:* real products with
    prices and stock, real hours and fees, the real delivery areas, the store phone number.
 2. **Admin: the live order board**. Columns by status, one-tap Accept, Reject (with a reason), Mark
