@@ -5,6 +5,7 @@
 	import { api } from '#convex/_generated/api.js';
 	import { SLOT_MINUTES, STORE_NAME } from '#convex/model/store/storeProfile.js';
 
+	import SendLocation from '#lib/store/ui/SendLocation.svelte';
 	import ShopPage from '#lib/store/ui/ShopPage.svelte';
 	import { getCartContext } from '#lib/store/cart.context.js';
 	import { formatDateTime, formatPaise, formatSlot } from '#lib/store/format.js';
@@ -86,6 +87,10 @@
 					{order.status === 'out_for_delivery' ? strings.orders.codeOnTheWay : strings.orders.codeKeep}
 				</p>
 			</section>
+		{/if}
+
+		{#if order.status === 'out_for_delivery' || order.status === 'delivery_failed' || order.status === 'packed'}
+			<SendLocation orderId={order._id} />
 		{/if}
 
 		{#if order.status === 'cancelled'}

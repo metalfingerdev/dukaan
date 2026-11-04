@@ -23,7 +23,9 @@ const placeOrder = async (s: StoreTest) => {
 		line1: '12, Test Street',
 		area: 'Main Market (placeholder)',
 		contactName: 'Test Customer',
-		contactPhone: '9876543210'
+		contactPhone: '9876543210',
+		lat: 23.2,
+		lng: 77.4
 	});
 	return (
 		await s.alice.mutation(api.store.orders.placeOrder, {

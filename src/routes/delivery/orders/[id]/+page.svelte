@@ -9,9 +9,10 @@
 	import { api } from '#convex/_generated/api.js';
 
 	import DeliveredDialog from '#lib/store/delivery/DeliveredDialog.svelte';
+	import PinPreview from '#lib/store/delivery/PinPreview.svelte';
 	import FailedDialog from '#lib/store/delivery/FailedDialog.svelte';
 	import { directionsUrl } from '#lib/store/directions.js';
-	import { formatDateTime, formatPaise, formatSlot } from '#lib/store/format.js';
+	import { formatDateTime, formatPaise, formatSlot, formatTime } from '#lib/store/format.js';
 	import { strings } from '#lib/store/strings.js';
 	import { SLOT_MINUTES } from '#convex/model/store/storeProfile.js';
 
@@ -121,6 +122,20 @@
 					<p class="text-surface-600-400 text-sm">{formatSlot(run.slotStartMs, SLOT_MINUTES)}</p>
 				{/if}
 			</div>
+			{#if run.customer.lat !== undefined && run.customer.lng !== undefined}
+				<PinPreview
+					lat={run.customer.lat}
+					lng={run.customer.lng}
+					href={directionsUrl({ ...run.customer, area: run.area })}
+				/>
+			{:else}
+				<p class="preset-tonal-warning rounded p-3 text-sm font-medium" role="alert">{text.noPin}</p>
+			{/if}
+			{#if run.pinUpdatedAt}
+				<p class="preset-tonal-primary rounded p-3 text-sm font-medium" role="status">
+					{text.pinMoved(formatTime(run.pinUpdatedAt))}
+				</p>
+			{/if}
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an external Maps link -->
 			<a
 				href={directionsUrl({ ...run.customer, area: run.area })}

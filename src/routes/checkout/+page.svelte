@@ -49,6 +49,8 @@
 
 	let chosenAddressId = $state<string | null>(null);
 	let addingAddress = $state(false);
+	// An address saved before pins were required is opened here to add one
+	let pinningAddress = $state(false);
 	let delivery = $state<'asap' | number>('asap');
 	let payment = $state<'cod' | 'upi_on_delivery'>('cod');
 	let note = $state('');
@@ -62,6 +64,7 @@
 			addressList.find((address) => address.isDefault) ??
 			addressList[0]
 	);
+	const pinOk = $derived(selectedAddress?.lat !== undefined && selectedAddress?.lng !== undefined);
 	const areaOk = $derived(!!selectedAddress && !!info && info.deliveryAreas.includes(selectedAddress.area));
 	const slotOk = $derived(delivery === 'asap' || slots.includes(delivery));
 	const meetsMinimum = $derived(!!pricing && !!info && pricing.subtotalPaise >= info.minOrderPaise);
@@ -69,6 +72,7 @@
 		open === true &&
 			!!selectedAddress &&
 			areaOk &&
+			pinOk &&
 			slotOk &&
 			meetsMinimum &&
 			lines.length > 0 &&
@@ -128,7 +132,16 @@
 
 		<section class="flex flex-col gap-2">
 			<h2 class="h5">{strings.checkout.address}</h2>
-			{#if addressList.length > 0 && !addingAddress}
+			{#if pinningAddress && selectedAddress}
+				<AddressForm
+					areas={info.deliveryAreas}
+					address={selectedAddress}
+					{defaultName}
+					{defaultPhone}
+					onsaved={() => (pinningAddress = false)}
+					oncancel={() => (pinningAddress = false)}
+				/>
+			{:else if addressList.length > 0 && !addingAddress}
 				<ul class="flex flex-col gap-2">
 					{#each addressList as address (address._id)}
 						<li>
@@ -157,6 +170,13 @@
 				</ul>
 				{#if selectedAddress && !areaOk}
 					<p class="text-error-600-400 text-sm" role="alert">{strings.checkout.areaGone}</p>
+				{:else if selectedAddress && !pinOk}
+					<div class="card preset-tonal-warning flex flex-col items-start gap-2 p-3" role="alert">
+						<p class="text-sm">{strings.checkout.needPin}</p>
+						<button type="button" class="btn preset-filled min-h-11" onclick={() => (pinningAddress = true)}>
+							{strings.checkout.addPin}
+						</button>
+					</div>
 				{/if}
 				<div class="flex flex-wrap gap-2">
 					<button type="button" class="btn preset-tonal min-h-11" onclick={() => (addingAddress = true)}>

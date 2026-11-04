@@ -40,9 +40,14 @@
 				zoom: start ? 18 : known ? 16 : 5,
 				disableDefaultUI: true,
 				zoomControl: true,
+				// Satellite with labels: in a village, roofs, fields and tracks are easier to recognise
+				// than a street map with few named streets
+				mapTypeId: 'hybrid',
 				gestureHandling: 'greedy' // one finger pans, so the page doesn't need two-finger scrolling
 			});
 			status = 'ready';
+			// A new pin starts where the customer is standing, if the phone allows it
+			if (!start) panToMe();
 		})();
 	});
 

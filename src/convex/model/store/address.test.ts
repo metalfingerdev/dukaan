@@ -10,7 +10,9 @@ const valid: AddressInput = {
 	line1: '12, Test Street',
 	area: 'Main Market',
 	contactName: 'Test Customer',
-	contactPhone: '98765 43210'
+	contactPhone: '98765 43210',
+	lat: 23.2,
+	lng: 77.4
 };
 
 const codeOf = (fn: () => unknown) => {
@@ -24,18 +26,23 @@ const codeOf = (fn: () => unknown) => {
 };
 
 describe('validateAddress', () => {
-	it('refuses half a location, out-of-range or non-finite coordinates', () => {
+	it('requires the pin, since the rider finds the door by it', () => {
+		const { lat: _lat, lng: _lng, ...noPin } = valid;
+		expect(codeOf(() => validateAddress(noPin, areas))).toEqual({ code: 'PIN_REQUIRED', field: 'pin' });
+		expect(validateAddress(valid, areas)).toMatchObject({ lat: 23.2, lng: 77.4 });
+	});
+
+	it('refuses half a pin, a pin outside India, the 0,0 a failing phone reports, and non-finite numbers', () => {
 		for (const location of [
-			{ lat: 23.2 },
-			{ lng: 77.4 },
+			{ lat: 23.2, lng: undefined },
+			{ lat: undefined, lng: 77.4 },
+			{ lat: 0, lng: 0 },
+			{ lat: 51.5, lng: -0.1 },
 			{ lat: 91, lng: 77 },
-			{ lat: 23, lng: 181 },
 			{ lat: Number.NaN, lng: 77 },
 			{ lat: Number.POSITIVE_INFINITY, lng: 77 }
 		]) {
-			expect(codeOf(() => validateAddress({ ...valid, ...location }, areas))?.field).toBe(
-				'location'
-			);
+			expect(codeOf(() => validateAddress({ ...valid, ...location }, areas))?.field).toBe('location');
 		}
 	});
 });

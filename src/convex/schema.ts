@@ -99,6 +99,7 @@ const schema = defineSchema({
 		address: deliveryAddress, // snapshot; later edits to the saved address don't change it
 		slotStartMs: v.optional(v.number()), // unset means "as soon as possible"
 		customerNote: v.optional(v.string()),
+		pinUpdatedAt: v.optional(v.number()), // the customer moved the pin after ordering
 		deliveryCode: v.string(), // 4 digits; shown to the customer, typed by the partner
 		assignedPartnerId: v.optional(v.id('deliveryPartners')),
 		deliveredAt: v.optional(v.number()),

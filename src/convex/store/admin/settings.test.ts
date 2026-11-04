@@ -62,7 +62,9 @@ describe('updateSettings', () => {
 			kind: 'house' as const,
 			line1: '12, Test Street',
 			contactName: 'Test Customer',
-			contactPhone: '9876543210'
+			contactPhone: '9876543210',
+			lat: 23.2,
+			lng: 77.4
 		};
 		await expect(
 			alice.mutation(api.store.addresses.saveAddress, { ...address, area: STORE_SETTINGS_DEFAULTS.deliveryAreas[0] })

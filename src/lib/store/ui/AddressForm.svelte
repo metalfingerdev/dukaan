@@ -68,12 +68,13 @@
 	let saving = $state(false);
 	let locating = $state(false);
 	let locationNote = $state('');
-	let pickingPin = $state(false);
+	// The map opens straight away for a new address: the pin is the first thing we ask for
+	let pickingPin = $state(Boolean(PUBLIC_GOOGLE_MAPS_API_KEY) && seed.lat === undefined);
 	let suggesting = $state(false);
 	let error = $state('');
 
 	const hasLocation = $derived(lat !== undefined && lng !== undefined);
-	// The map is an extra: without a key it is simply not offered
+	// Without a Maps key the pin comes from the phone's location alone
 	const mapsEnabled = Boolean(PUBLIC_GOOGLE_MAPS_API_KEY);
 
 	const chooseReceiver = (who: 'myself' | 'other') => {
@@ -132,8 +133,12 @@
 
 	const submit = async (event: SubmitEvent) => {
 		event.preventDefault();
-		saving = true;
 		error = '';
+		if (!hasLocation) {
+			error = strings.address.errors.pin;
+			return;
+		}
+		saving = true;
 		try {
 			const { addressId } = await client.mutation(api.store.addresses.saveAddress, {
 				id: address?._id,
@@ -159,6 +164,67 @@
 </script>
 
 <form class="card preset-outlined-surface-300-700 flex flex-col gap-3 p-3" onsubmit={submit}>
+	<fieldset class="flex flex-col items-start gap-2">
+		<legend class="font-semibold">{strings.address.pinStep}</legend>
+		<p class="text-surface-600-400 text-sm">{strings.address.pinWhy}</p>
+		{#if pickingPin}
+			<div class="w-full">
+				<MapPinPicker
+					start={hasLocation ? { lat: lat!, lng: lng! } : undefined}
+					onconfirm={(pin) => {
+						lat = pin.lat;
+						lng = pin.lng;
+						pickingPin = false;
+					}}
+					oncancel={() => (pickingPin = false)}
+				/>
+			</div>
+		{:else if hasLocation}
+			<p class="text-success-600-400 text-sm" role="status">{strings.address.locationSaved}</p>
+			<div class="flex flex-wrap gap-2">
+				{#if mapsEnabled}
+					<button type="button" class="btn preset-tonal min-h-11" onclick={() => (pickingPin = true)}>
+						{strings.address.changePin}
+					</button>
+					<button type="button" class="btn preset-tonal min-h-11" disabled={suggesting} onclick={suggestFromPin}>
+						{suggesting ? strings.address.suggesting : strings.address.suggestFromPin}
+					</button>
+				{:else}
+					<button type="button" class="btn preset-tonal min-h-11" disabled={locating} onclick={useMyLocation}>
+						{locating ? strings.address.locating : strings.address.useLocation}
+					</button>
+					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an external Maps link -->
+					<a
+						class="btn preset-tonal min-h-11"
+						href="https://www.google.com/maps/search/?api=1&query={encodeURIComponent(`${lat},${lng}`)}"
+						target="_blank"
+						rel="noopener noreferrer">{strings.address.checkPin}</a
+					>
+				{/if}
+			</div>
+		{:else}
+			<div class="flex flex-wrap gap-2">
+				{#if mapsEnabled}
+					<button type="button" class="btn preset-filled min-h-11" onclick={() => (pickingPin = true)}>
+						{strings.address.setPin}
+					</button>
+				{/if}
+				<button
+					type="button"
+					class="btn min-h-11 {mapsEnabled ? 'preset-tonal' : 'preset-filled'}"
+					disabled={locating}
+					onclick={useMyLocation}
+				>
+					{locating ? strings.address.locating : strings.address.useLocation}
+				</button>
+			</div>
+			<p class="text-surface-600-400 text-sm">{strings.address.pinStandAtDoor}</p>
+		{/if}
+		{#if locationNote}
+			<p class="text-warning-700-300 text-sm" role="status">{locationNote}</p>
+		{/if}
+	</fieldset>
+
 	<label class="label">
 		<span class="label-text">{strings.address.label}</span>
 		<input class="input min-h-11" bind:value={label} placeholder={strings.address.labelHint} maxlength="30" required />
@@ -227,58 +293,6 @@
 			required
 		/>
 	</label>
-
-	<div class="flex flex-col items-start gap-2">
-		{#if pickingPin}
-			<div class="w-full">
-				<MapPinPicker
-					start={hasLocation ? { lat: lat!, lng: lng! } : undefined}
-					onconfirm={(pin) => {
-						lat = pin.lat;
-						lng = pin.lng;
-						pickingPin = false;
-					}}
-					oncancel={() => (pickingPin = false)}
-				/>
-			</div>
-		{:else}
-			{#if hasLocation}
-				<p class="text-success-600-400 text-sm" role="status">{strings.address.locationSaved}</p>
-				<div class="flex flex-wrap gap-2">
-					{#if mapsEnabled}
-						<button type="button" class="btn preset-tonal min-h-11" onclick={() => (pickingPin = true)}>
-							{strings.address.changePin}
-						</button>
-						<button type="button" class="btn preset-tonal min-h-11" disabled={suggesting} onclick={suggestFromPin}>
-							{suggesting ? strings.address.suggesting : strings.address.suggestFromPin}
-						</button>
-					{/if}
-					<button
-						type="button"
-						class="btn preset-tonal min-h-11"
-						onclick={() => {
-							lat = undefined;
-							lng = undefined;
-						}}>{strings.address.removeLocation}</button
-					>
-				</div>
-			{:else}
-				<div class="flex flex-wrap gap-2">
-					{#if mapsEnabled}
-						<button type="button" class="btn preset-tonal min-h-11" onclick={() => (pickingPin = true)}>
-							{strings.address.setPin}
-						</button>
-					{/if}
-					<button type="button" class="btn preset-tonal min-h-11" disabled={locating} onclick={useMyLocation}>
-						{locating ? strings.address.locating : strings.address.useLocation}
-					</button>
-				</div>
-			{/if}
-			{#if locationNote}
-				<p class="text-warning-700-300 text-sm" role="status">{locationNote}</p>
-			{/if}
-		{/if}
-	</div>
 
 	<label class="label">
 		<span class="label-text">{strings.address.mapsLink}</span>

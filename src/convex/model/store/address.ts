@@ -48,11 +48,15 @@ export type AddressInput = {
 	mapsUrl?: string;
 };
 
+/** A generous box around India: enough to refuse a broken or faked location, not a delivery radius */
+export const isInIndia = ({ lat, lng }: { lat: number; lng: number }) =>
+	Number.isFinite(lat) && Number.isFinite(lng) && lat >= 6 && lat <= 37.5 && lng >= 68 && lng <= 97.5;
+
 /** The fields that get stored (no `userId`, no `isDefault`) */
 export type CleanAddress = Omit<AddressInput, 'landmark' | 'lat' | 'lng' | 'mapsUrl'> & {
 	landmark?: string;
-	lat?: number;
-	lng?: number;
+	lat: number;
+	lng: number;
 	mapsUrl?: string;
 };
 
@@ -76,13 +80,22 @@ export function validateAddress(input: AddressInput, deliveryAreas: string[]): C
 	const contactPhone = normalizeIndianMobile(input.contactPhone);
 	if (!contactPhone) throw invalid('contactPhone');
 
+	// The pin is required: Kothri has few street names or house numbers, so the rider finds the door
+	// from the pin (and a phone call). It comes from the map or the browser's geolocation, as a pair,
+	// and must fall inside India, which also catches the 0,0 some phones report when they fail.
+	const { lat, lng } = input;
+	if (lat === undefined && lng === undefined) throw invalid('pin', 'PIN_REQUIRED');
+	if (lat === undefined || lng === undefined || !isInIndia({ lat, lng })) throw invalid('location');
+
 	const clean: CleanAddress = {
 		label: requiredText(input.label, 'label'),
 		kind: input.kind,
 		line1: requiredText(input.line1, 'line1'),
 		area,
 		contactName: requiredText(input.contactName, 'contactName'),
-		contactPhone
+		contactPhone,
+		lat,
+		lng
 	};
 
 	if (input.landmark !== undefined && input.landmark.trim() !== '') {
@@ -93,23 +106,6 @@ export function validateAddress(input: AddressInput, deliveryAreas: string[]): C
 		const mapsUrl = input.mapsUrl.trim();
 		if (mapsUrl.length > MAX_MAPS_URL_LENGTH || !isAllowedMapsUrl(mapsUrl)) throw invalid('mapsUrl');
 		clean.mapsUrl = mapsUrl;
-	}
-
-	// Coordinates come as a pair, from the browser's geolocation; anything else is dropped
-	if (input.lat !== undefined || input.lng !== undefined) {
-		const { lat, lng } = input;
-		if (
-			lat === undefined ||
-			lng === undefined ||
-			!Number.isFinite(lat) ||
-			!Number.isFinite(lng) ||
-			Math.abs(lat) > 90 ||
-			Math.abs(lng) > 180
-		) {
-			throw invalid('location');
-		}
-		clean.lat = lat;
-		clean.lng = lng;
 	}
 
 	return clean;

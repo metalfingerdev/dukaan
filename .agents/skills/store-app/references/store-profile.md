@@ -55,15 +55,24 @@ When the user dictates values, update this table first, then the code constants 
   slothbytes.dev, but only at the end).
 - **Delivery people are store employees** in a very small town and **phone the customer**. So the
   customer's phone number and a landmark matter more than a perfect pin.
-- **Maps**: customers pick a named area; an optional Google Maps pin, an optional pasted Google
-  Maps link and "use my current location" help the rider. **No coverage radius.** The pin is never
-  required, and the map is hidden unless `PUBLIC_GOOGLE_MAPS_API_KEY` is set. Google requires a
-  billing account for the Maps APIs, but at this size usage stays inside the free monthly allowance
-  (70,000 events per product on Google's India pricing); if a key is created, cap it with a daily
-  API quota (a budget alert only emails). The founder has not created a key yet. **No live rider
-  tracking** until there is a rider app that can report location in the background (a web page
-  stops reporting when the screen locks).
-- **Payment today**: cash on delivery or UPI on delivery. Online payment is wanted too (see below).
+- **Maps** (changed 2026-11-04): **every saved address needs a pin**. Kothri Kalan is a village with
+  few street names or house numbers, so the rider finds the door from the pin first and the phone
+  call second. The address form opens with "Where should we come?": the map in satellite view,
+  starting at the customer's location, or, without a Maps key, "Use my current location". The
+  server refuses an address without a pin (`PIN_REQUIRED`) and an order to an address saved before
+  this rule; checkout offers "Add the pin". Customers still pick a named area (**no coverage
+  radius**), may paste a Google Maps link, and can "Send my current location" from an open order,
+  which moves the rider's pin live. The rider sees a small satellite view of the pin, and orders
+  without a pin are flagged on the board and the rider's list. The map parts appear only when
+  `PUBLIC_GOOGLE_MAPS_API_KEY` is set; Google requires a billing account for the Maps APIs, so cap
+  the key with a daily API quota (a budget alert only emails). The founder is creating the key.
+  **No live rider tracking** until there is a rider app that can report location in the background
+  (a web page stops reporting when the screen locks).
+- **Payment today**: cash on delivery or UPI on delivery. The rider carries the store's printed UPI
+  QR, as the store already works, and records on delivery whether he was paid in cash or by UPI.
+  **Payment gateway: Razorpay**, chosen 2026-11-04 and **parked** until the founder is ready. When
+  it is built, UPI must be confirmed by the gateway (a per-order QR plus a signed webhook), never by
+  the owner reading the bank statement; that manual design was tried and rejected.
 - **Tests**: very few, and only tests that fail when behaviour breaks: security refusals, money and
   stock correctness, real invariants. No tests that restate a table, a string or static data.
   Pages are checked by the Playwright suite in `tests/e2e`, run locally against the dev deployment
@@ -159,14 +168,17 @@ those come first. Ordered by what unblocks what.
    reason. A failed delivery lands in a "Needs you" section on the admin board (Pack again or
    Cancel). The header shows a "Deliveries" link to partners. *Needs:* a partner signed in on a real
    phone to try it end to end.
-5. **UPI on delivery** (partly built: the rider already records `paidWith` cash or UPI on delivery,
-   and only cash counts toward `cashCollectedPaise`). Still to do: show the store's UPI id and a scannable QR on the order page for UPI
-   orders (never expose the UPI id in public queries; return it through the order projection), and
-   an admin view to reconcile UPI against cash. *Needs:* the real UPI id.
+5. **UPI on delivery** (built as far as the store works today: the rider uses the store's printed
+   QR and records `paidWith` cash or UPI on delivery; only cash counts toward `cashCollectedPaise`).
+   **Gateway-confirmed UPI is parked** with step 7 and will use Razorpay: when an unpaid order goes
+   out, the server creates a single-use, fixed-amount UPI QR for it; the gateway's signed webhook
+   (`qr_code.credited`) marks it paid and the rider's screen shows "Paid" live; a status-check call
+   covers a late webhook. Razorpay's UPI QR has to be enabled on the account by their support.
+   *Needs:* Razorpay test keys (set with `npx convex env set`), then KYC for live.
 6. **Invoices** (`admin.md`). Numbered only when an order is delivered, immutable, printable.
    *Needs:* a decision with the founder's accountant on GST (registered? GSTIN? composition
    scheme?), the legal name and address. Don't assert tax rules in code or copy.
-7. **Online payments through a payment gateway**. Customers pay before delivery. A separate plan
+7. **Online payments through a payment gateway** (Razorpay, parked). Customers pay before delivery. A separate plan
    is needed before building. Prerequisites the founder must arrange: a gateway merchant account
    with business KYC (Razorpay, Cashfree, PhonePe PG and similar are the usual choices; compare
    current fees and settlement times yourself, none are verified here), test and live API keys,
@@ -183,6 +195,6 @@ those come first. Ordered by what unblocks what.
    slothbytes.dev and not by another company's branding.
 
 **Smaller items, any time**: the founder enters the real delivery areas, hours, fees and store
-phone in `/admin/settings` on staging; create a Maps key if wrong-door deliveries show up; push or SMS
+phone in `/admin/settings` on staging; create the Maps key (`docs/08-environments-and-deployment.md`); push or SMS
 notifications (SMS to Indian numbers at scale needs TRAI DLT registration); bump the GitHub Actions versions that warn about Node 20;
 a rider app if live tracking is ever wanted.
