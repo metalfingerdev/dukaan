@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import "../app.css";
   import favicon from "#lib/assets/favicon.svg";
   import { PUBLIC_APP_ENV } from "$app/env/public";
@@ -24,6 +25,10 @@
 
   let { children, data } = $props();
 
+  // The designed look applies to the storefront; admin, delivery and sign-in keep the old one
+  // until their turn in the redesign
+  const shop = $derived(!/^\/(admin|delivery|\(auth\))/.test(page.route.id ?? ""));
+
   createSvelteAuthClient({ authClient, getServerState: () => data.authState });
   const auth = useAuth();
   // After the auth client: the cart reads the auth state and the Convex client it sets up
@@ -36,18 +41,12 @@
 
 <Toaster position="top-center" />
 <AuthProvider {api} {authClient} authConstants={AUTH_CONSTANTS}>
-  <div class="flex min-h-dvh flex-col">
+  <div class="shell" class:shop>
     {#if AUTH_CONSTANTS.admin}
       <div class="print:hidden"><ImpersonationBanner /></div>
     {/if}
-    <header
-      class="flex min-w-0 items-center justify-between gap-2 p-3 sm:gap-5 sm:p-4 print:hidden"
-    >
-      <a
-        href={resolve("/")}
-        class="mr-auto min-w-0 truncate text-xl font-bold text-orange-500 sm:text-2xl"
-        >{STORE_NAME}</a
-      >
+    <header class="site-header">
+      <a href={resolve("/")} class="wordmark">{STORE_NAME}</a>
       {#if PUBLIC_APP_ENV === "staging"}
         <span
           class="badge preset-filled-warning-500 text-xs font-semibold uppercase"
@@ -79,3 +78,29 @@
     <OrganizationProfileHost initialData={data.initialData} />
   {/if}
 </AuthProvider>
+
+<style lang="postcss">
+  @reference 'src/app.css';
+
+  .shell {
+    @apply flex min-h-dvh flex-col;
+  }
+  .site-header {
+    @apply flex min-w-0 items-center justify-between gap-2 p-3 sm:gap-5 sm:p-4 print:hidden;
+  }
+  .wordmark {
+    @apply mr-auto min-w-0 truncate text-xl font-bold text-orange-500 sm:text-2xl;
+  }
+
+  .shop {
+    @apply bg-midground text-text;
+  }
+  .shop .site-header {
+    @apply bg-foreground;
+    border-bottom: 2px solid
+      color-mix(in oklch, var(--color-foreground), black 30%);
+  }
+  .shop .wordmark {
+    @apply font-extrabold tracking-tight text-primary;
+  }
+</style>
