@@ -14,7 +14,7 @@ const TEST_AREA = 'E2E test area';
 test('settings reach the customer, and the switch stops checkout', async ({ browser }) => {
 	const admin = await openAdminSettings(browser);
 	const areas = admin.page.getByLabel(/One area per line/);
-	const fee = admin.page.getByLabel('Delivery fee');
+	const fee = admin.page.getByLabel('Delivery fee', { exact: true });
 	const before = { areas: await areas.inputValue(), fee: await fee.inputValue() };
 	const wasSwitchedOff = await admin.page.getByRole('button', { name: 'Open the store' }).isVisible();
 	if (wasSwitchedOff) await admin.page.getByRole('button', { name: 'Open the store' }).click();
@@ -46,7 +46,7 @@ test('settings reach the customer, and the switch stops checkout', async ({ brow
 		const reopen = admin.page.getByRole('button', { name: 'Open the store' });
 		if (!wasSwitchedOff && (await reopen.isVisible())) await reopen.click();
 		await admin.page.getByLabel(/One area per line/).fill(before.areas);
-		await admin.page.getByLabel('Delivery fee').fill(before.fee);
+		await admin.page.getByLabel('Delivery fee', { exact: true }).fill(before.fee);
 		await saveSettings(admin.page);
 		await clearCart(customer);
 		await customerContext.close();
