@@ -22,7 +22,9 @@ const isPublic = createRouteMatcher([
 	'/about',
 	'/terms',
 	'/privacy',
-	...STORE_PUBLIC_ROUTES
+	...STORE_PUBLIC_ROUTES,
+	// Design scratch pad (static mock screens); its layout 404s on the real production site
+	'/demo{/*rest}'
 ]);
 
 /* --------------------------------------------------------- */

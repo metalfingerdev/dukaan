@@ -1,0 +1,109 @@
+@reference 'src/app.css';
+
+/* Generic building blocks for the /demo screens only. Replace them with real components. */
+
+.demo .d-stack {
+	@apply flex flex-col gap-3;
+}
+.demo .d-row {
+	@apply flex flex-wrap items-center gap-2;
+}
+.demo .d-between {
+	@apply flex items-center justify-between gap-3;
+}
+.demo .d-grid2 {
+	@apply grid grid-cols-2 gap-3;
+}
+.demo .d-grid4 {
+	@apply grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4;
+}
+.demo .d-title {
+	@apply text-xl font-extrabold;
+}
+.demo .d-sub {
+	@apply text-lg font-bold;
+}
+.demo .d-muted {
+	@apply text-text-muted text-sm;
+}
+.demo .d-card {
+	--fill: var(--color-foreground);
+	@apply edge rounded-container bg-foreground p-3;
+}
+.demo .d-card-flat {
+	@apply border-border rounded-container border-2 p-3;
+}
+.demo .d-img {
+	@apply bg-secondary/10 border-border rounded-base flex aspect-square w-full items-center justify-center overflow-hidden border-2 text-xs;
+}
+.demo .d-btn {
+	--fill: var(--color-foreground);
+	@apply edge edge-press rounded-base bg-midground inline-flex min-h-11 items-center justify-center px-4 font-bold;
+}
+.demo .d-btn-primary {
+	--fill: var(--color-primary);
+	@apply bg-primary text-foreground;
+}
+.demo .d-btn-accent {
+	--fill: var(--color-secondary);
+	@apply bg-secondary text-foreground;
+}
+.demo .d-btn-danger {
+	--fill: var(--color-danger);
+	@apply bg-danger text-foreground;
+}
+.demo .d-btn-block {
+	@apply w-full;
+}
+.demo .d-btn-sm {
+	@apply min-h-9 px-3 text-sm;
+}
+.demo .d-pill {
+	@apply border-border inline-flex items-center rounded-full border-2 px-2 text-xs font-bold;
+}
+.demo .d-pill-ok {
+	--fill: var(--color-primary);
+	@apply bg-primary text-foreground;
+}
+.demo .d-pill-warn {
+	@apply bg-secondary/30 text-text;
+}
+.demo .d-pill-bad {
+	--fill: var(--color-danger);
+	@apply bg-danger text-foreground;
+}
+.demo .d-input {
+	--fill: var(--color-foreground);
+	@apply edge rounded-base bg-foreground min-h-11 w-full px-3;
+}
+.demo .d-field {
+	@apply flex flex-col gap-1 text-sm font-semibold;
+}
+.demo .d-list {
+	@apply flex flex-col;
+}
+.demo .d-list > * + * {
+	@apply border-border-muted border-t-2;
+}
+.demo .d-item {
+	@apply flex items-center justify-between gap-3 py-2;
+}
+.demo .d-table {
+	@apply w-full text-left text-sm;
+}
+.demo .d-table th {
+	@apply border-border border-b-2 py-2 pr-3 font-bold;
+}
+.demo .d-table td {
+	@apply border-border-muted border-b py-2 pr-3;
+}
+.demo .d-bar {
+	--fill: var(--color-primary);
+	@apply edge edge-press bg-primary text-foreground rounded-container sticky bottom-3 flex min-h-14 items-center justify-between px-4 py-2 font-bold;
+}
+.demo .d-banner {
+	@apply border-border bg-secondary/20 rounded-container border-2 p-3 text-sm;
+}
+.demo .d-strike {
+	@apply text-text-muted text-sm line-through;
+}

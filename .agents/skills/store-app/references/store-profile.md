@@ -213,6 +213,13 @@ those come first. Ordered by what unblocks what.
    KYC and live keys before real money.
 8. **The designed UI**, last: colours, logo, layout, Hindi strings if wanted, inspired by
    slothbytes.dev and not by another company's branding.
+   **In progress**, one screen per PR, founder reviews each (order: storefront, rider, admin, auth).
+   Own colours in `src/themes/palette.css` (not Skeleton), headless parts from Bits UI (replacing
+   Ark UI), shared parts as small components in `src/lib/ui`. Rules in AGENTS.md Conventions.
+   Design scratch pad: `/demo` (`src/routes/demo`, `src/lib/demo`) has one static mock page per
+   screen with a "this screen must" note; the founder edits the mocks and each real screen is built
+   from its mock. It 404s on the real production site; delete it, Skeleton and Ark when the last
+   area is done.
 
 **Smaller items, any time**: the founder enters the real delivery areas, hours, fees and store
 phone in `/admin/settings` on staging; create the Maps key (`docs/08-environments-and-deployment.md`); push or SMS

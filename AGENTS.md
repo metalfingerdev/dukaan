@@ -69,9 +69,24 @@ docs/                  developer docs, start at docs/README.md
 
 - **Read `src/convex/_generated/ai/guidelines.md` before touching Convex code.** Its rules override
   what you remember about Convex.
-- **Match the file you are editing.** Formatting is mixed (most files use tabs and single quotes;
-  `src/routes/+layout.svelte` uses two spaces and double quotes). Don't reformat files you aren't
-  changing.
+- **Formatting is 2 spaces and double quotes** (`.prettierrc`). Older files still use tabs and single
+  quotes; keep a file's existing style when you make a small edit, and never reformat files you
+  aren't changing. New and rewritten files use the `.prettierrc` style.
+- **The UI is moving off Skeleton UI and Ark UI to our own palette and Bits UI** (roadmap:
+  `.agents/skills/store-app/references/store-profile.md`, step 8). Colours come from
+  `src/themes/palette.css` only: layers `background` (darkest) < `midground` < `foreground`
+  (lightest) in both light and dark mode, plus `text`, `text-muted`, `primary`, `secondary`,
+  `danger`, `warning`, `success`, `info`, `border`. Never flip the layers per mode. New code uses no
+  Skeleton classes (`preset-*`, `btn`, `card`, `surface-*`, `primary-500`) and no `@ark-ui`; use
+  `bits-ui`. Borders and hard shadows are never black (black is for text): use the `edge`,
+  `edge-flat` and `edge-press` utilities in `src/app.css` and set `--fill` to the element's own
+  background so the border is a shade darker than the surface. System dark mode only.
+- **No long Tailwind class lists inline.** Give the element a short semantic class and put the
+  Tailwind in the component's style block with `@apply`:
+  `<style lang="postcss">` then `@reference 'src/app.css';` then rules. Why: the founder finds
+  inline utility strings unreadable. One or two layout utilities in markup are tolerable; styling
+  (colour, border, shadow, type) goes in the style block. Existing files keep their inline classes
+  until touched.
 - **Money is integer paise.** Format only for display, with `en-IN`.
 - **Never accept a `userId` (or any identity) argument** for authorization. Derive the user on the
   server (`authComponent.getAuthUser(ctx)`). Every store function calls exactly one access guard.

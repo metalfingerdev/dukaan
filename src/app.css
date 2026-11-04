@@ -4,6 +4,7 @@
 @import '@skeletonlabs/skeleton';
 
 @import 'themes/auth.css';
+@import 'themes/palette.css';
 
 @plugin '@tailwindcss/forms';
 
@@ -19,28 +20,22 @@
 		}
 	}
 
-	/* Shadcn */
+	/* Shadcn-style names still used by the older primitives; background, foreground, primary,
+	   secondary and border now belong to themes/palette.css */
 
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
-	--color-background: var(--color-surface-50-950);
-	--color-foreground: var(--color-surface-contrast-50-950);
 	--color-card: var(--color-surface-100-900);
 	--color-card-foreground: var(--color-surface-contrast-100-900);
 	--color-popover: var(--color-surface-200-800);
 	--color-popover-foreground: var(--color-surface-contrast-200-800);
-	--color-primary: var(--color-surface-950-50);
-	--color-primary-foreground: var(--color-surface-contrast-950-50);
-	--color-secondary: var(--color-secondary-500);
-	--color-secondary-foreground: var(--color-secondary-contrast-500);
 	--color-muted: var(--color-surface-100-900);
 	--color-muted-foreground: var(--color-surface-contrast-100-900);
 	--color-accent: var(--color-primary-200-800);
 	--color-accent-foreground: var(--color-primary-contrast-200-800);
 	--color-destructive: var(--color-error-500);
-	--color-border: var(--color-surface-300-700);
 	--color-input: var(--color-surface-100-900);
 	--color-ring: var(--color-surface-400-600);
 	--color-chart-1: var(--color-primary-900-100);
@@ -95,4 +90,17 @@
 			-webkit-tap-highlight-color: transparent;
 		}
 	}
+}
+
+/* Borders and hard shadows are a shade darker than the surface they sit on, never black (black is
+   for text). A component sets --fill to its own background; `edge` derives the tone from it. */
+@utility edge {
+	border: 2px solid color-mix(in oklch, var(--fill, var(--color-midground)), black 30%);
+	box-shadow: 3px 3px 0 0 color-mix(in oklch, var(--fill, var(--color-midground)), black 30%);
+}
+@utility edge-flat {
+	border: 2px solid color-mix(in oklch, var(--fill, var(--color-midground)), black 30%);
+}
+@utility edge-press {
+	@apply transition-[translate,box-shadow] duration-100 active:translate-x-0.75 active:translate-y-0.75 active:shadow-none;
 }
