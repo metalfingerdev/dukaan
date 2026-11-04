@@ -97,8 +97,15 @@ photos are not built. On `/admin/products` each row has a Stock panel (Received,
 count and the last 20 changes) and the list has Low stock / Out of stock filters; every change goes
 through `adjustStock` (`store/admin/stock.ts`). A count sets stock to *count minus what placed and
 accepted orders hold* (`heldByOpenOrders`) and is refused if the stock moved since it was shown.
+`/admin/products/import` exports every product as CSV and imports one back (up to 1000 rows;
+columns `slug,name,category,unit,price,mrp,stock,low_stock_at,max_per_order,featured,active,gst_rate,hsn`).
+`planImport` (`model/store/productImport.ts`) is the one planner used by the preview and again by
+`applyImport`, which is all or nothing. A blank cell keeps the value (a blank cell cannot clear
+one); unknown categories are created; the stock column follows a per-import mode: leave alone
+(default), add as received, or set to a counted number (count minus held), and `set` is refused if
+stock moved since the preview.
 
-**Not built**: CSV import and export, the order board and anything for the
+**Not built**: the order board and anything for the
 delivery partner, so **an order stays at "Order placed" forever**; payments beyond cash; invoices;
 the designed UI.
 
@@ -111,7 +118,7 @@ those come first. Ordered by what unblocks what.
    (stock through `adjustStock` only), and a settings page that replaces the placeholders: hours,
    fees, delivery areas, store phone, UPI id (**built**; `store/seed:setDeliveryAreas` is gone).
    The user dashboard moved from `/admin` to `/admin/users` (**built**). Categories, products with photos and the
-   stock panel are **built**. Still to come: CSV export and import with the stock modes above. *Needs from the founder:* real products with
+   stock panel are **built**. CSV export and import with the stock modes above are **built**; step 1 is complete. *Needs from the founder:* real products with
    prices and stock, real hours and fees, the real delivery areas, the store phone number.
 2. **Admin: the live order board**. Columns by status, one-tap Accept, Reject (with a reason), Mark
    packed, Assign partner; new-order alert; all moves through `transitionOrder`. Orders finally move.

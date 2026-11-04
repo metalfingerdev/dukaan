@@ -32,7 +32,7 @@ const toAdminCategory = (category: Doc<'categories'>) => ({
 });
 
 /** Every category, hidden ones too, in display order. Bounded by MAX_CATEGORIES. */
-const allCategories = async (ctx: QueryCtx | MutationCtx) => {
+export const allCategories = async (ctx: QueryCtx | MutationCtx) => {
 	const [shown, hidden] = await Promise.all(
 		[true, false].map((isActive) =>
 			ctx.db
@@ -53,6 +53,21 @@ export const listCategories = query({
 	}
 });
 
+/** Inserts a category after the last one, with a link that no other category uses */
+export const insertCategory = async (ctx: MutationCtx, name: string, sortOrder: number) => {
+	const slug = await uniqueSlug(slugify(name) || 'category', async (candidate) => {
+		const taken = await ctx.db
+			.query('categories')
+			.withIndex('by_slug', (q) => q.eq('slug', candidate))
+			.first();
+		return taken !== null;
+	});
+	return await ctx.db.insert('categories', { name, slug, sortOrder, isActive: true });
+};
+
+export const nextSortOrder = (categories: Doc<'categories'>[]) =>
+	categories.reduce((highest, category) => Math.max(highest, category.sortOrder), -1) + 1;
+
 /** Adds a category at the end, or throws `INVALID_CATEGORY` / `TOO_MANY_CATEGORIES` */
 export const createCategory = mutation({
 	args: { name: v.string() },
@@ -63,16 +78,7 @@ export const createCategory = mutation({
 		if (!name) throw new ConvexError({ code: 'INVALID_CATEGORY', field: 'name' });
 		const existing = await allCategories(ctx);
 		if (existing.length >= MAX_CATEGORIES) throw new ConvexError({ code: 'TOO_MANY_CATEGORIES' });
-
-		const slug = await uniqueSlug(slugify(name) || 'category', async (candidate) => {
-			const taken = await ctx.db
-				.query('categories')
-				.withIndex('by_slug', (q) => q.eq('slug', candidate))
-				.first();
-			return taken !== null;
-		});
-		const sortOrder = existing.reduce((highest, category) => Math.max(highest, category.sortOrder), -1) + 1;
-		return await ctx.db.insert('categories', { name, slug, sortOrder, isActive: true });
+		return await insertCategory(ctx, name, nextSortOrder(existing));
 	}
 });
 

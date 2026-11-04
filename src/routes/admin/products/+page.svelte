@@ -64,7 +64,10 @@
 
 <div class="flex items-center justify-between gap-3">
 	<h1 class="h3">{text.title}</h1>
-	<a href={addHref} class="btn preset-filled-primary-500 min-h-11">{text.add}</a>
+	<div class="flex gap-2">
+		<a href={resolve('/admin/products/import')} class="btn preset-tonal min-h-11">{text.importLink}</a>
+		<a href={addHref} class="btn preset-filled-primary-500 min-h-11">{text.add}</a>
+	</div>
 </div>
 
 <div class="flex gap-2" role="group" aria-label={text.title}>
