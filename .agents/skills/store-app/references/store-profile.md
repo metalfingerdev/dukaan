@@ -86,7 +86,7 @@ saved addresses with optional pin, Maps link and Myself/Someone else; checkout w
 order engine (`placeOrder`, `cancelOrder`, stock and status helpers, rate limits); `/orders` and
 live `/orders/[id]` with the delivery code.
 
-Step 1 in progress: the admin area has a layout and nav, `/admin` (home with the open/closed
+Step 1 is **complete** (PRs #10, #12, #13, #14). The admin area has a layout and nav, `/admin` (home with the open/closed
 switch, until the order board), `/admin/settings` (hours, ETA, fees, minimum order, delivery areas,
 store phone, UPI id), `/admin/users` (the user dashboard, moved from `/admin`),
 `/admin/categories` (add, rename, hide, reorder) and `/admin/products` (list by category or name,
@@ -105,9 +105,32 @@ one); unknown categories are created; the stock column follows a per-import mode
 (default), add as received, or set to a counted number (count minus held), and `set` is refused if
 stock moved since the preview.
 
+End-to-end tests run against dev: the admin test user is in `ADMIN_USER_IDS` on the dev
+deployment and `E2E_ADMIN_PHONE` / `E2E_CUSTOMER_PHONE` are in `.env.local` (never committed), so
+`pnpm test:e2e` runs all specs, including `admin-products.spec.ts`. Playwright is **not** run on
+every change: it is slow (~2 min) and has found only test bugs so far, so run it when a change
+touches a screen it covers, or when asked.
+
 **Not built**: the order board and anything for the
 delivery partner, so **an order stays at "Order placed" forever**; payments beyond cash; invoices;
 the designed UI.
+
+## Step 2: the live order board (built)
+
+`/admin` is the board (`src/lib/store/admin/OrderBoard.svelte`, `OrderCard.svelte`,
+`RejectDialog.svelte`). Backend in `src/convex/store/admin/orders.ts`: `listOrders({ status })`,
+`acceptOrder`, `packOrder`, `cancelOrder({ reason })`, all through `transitionOrder`.
+
+- One `useQuery` per column (New, Accepted, Packed, Out for delivery). Under `lg` the columns are
+  tabs with counts; from `lg` up all four show side by side.
+- Card: number, age (`createClock`, 15 s), items, area, landmark, COD amount to collect, tap-to-call.
+  A New order older than 5 minutes is highlighted. Accept / Mark packed / Reject (a dialog with the
+  required reason and three quick-reason chips); Packed offers Cancel only.
+- Alerts (`orderAlerts.svelte.ts`): toast, tab title flashing "(n) New order" while the tab is in the
+  background, and a tone behind a "Sound off/on" switch kept in `localStorage`. The first list that
+  loads is the baseline, so orders already waiting don't alert on page load.
+- The open/closed switch sits above the board; the other admin pages are in the layout nav.
+- Out for delivery stays empty until step 3 (no partner flow yet; no actions on those cards).
 
 ## Roadmap (agreed order; each step is its own PR or small series)
 
@@ -120,8 +143,8 @@ those come first. Ordered by what unblocks what.
    The user dashboard moved from `/admin` to `/admin/users` (**built**). Categories, products with photos and the
    stock panel are **built**. CSV export and import with the stock modes above are **built**; step 1 is complete. *Needs from the founder:* real products with
    prices and stock, real hours and fees, the real delivery areas, the store phone number.
-2. **Admin: the live order board**. Columns by status, one-tap Accept, Reject (with a reason), Mark
-   packed, Assign partner; new-order alert; all moves through `transitionOrder`. Orders finally move.
+2. **Admin: the live order board** (**built**, see the section above). Columns by status, one-tap Accept, Reject (with a reason), Mark
+   packed, Assign partner (step 3); new-order alert; all moves through `transitionOrder`. Orders finally move.
 3. **Admin: delivery partners and cash settlement**. Add a partner by phone number (matched to
    their verified sign-in phone), activate or deactivate, cash to settle per partner per day.
    *Needs:* the partners' phone numbers.

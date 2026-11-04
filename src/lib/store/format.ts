@@ -1,3 +1,5 @@
+import { strings } from './strings.js';
+
 /**
  * Display formatting for the store. Money is integer paise everywhere else; convert only here,
  * at the edge.
@@ -48,3 +50,12 @@ export const formatSlot = (startMs: number, slotMinutes: number) =>
 /** "% off" for a product whose MRP is above its price, or `null` when there is no discount */
 export const percentOff = (pricePaise: number, mrpPaise: number) =>
 	mrpPaise > pricePaise ? Math.round(((mrpPaise - pricePaise) / mrpPaise) * 100) : null;
+
+/** How long ago an order was placed, in the words the board shows: "just now", "4 min ago", "1 h 5 min ago" */
+export const formatAge = (ageMs: number) => {
+	const text = strings.admin.board.age;
+	const minutes = Math.max(0, Math.floor(ageMs / 60_000));
+	if (minutes < 1) return text.now;
+	if (minutes < 60) return text.minutes(minutes);
+	return text.hours(Math.floor(minutes / 60), minutes % 60);
+};
