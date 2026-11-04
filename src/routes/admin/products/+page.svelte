@@ -44,7 +44,7 @@
 		if (value) params.set(name, value);
 		else params.delete(name);
 		void gotoApp(`${resolve('/admin/products')}${params.size ? `?${params}` : ''}`, {
-			replaceState: true
+			replace: true
 		});
 	};
 
