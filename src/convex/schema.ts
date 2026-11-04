@@ -103,7 +103,8 @@ const schema = defineSchema({
 		assignedPartnerId: v.optional(v.id('deliveryPartners')),
 		deliveredAt: v.optional(v.number()),
 		invoiceNumber: v.optional(v.string()),
-		cashCollectedPaise: v.optional(v.number()),
+		paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi'))), // how the partner was actually paid
+		cashCollectedPaise: v.optional(v.number()), // set only when paid in cash
 		cashSettledAt: v.optional(v.number()) // the admin received this cash from the partner
 	})
 		.index('by_userId', ['userId'])

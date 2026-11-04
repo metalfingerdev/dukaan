@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 import { hasRole, skipReason, statePath } from './env';
 
 const PUBLIC_PAGES = ['/', '/cart', '/search?q=milk', '/c/dairy-eggs', '/p/toned-milk-500ml'];
-const PRIVATE_PAGES = ['/checkout', '/orders', '/account/addresses', '/admin', '/admin/settings', '/admin/users'];
+const PRIVATE_PAGES = ['/checkout', '/orders', '/account/addresses', '/admin', '/admin/settings', '/admin/users', '/delivery'];
 
 test.describe('signed out', () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
@@ -39,9 +39,12 @@ test.describe('customer', () => {
 			await page.goto(path);
 			await expect(page.getByRole('heading', { name: 'Access denied' })).toBeVisible();
 		}
+		await page.goto('/delivery');
+		await expect(page.getByRole('heading', { name: 'Access denied' })).toBeVisible();
 		await page.goto('/');
 		await expect(page.getByRole('link', { name: 'Orders' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Admin' })).toHaveCount(0);
+		await expect(page.getByRole('link', { name: 'Deliveries' })).toHaveCount(0);
 	});
 });
 

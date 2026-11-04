@@ -67,6 +67,12 @@ customer reads out; the mutation compares against `orders.deliveryCode`. Never r
 the partner. Limit wrong attempts with `@convex-dev/rate-limiter` (for example 5 per order per 10
 minutes), or four digits can be guessed in a few taps.
 
+A wrong code is returned as a result (`{ ok: false, reason: 'WRONG_CODE' }`), not thrown: a thrown
+error rolls back the rate limiter's counter and the limit would never trip.
+
+The partner also says how they were actually paid (`paidWith`: cash or UPI). Only cash sets
+`cashCollectedPaise` (what they owe the store); UPI is recorded but is not cash to settle.
+
 On success the mutation sets `deliveredAt`, `paymentStatus: 'paid'`, `cashCollectedPaise` (the order
 total for cash; for UPI, still the total, recorded with the method so the admin can reconcile) and
 assigns the invoice number (`admin.md`).

@@ -23,7 +23,8 @@
 		placed: useQuery(api.store.admin.orders.listOrders, { status: 'placed' }),
 		accepted: useQuery(api.store.admin.orders.listOrders, { status: 'accepted' }),
 		packed: useQuery(api.store.admin.orders.listOrders, { status: 'packed' }),
-		out_for_delivery: useQuery(api.store.admin.orders.listOrders, { status: 'out_for_delivery' })
+		out_for_delivery: useQuery(api.store.admin.orders.listOrders, { status: 'out_for_delivery' }),
+		delivery_failed: useQuery(api.store.admin.orders.listOrders, { status: 'delivery_failed' })
 	};
 
 	const partners = useQuery(api.store.admin.delivery.listPartners, {});
@@ -70,6 +71,8 @@
 		run(orderId, () => client.mutation(api.store.admin.orders.assignPartner, { orderId, partnerId }));
 	const start = (orderId: Id<'orders'>) =>
 		run(orderId, () => client.mutation(api.store.admin.orders.startDelivery, { orderId }));
+	const repack = (orderId: Id<'orders'>) =>
+		run(orderId, () => client.mutation(api.store.admin.orders.repackOrder, { orderId }));
 	const reject = (orderId: Id<'orders'>, reason: string) =>
 		run(orderId, () => client.mutation(api.store.admin.orders.cancelOrder, { orderId, reason }));
 </script>
@@ -87,6 +90,29 @@
 			{alerts.soundOn ? text.alerts.on : text.alerts.off}
 		</button>
 	</div>
+
+	{#if lists.delivery_failed.data?.length}
+		<section class="flex flex-col gap-2" aria-labelledby="failed-title">
+			<h2 id="failed-title" class="text-warning-700-300 font-semibold">{text.failedTitle}</h2>
+			<p class="text-surface-600-400 text-sm">{text.failedHint}</p>
+			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+				{#each lists.delivery_failed.data as order (order._id)}
+					<OrderCard
+						{order}
+						now={clock.now}
+						busy={busyId === order._id}
+						partners={activePartners}
+						onassign={() => {}}
+						onstart={() => {}}
+						onrepack={() => repack(order._id)}
+						onaccept={() => {}}
+						onpack={() => {}}
+						onreject={() => (rejecting = { _id: order._id, orderNumber: order.orderNumber, status: order.status })}
+					/>
+				{/each}
+			</div>
+		</section>
+	{/if}
 
 	<div class="grid grid-cols-4 gap-1 lg:hidden" role="tablist" aria-label={text.title}>
 		{#each columns as column (column)}
@@ -127,6 +153,7 @@
 							partners={activePartners}
 							onassign={(partnerId) => assign(order._id, partnerId)}
 							onstart={() => start(order._id)}
+							onrepack={() => repack(order._id)}
 							onaccept={() => accept(order._id)}
 							onpack={() => pack(order._id)}
 							onreject={() => (rejecting = { _id: order._id, orderNumber: order.orderNumber, status: order.status })}

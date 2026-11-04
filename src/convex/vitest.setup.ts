@@ -10,6 +10,7 @@
  * checked against a real deployment by the Playwright suite in tests/e2e.
  */
 import { vi } from 'vitest';
+import type { QueryCtx } from './_generated/server';
 
 vi.mock('./model/store/access', async () => {
 	const { ConvexError } = await import('convex/values');
@@ -27,5 +28,24 @@ vi.mock('./model/store/access', async () => {
 		return user;
 	};
 
-	return { requireCustomer, requireAppAdmin };
+	// A partner is the identity whose verified phone number is on an active `deliveryPartners` row
+	// (the real guard reads the same two fields from the user document)
+	const requireDeliveryPartner = async (ctx: QueryCtx) => {
+		const identity = (await ctx.auth.getUserIdentity()) as {
+			subject: string;
+			phoneNumber?: string;
+			phoneNumberVerified?: boolean;
+		} | null;
+		const notAPartner = new ConvexError('Not a delivery partner');
+		if (!identity?.phoneNumber || !identity.phoneNumberVerified) throw notAPartner;
+		const phoneNumber = identity.phoneNumber;
+		const partner = await ctx.db
+			.query('deliveryPartners')
+			.withIndex('by_phoneNumber', (q) => q.eq('phoneNumber', phoneNumber))
+			.unique();
+		if (!partner || !partner.isActive) throw notAPartner;
+		return { user: { _id: identity.subject }, partner };
+	};
+
+	return { requireCustomer, requireAppAdmin, requireDeliveryPartner };
 });
