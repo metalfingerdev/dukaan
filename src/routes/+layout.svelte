@@ -38,10 +38,10 @@
 <AuthProvider {api} {authClient} authConstants={AUTH_CONSTANTS}>
   <div class="flex min-h-dvh flex-col">
     {#if AUTH_CONSTANTS.admin}
-      <ImpersonationBanner />
+      <div class="print:hidden"><ImpersonationBanner /></div>
     {/if}
     <header
-      class="flex min-w-0 items-center justify-between gap-2 p-3 sm:gap-5 sm:p-4"
+      class="flex min-w-0 items-center justify-between gap-2 p-3 sm:gap-5 sm:p-4 print:hidden"
     >
       <a
         href={resolve("/")}

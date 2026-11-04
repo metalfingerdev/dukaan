@@ -28,6 +28,7 @@
 		{ href: '/admin/products', label: strings.admin.nav.products },
 		{ href: '/admin/categories', label: strings.admin.nav.categories },
 		{ href: '/admin/delivery', label: strings.admin.nav.delivery },
+		{ href: '/admin/orders', label: strings.admin.nav.pastOrders },
 		{ href: '/admin/settings', label: strings.admin.nav.settings },
 		{ href: '/admin/users', label: strings.admin.nav.users }
 	] as const;
@@ -72,8 +73,8 @@
 		<a href={resolve('/')} class="btn preset-tonal">{strings.common.backHome}</a>
 	</div>
 {:else}
-	<div class="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 sm:p-6">
-		<nav aria-label={strings.admin.title} class="-mx-1 flex gap-1 overflow-x-auto">
+	<div class="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 sm:p-6 print:max-w-none print:p-0">
+		<nav aria-label={strings.admin.title} class="-mx-1 flex gap-1 overflow-x-auto print:hidden">
 			{#each nav as item (item.href)}
 				<a
 					href={resolve(item.href)}

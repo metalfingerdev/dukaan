@@ -17,12 +17,13 @@ import { isOpenStatus, transitionOrder } from '../model/store/orderStatus';
 import { priceCart } from '../model/store/pricing';
 import { isProductVisible, maxQuantityFor } from '../model/store/publicProjection';
 import { isInIndia } from '../model/store/address';
+import { invoiceFor } from '../model/store/invoice';
 import { upiQrFor, upiQrView } from './upi';
 import { isValidSlot } from '../model/store/slots';
 import { adjustStock } from '../model/store/stock';
 import { isOpenNow } from '../model/store/time';
 import { MAX_OPEN_ORDERS, orderRateLimiter } from './rateLimits';
-import { orderStatus, paymentMethod, paymentStatus } from './validators';
+import { invoiceView, orderStatus, paymentMethod, paymentStatus } from './validators';
 
 const MAX_NOTE_LENGTH = 300;
 const MAX_CART_LINES = 100;
@@ -433,5 +434,18 @@ export const updateOrderPin = mutation({
 			pinUpdatedAt: Date.now()
 		});
 		return null;
+	}
+});
+
+/** The invoice of one of the customer's own delivered orders, or `null` (not delivered, not theirs, or missing) */
+export const getInvoice = query({
+	args: { orderId: v.string() },
+	returns: v.union(v.null(), invoiceView),
+	handler: async (ctx, args) => {
+		const user = await requireCustomer(ctx);
+		const id = ctx.db.normalizeId('orders', args.orderId);
+		const order = id ? await ctx.db.get(id) : null;
+		if (!order || order.userId !== user._id) return null;
+		return await invoiceFor(ctx, order);
 	}
 });

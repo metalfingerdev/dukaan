@@ -2,6 +2,7 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import {
 	deliveryAddress,
+	invoiceSeller,
 	orderActorKind,
 	orderStatus,
 	paymentMethod,
@@ -103,7 +104,9 @@ const schema = defineSchema({
 		deliveryCode: v.string(), // 4 digits; shown to the customer, typed by the partner
 		assignedPartnerId: v.optional(v.id('deliveryPartners')),
 		deliveredAt: v.optional(v.number()),
-		invoiceNumber: v.optional(v.string()),
+		invoiceNumber: v.optional(v.string()), // given on delivery (model/store/invoice.ts)
+		invoiceIssuedAt: v.optional(v.number()),
+		invoiceSeller: v.optional(invoiceSeller), // the seller's details when it was issued; never rewritten
 		paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi'))), // how the partner was actually paid
 		cashCollectedPaise: v.optional(v.number()), // set only when paid in cash
 		cashSettledAt: v.optional(v.number()) // the admin received this cash from the partner

@@ -14,6 +14,7 @@
 import { ConvexError } from 'convex/values';
 import type { Doc, Id } from '../../_generated/dataModel';
 import type { MutationCtx } from '../../_generated/server';
+import { issueInvoice } from './invoice';
 import { adjustStock } from './stock';
 
 export type OrderStatus = Doc<'orders'>['status'];
@@ -75,10 +76,14 @@ export async function transitionOrder(
 		}
 	}
 
+	const now = Date.now();
 	await ctx.db.patch(order._id, {
 		status: args.to,
-		...(args.to === 'delivered' ? { deliveredAt: Date.now() } : {})
+		...(args.to === 'delivered' ? { deliveredAt: now } : {})
 	});
+	// The invoice number is given here, in the same transaction, and never earlier: a cancelled
+	// order must not use one, or the sequence would have gaps
+	if (args.to === 'delivered') await issueInvoice(ctx, order, now);
 	await ctx.db.insert('orderEvents', {
 		orderId: order._id,
 		status: args.to,

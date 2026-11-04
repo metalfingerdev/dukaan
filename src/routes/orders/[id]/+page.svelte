@@ -108,6 +108,12 @@
 			<p class="text-surface-600-400">{strings.orders.cancelledNote}</p>
 		{/if}
 
+		{#if order.invoiceNumber}
+			<a href={resolve('/orders/[id]/invoice', { id: order._id })} class="btn preset-tonal min-h-11 self-start">
+				{strings.orders.viewInvoice} · {order.invoiceNumber}
+			</a>
+		{/if}
+
 		<section class="flex flex-col gap-2">
 			<h2 class="h5">{strings.orders.timeline}</h2>
 			<ol class="flex flex-col gap-1">

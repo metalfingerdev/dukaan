@@ -1,8 +1,8 @@
 /**
  * The store settings the admin edits in /admin/settings: the open/closed switch, opening hours,
  * delivery time, fees, minimum order, delivery areas, the store phone and the UPI id. Every
- * function calls `requireAppAdmin`. Invoice details (legal name, address, GSTIN, prefix) wait for
- * the invoices step, which needs the store's accountant's answers first.
+ * function calls `requireAppAdmin`. The invoice details (legal name, address, GSTIN, prefix) have
+ * their own form and mutation; until the store's accountant confirms them they are placeholders.
  *
  * Both writes work before the `storeSettings` row exists: they create it from
  * STORE_SETTINGS_DEFAULTS, so a fresh deployment can be set up from the page without the seed.
@@ -12,6 +12,7 @@ import type { Doc } from '../../_generated/dataModel';
 import type { MutationCtx } from '../../_generated/server';
 import { mutation, query } from '../../_generated/server';
 import { requireAppAdmin } from '../../model/store/access';
+import { validateInvoiceDetails } from '../../model/store/invoice';
 import { validateSettings } from '../../model/store/settings';
 import { STORE_SETTINGS_DEFAULTS } from '../../model/store/storeProfile';
 
@@ -102,5 +103,46 @@ export const setStoreOpen = mutation({
 		if (row) await ctx.db.patch(row._id, { isOpen: args.isOpen });
 		else await ctx.db.insert('storeSettings', { ...STORE_SETTINGS_DEFAULTS, isOpen: args.isOpen });
 		return null;
+	}
+});
+
+const invoiceDetails = v.object({
+	legalName: v.string(),
+	addressLine: v.string(),
+	gstin: v.optional(v.string()),
+	invoicePrefix: v.string()
+});
+
+/** What new invoices will carry. Invoices already issued keep the details they were issued with. */
+export const getInvoiceDetails = query({
+	args: {},
+	returns: invoiceDetails,
+	handler: async (ctx) => {
+		await requireAppAdmin(ctx);
+		const row: StoredSettings = (await ctx.db.query('storeSettings').first()) ?? STORE_SETTINGS_DEFAULTS;
+		return {
+			legalName: row.legalName,
+			addressLine: row.addressLine,
+			invoicePrefix: row.invoicePrefix,
+			...(row.gstin ? { gstin: row.gstin } : {})
+		};
+	}
+});
+
+/**
+ * Saves the invoice details, or throws `INVALID_INVOICE_DETAILS` with the field. A blank GSTIN
+ * removes it, and invoices then have no tax breakdown.
+ */
+export const updateInvoiceDetails = mutation({
+	args: invoiceDetails.fields,
+	returns: invoiceDetails,
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		const clean = validateInvoiceDetails(args);
+		const row = await findSettings(ctx);
+		const fields = { ...clean, gstin: clean.gstin };
+		if (row) await ctx.db.patch(row._id, fields);
+		else await ctx.db.insert('storeSettings', { ...STORE_SETTINGS_DEFAULTS, ...clean });
+		return clean;
 	}
 });

@@ -28,6 +28,7 @@ import type * as model_store_counters from "../model/store/counters.js";
 import type * as model_store_deliveryCode from "../model/store/deliveryCode.js";
 import type * as model_store_deliveryFailure from "../model/store/deliveryFailure.js";
 import type * as model_store_demoCatalog from "../model/store/demoCatalog.js";
+import type * as model_store_invoice from "../model/store/invoice.js";
 import type * as model_store_orderStatus from "../model/store/orderStatus.js";
 import type * as model_store_pricing from "../model/store/pricing.js";
 import type * as model_store_product from "../model/store/product.js";
@@ -106,6 +107,7 @@ declare const fullApi: ApiFromModules<{
   "model/store/deliveryCode": typeof model_store_deliveryCode;
   "model/store/deliveryFailure": typeof model_store_deliveryFailure;
   "model/store/demoCatalog": typeof model_store_demoCatalog;
+  "model/store/invoice": typeof model_store_invoice;
   "model/store/orderStatus": typeof model_store_orderStatus;
   "model/store/pricing": typeof model_store_pricing;
   "model/store/product": typeof model_store_product;

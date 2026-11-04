@@ -9,13 +9,13 @@ function here starts with `requireAppAdmin(ctx)` (`roles-and-access.md`).
 | Route | Shows |
 | --- | --- |
 | `/admin` | **Live order board** (the page an admin lands on) with the open/closed switch above it |
-| `/admin/orders` | all orders, filter by status/date, paginated |
+| `/admin/orders` | past (delivered) orders, newest first, with their invoices (built); filters later |
 | `/admin/orders/[id]` | one order: items, address, payment, timeline, actions, invoice |
 | `/admin/orders/[id]/invoice` | printable invoice |
 | `/admin/products` | stock and price editing, create/edit product |
 | `/admin/categories` | create/rename/reorder/hide categories (built) |
 | `/admin/delivery` | partners, who is out, cash to settle |
-| `/admin/settings` | hours, open/closed switch, fees, areas, invoice details |
+| `/admin/settings` | hours, open/closed switch, fees, areas, phone, UPI id, invoice details (built) |
 | `/admin/users` | the existing user and organization dashboard |
 
 The starter's user-management dashboard starts out *as* `/admin` (`src/routes/admin/+page.svelte`,

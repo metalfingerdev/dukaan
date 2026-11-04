@@ -5,6 +5,7 @@
 	import { api } from '#convex/_generated/api.js';
 	import type { SettingsField } from '#convex/model/store/settings.js';
 
+	import InvoiceDetailsForm from '#lib/store/admin/InvoiceDetailsForm.svelte';
 	import StoreOpenSwitch from '#lib/store/admin/StoreOpenSwitch.svelte';
 	import { minuteToTime, paiseToInput, parseRupees, timeToMinute } from '#lib/store/inputs.js';
 	import { strings } from '#lib/store/strings.js';
@@ -309,4 +310,6 @@
 			{/if}
 		</div>
 	</form>
+
+	<InvoiceDetailsForm />
 {/if}
