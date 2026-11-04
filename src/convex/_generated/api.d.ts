@@ -58,6 +58,7 @@ import type * as storage from "../storage.js";
 import type * as store_access from "../store/access.js";
 import type * as store_addresses from "../store/addresses.js";
 import type * as store_admin_categories from "../store/admin/categories.js";
+import type * as store_admin_delivery from "../store/admin/delivery.js";
 import type * as store_admin_import from "../store/admin/import.js";
 import type * as store_admin_orders from "../store/admin/orders.js";
 import type * as store_admin_products from "../store/admin/products.js";
@@ -131,6 +132,7 @@ declare const fullApi: ApiFromModules<{
   "store/access": typeof store_access;
   "store/addresses": typeof store_addresses;
   "store/admin/categories": typeof store_admin_categories;
+  "store/admin/delivery": typeof store_admin_delivery;
   "store/admin/import": typeof store_admin_import;
   "store/admin/orders": typeof store_admin_orders;
   "store/admin/products": typeof store_admin_products;

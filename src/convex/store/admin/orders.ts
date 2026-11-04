@@ -4,7 +4,8 @@
  * cancel, puts the stock back. Two people moving the same order can't both win: the second move
  * is no longer a valid transition and is refused with `INVALID_TRANSITION`.
  *
- * Handing a packed order to a delivery partner arrives with the delivery-partner screens.
+ * A packed order is handed to a delivery partner in two taps: `assignPartner` (changeable until
+ * it leaves), then `startDelivery`. The partner screens can later start the run themselves.
  */
 import { ConvexError, v } from 'convex/values';
 import type { Doc } from '../../_generated/dataModel';
@@ -39,6 +40,8 @@ const boardOrder = v.object({
 	contactPhone: v.string(),
 	slotStartMs: v.optional(v.number()),
 	customerNote: v.optional(v.string()),
+	assignedPartnerId: v.optional(v.id('deliveryPartners')),
+	assignedPartnerName: v.optional(v.string()),
 	itemCount: v.number(),
 	items: v.array(v.object({ name: v.string(), unitLabel: v.string(), quantity: v.number() }))
 });
@@ -51,6 +54,7 @@ const toBoardOrder = async (
 		.query('orderItems')
 		.withIndex('by_orderId', (q) => q.eq('orderId', order._id))
 		.take(MAX_ITEMS_PER_ORDER);
+	const partner = order.assignedPartnerId ? await ctx.db.get(order.assignedPartnerId) : null;
 	return {
 		_id: order._id,
 		orderNumber: order.orderNumber,
@@ -65,6 +69,8 @@ const toBoardOrder = async (
 		contactPhone: order.address.contactPhone,
 		slotStartMs: order.slotStartMs,
 		customerNote: order.customerNote,
+		assignedPartnerId: order.assignedPartnerId,
+		assignedPartnerName: partner?.name,
 		itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
 		items: items.map((item) => ({
 			name: item.name,
@@ -136,6 +142,41 @@ export const cancelOrder = mutation({
 			to: 'cancelled',
 			actor: { kind: 'admin', id: admin._id },
 			note: reason
+		});
+		return null;
+	}
+});
+
+/** Chooses (or changes) the partner for a packed order. Throws `NOT_PACKED` or `PARTNER_NOT_FOUND`. */
+export const assignPartner = mutation({
+	args: { orderId: v.id('orders'), partnerId: v.id('deliveryPartners') },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		const order = await ctx.db.get(args.orderId);
+		if (!order) throw new ConvexError({ code: 'ORDER_NOT_FOUND' });
+		if (order.status !== 'packed') throw new ConvexError({ code: 'NOT_PACKED' });
+		const partner = await ctx.db.get(args.partnerId);
+		if (!partner || !partner.isActive) throw new ConvexError({ code: 'PARTNER_NOT_FOUND' });
+		await ctx.db.patch(order._id, { assignedPartnerId: partner._id });
+		return null;
+	}
+});
+
+/** Packed → Out for delivery, with the partner already chosen. Throws `NO_PARTNER` without one. */
+export const startDelivery = mutation({
+	args: { orderId: v.id('orders') },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const admin = await requireAppAdmin(ctx);
+		const order = await ctx.db.get(args.orderId);
+		if (!order) throw new ConvexError({ code: 'ORDER_NOT_FOUND' });
+		const partner = order.assignedPartnerId ? await ctx.db.get(order.assignedPartnerId) : null;
+		if (!partner || !partner.isActive) throw new ConvexError({ code: 'NO_PARTNER' });
+		await transitionOrder(ctx, {
+			orderId: order._id,
+			to: 'out_for_delivery',
+			actor: { kind: 'admin', id: admin._id }
 		});
 		return null;
 	}

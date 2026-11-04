@@ -214,6 +214,7 @@ export const strings = {
 			home: 'Orders',
 			products: 'Products',
 			categories: 'Categories',
+			delivery: 'Delivery',
 			settings: 'Settings',
 			users: 'Users'
 		},
@@ -246,6 +247,15 @@ export const strings = {
 			landmark: (text: string) => `Near ${text}`,
 			note: (text: string) => `Customer note: ${text}`,
 			call: (name: string) => `Call ${name}`,
+			assignedTo: (name: string) => `Delivery: ${name}`,
+			choosePartner: 'Choose a delivery partner',
+			partnerLabel: 'Delivery partner',
+			noPartners: 'Add a delivery partner under Delivery first.',
+			startDelivery: 'Out for delivery',
+			needPartner: 'Choose a partner first.',
+			withPartner: (name: string) => `With ${name}`,
+			partnerGone: 'That partner is not available. Pick another.',
+			notPacked: 'That order has moved. The board is up to date.',
 			accept: 'Accept',
 			markPacked: 'Mark packed',
 			reject: 'Reject',
@@ -303,6 +313,36 @@ export const strings = {
 			errors: {
 				name: 'Enter a name up to 40 characters.',
 				tooMany: 'You can have at most 50 categories.'
+			}
+		},
+		delivery: {
+			title: 'Delivery',
+			partnersTitle: 'Delivery partners',
+			partnersHint:
+				'A partner signs in with the mobile number you add here and then sees only the orders given to them.',
+			name: 'Name',
+			phone: 'Mobile number',
+			phonePlaceholder: '10-digit mobile number',
+			add: 'Add partner',
+			adding: 'Adding…',
+			active: 'Active',
+			off: 'Switched off',
+			switchOff: 'Switch off',
+			switchOn: 'Switch on',
+			empty: 'No delivery partners yet.',
+			cashTitle: 'Cash to settle',
+			cashHint: 'Cash each partner collected on delivery and has not yet handed to the store, by delivery day.',
+			cashEmpty: 'No cash waiting to be settled.',
+			orders: (n: number) => (n === 1 ? '1 order' : `${n} orders`),
+			markSettled: 'Mark settled',
+			settling: 'Settling…',
+			cashChanged: (amount: string) => `The total changed to ${amount}. Check it and settle again.`,
+			nothingToSettle: 'That cash was already settled.',
+			errors: {
+				name: 'Enter a name up to 60 characters.',
+				phone: 'Enter a 10-digit Indian mobile number.',
+				taken: 'That number is already a delivery partner.',
+				tooMany: 'You can have at most 50 delivery partners.'
 			}
 		},
 		import: {

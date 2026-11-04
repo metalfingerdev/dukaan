@@ -2,6 +2,7 @@
 	import PhoneIcon from '@lucide/svelte/icons/phone';
 	import type { FunctionReturnType } from 'convex/server';
 	import { api } from '#convex/_generated/api.js';
+	import type { Id } from '#convex/_generated/dataModel.js';
 	import { formatAge, formatPaise } from '#lib/store/format.js';
 	import { strings } from '#lib/store/strings.js';
 
@@ -13,8 +14,12 @@
 		onaccept: () => void;
 		onpack: () => void;
 		onreject: () => void;
+		/** Active partners to choose from */
+		partners: { _id: Id<'deliveryPartners'>; name: string }[];
+		onassign: (partnerId: Id<'deliveryPartners'>) => void;
+		onstart: () => void;
 	};
-	let { order, now, busy, onaccept, onpack, onreject }: Props = $props();
+	let { order, now, busy, onaccept, onpack, onreject, partners, onassign, onstart }: Props = $props();
 
 	const text = strings.admin.board;
 	const SHOWN_ITEMS = 4;
@@ -74,6 +79,36 @@
 		<PhoneIcon class="size-4" aria-hidden="true" />
 		{order.contactName}
 	</a>
+
+	{#if order.status === 'packed'}
+		<label class="flex flex-col gap-1">
+			<span class="text-sm font-medium">{text.partnerLabel}</span>
+			<select
+				class="select min-h-12"
+				disabled={busy || partners.length === 0}
+				value={order.assignedPartnerId ?? ''}
+				onchange={(event) => {
+					const id = event.currentTarget.value;
+					if (id) onassign(id as Id<'deliveryPartners'>);
+				}}
+			>
+				<option value="" disabled>{partners.length === 0 ? text.noPartners : text.choosePartner}</option>
+				{#each partners as partner (partner._id)}
+					<option value={partner._id}>{partner.name}</option>
+				{/each}
+			</select>
+		</label>
+		<button
+			type="button"
+			class="btn preset-filled-primary-500 min-h-12"
+			disabled={busy || !order.assignedPartnerId}
+			onclick={onstart}
+		>
+			{text.startDelivery}
+		</button>
+	{:else if order.status === 'out_for_delivery' && order.assignedPartnerName}
+		<p class="text-sm font-medium">{text.withPartner(order.assignedPartnerName)}</p>
+	{/if}
 
 	{#if order.status === 'placed' || order.status === 'accepted' || order.status === 'packed'}
 		<div class="mt-1 flex gap-2">

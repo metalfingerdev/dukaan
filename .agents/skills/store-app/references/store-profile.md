@@ -130,7 +130,7 @@ the designed UI.
   background, and a tone behind a "Sound off/on" switch kept in `localStorage`. The first list that
   loads is the baseline, so orders already waiting don't alert on page load.
 - The open/closed switch sits above the board; the other admin pages are in the layout nav.
-- Out for delivery stays empty until step 3 (no partner flow yet; no actions on those cards).
+- Out for delivery cards show who has the order; the partner's own screens (step 4) do the rest.
 
 ## Roadmap (agreed order; each step is its own PR or small series)
 
@@ -145,9 +145,12 @@ those come first. Ordered by what unblocks what.
    prices and stock, real hours and fees, the real delivery areas, the store phone number.
 2. **Admin: the live order board** (**built**, see the section above). Columns by status, one-tap Accept, Reject (with a reason), Mark
    packed, Assign partner (step 3); new-order alert; all moves through `transitionOrder`. Orders finally move.
-3. **Admin: delivery partners and cash settlement**. Add a partner by phone number (matched to
-   their verified sign-in phone), activate or deactivate, cash to settle per partner per day.
-   *Needs:* the partners' phone numbers.
+3. **Admin: delivery partners and cash settlement** (**built**). `/admin/delivery`: add a partner by
+   phone number (matched to their verified sign-in phone), switch on or off, cash to settle per
+   partner per India delivery day (`settleCash` refuses if the total changed since the admin saw it).
+   On the board a packed card has a partner select and an "Out for delivery" button
+   (`assignPartner`, `startDelivery`). Cash only appears once step 4 records `cashCollectedPaise`
+   on delivery. *Needs:* the partners' real phone numbers, added in `/admin/delivery` on staging.
 4. **Delivery-partner screens** (`delivery.md`). Only their own orders; the customer's phone as a
    big tap-to-call button first (the main way a rider finds the door), the address, landmark and a
    Maps button (from the saved pin or Maps link, else a search on the address text); "Picked up",
