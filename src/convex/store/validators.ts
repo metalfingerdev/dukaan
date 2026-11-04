@@ -5,6 +5,7 @@
 import { v } from 'convex/values';
 
 export const orderStatus = v.union(
+	v.literal('awaiting_payment'), // paying online: not on the board until Razorpay confirms the payment
 	v.literal('placed'),
 	v.literal('accepted'),
 	v.literal('packed'),
@@ -14,8 +15,18 @@ export const orderStatus = v.union(
 	v.literal('cancelled')
 );
 
-// Both are collected at the door until an online payment gateway is added
-export const paymentMethod = v.union(v.literal('cod'), v.literal('upi_on_delivery'));
+// Cash or UPI at the door, or paid online through Razorpay before the order is accepted
+export const paymentMethod = v.union(v.literal('cod'), v.literal('upi_on_delivery'), v.literal('online'));
+
+/** How an order was actually paid: cash to the rider, UPI by Razorpay QR at the door, or online */
+export const paidWith = v.union(v.literal('cash'), v.literal('upi'), v.literal('online'));
+
+/** Money back to the customer through Razorpay, for a gateway-paid order that was cancelled */
+export const refundState = v.object({
+	status: v.union(v.literal('requesting'), v.literal('pending'), v.literal('processed'), v.literal('failed')),
+	refundId: v.optional(v.string()), // rfnd_...
+	error: v.optional(v.string())
+});
 
 export const paymentStatus = v.union(
 	v.literal('pending'),
@@ -68,7 +79,7 @@ export const invoiceView = v.object({
 	seller: invoiceSeller,
 	buyer: v.object({ name: v.string(), line1: v.string(), area: v.string(), landmark: v.optional(v.string()) }),
 	paymentMethod,
-	paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi'))),
+	paidWith: v.optional(paidWith),
 	lines: v.array(
 		v.object({
 			name: v.string(),

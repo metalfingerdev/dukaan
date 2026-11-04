@@ -13,7 +13,7 @@ import type { QueryCtx } from '../../_generated/server';
 import { mutation, query } from '../../_generated/server';
 import { requireAppAdmin } from '../../model/store/access';
 import { transitionOrder } from '../../model/store/orderStatus';
-import { invoiceView, orderStatus, paymentMethod, paymentStatus } from '../validators';
+import { invoiceView, orderStatus, paidWith, paymentMethod, paymentStatus } from '../validators';
 import { invoiceFor } from '../../model/store/invoice';
 import { paginationOptsValidator, paginationResultValidator } from 'convex/server';
 
@@ -238,7 +238,7 @@ export const listDelivered = query({
 			deliveredAt: v.optional(v.number()),
 			totalPaise: v.number(),
 			paymentMethod,
-			paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi'))),
+			paidWith: v.optional(paidWith),
 			contactName: v.string(),
 			area: v.string(),
 			invoiceNumber: v.optional(v.string())

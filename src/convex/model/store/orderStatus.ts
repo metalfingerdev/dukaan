@@ -3,6 +3,7 @@
  * move is allowed, writes the `orderEvents` row and runs the side effects. Scattered
  * `ctx.db.patch(orderId, { status })` calls are how orders end up delivered and cancelled at once.
  *
+ *   awaiting_payment (paying online) -> placed, or -> cancelled when the payment never comes
  *   placed -> accepted -> packed -> out_for_delivery -> delivered
  *      |         |          |               |
  *      +---------+----------+               +-> delivery_failed -> (admin) cancelled / packed again
@@ -13,6 +14,7 @@
  */
 import { ConvexError } from 'convex/values';
 import type { Doc, Id } from '../../_generated/dataModel';
+import { internal } from '../../_generated/api';
 import type { MutationCtx } from '../../_generated/server';
 import { issueInvoice } from './invoice';
 import { adjustStock } from './stock';
@@ -21,6 +23,7 @@ export type OrderStatus = Doc<'orders'>['status'];
 export type ActorKind = Doc<'orderEvents'>['actorKind'];
 
 export const ALLOWED_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
+	awaiting_payment: ['placed', 'cancelled'],
 	placed: ['accepted', 'cancelled'],
 	accepted: ['packed', 'cancelled'],
 	packed: ['out_for_delivery', 'cancelled'],
@@ -32,6 +35,7 @@ export const ALLOWED_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = 
 
 /** Statuses an order can still leave: it is "open" until it reaches one of the other two */
 export const OPEN_STATUSES: readonly OrderStatus[] = [
+	'awaiting_payment',
 	'placed',
 	'accepted',
 	'packed',
@@ -84,6 +88,10 @@ export async function transitionOrder(
 	// The invoice number is given here, in the same transaction, and never earlier: a cancelled
 	// order must not use one, or the sequence would have gaps
 	if (args.to === 'delivered') await issueInvoice(ctx, order, now);
+	// Money paid through Razorpay goes back when the order is cancelled. Cash never reaches us
+	// before delivery, and a delivered order can't be cancelled.
+	if (args.to === 'cancelled') await startRefundIfPaid(ctx, order);
+
 	await ctx.db.insert('orderEvents', {
 		orderId: order._id,
 		status: args.to,
@@ -91,4 +99,15 @@ export async function transitionOrder(
 		actorId: args.actor.id,
 		note: args.note
 	});
+}
+
+/**
+ * Asks Razorpay to refund a cancelled order that was paid through it (online, or by UPI QR at the
+ * door). Records the request on the order first, in this transaction, so it happens exactly once;
+ * the action (store/payments.ts) does the network call.
+ */
+export async function startRefundIfPaid(ctx: MutationCtx, order: Doc<'orders'>) {
+	if (order.paymentStatus !== 'paid' || order.paidWith === 'cash' || order.refund) return;
+	await ctx.db.patch(order._id, { refund: { status: 'requesting' } });
+	await ctx.scheduler.runAfter(0, internal.store.payments.refundOrder, { orderId: order._id });
 }

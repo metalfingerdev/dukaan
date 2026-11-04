@@ -152,8 +152,10 @@ One page, four blocks, a single primary button:
    refuses it. From an open order the customer can "Send my current location"
    (`updateOrderPin`), which moves the order's pin and shows the rider when it moved.
 2. **Delivery**: "As soon as possible (~N min)" or a slot list generated from the store's hours.
-3. **Payment**: cash on delivery or UPI on delivery (the partner shows the store's UPI QR/VPA, or
-   the customer pays by UPI app at the door). Online payment is a later step.
+3. **Payment**: cash on delivery, UPI on delivery (a Razorpay QR fixed to the order total, shown by
+   the rider or on the customer's order page), or **pay online now** through Razorpay Checkout. An
+   online order waits as `awaiting_payment` until Razorpay confirms (`store/payments.ts`), and is
+   cancelled with its stock released if not paid within 15 minutes.
 4. **Summary**: lines, the `priceCart` breakdown, the minimum-order check.
 
 **`placeOrder`** (`src/convex/store/orders.ts`, `requireCustomer`) takes the address id, slot,

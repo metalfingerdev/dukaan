@@ -140,6 +140,8 @@ export const strings = {
 		cod: 'Cash on delivery',
 		upi: 'UPI on delivery',
 		upiHint: 'Pay the delivery partner by UPI when your order arrives.',
+		online: 'Pay online now',
+		onlineHint: 'Pay securely through Razorpay. The store starts packing once the payment goes through.',
 		note: 'Note for the delivery partner (optional)',
 		notePlaceholder: 'For example: call at the gate',
 		placeOrder: (amount: string) => `Place order, ${amount}`,
@@ -209,9 +211,10 @@ export const strings = {
 		codeTitle: 'Your delivery code',
 		codeOnTheWay: 'Tell this to your delivery partner when you receive your order.',
 		codeKeep: 'Keep this code. You will need it when your order arrives.',
-		paymentMethod: { cod: 'Cash on delivery', upi_on_delivery: 'UPI on delivery' },
+		paymentMethod: { cod: 'Cash on delivery', upi_on_delivery: 'UPI on delivery', online: 'Paid online' },
 		paymentStatus: { pending: 'To pay on delivery', paid: 'Paid', refunded: 'Refunded' },
 		status: {
+			awaiting_payment: 'Waiting for payment',
 			placed: 'Order placed',
 			accepted: 'Accepted by the store',
 			packed: 'Packed',
@@ -250,9 +253,29 @@ export const strings = {
 		total: 'Total',
 		youSaved: (amount: string) => `You saved ${amount} on MRP`,
 		taxIncluded: 'Prices include tax.',
-		paidBy: { cash: 'Paid in cash', upi: 'Paid by UPI' },
-		payment: { cod: 'Cash on delivery', upi_on_delivery: 'UPI on delivery' },
+		paidBy: { cash: 'Paid in cash', upi: 'Paid by UPI', online: 'Paid online' },
+		payment: { cod: 'Cash on delivery', upi_on_delivery: 'UPI on delivery', online: 'Paid online' },
 		thanks: 'Thank you for shopping with us.'
+	},
+	payOnline: {
+		title: 'Complete your payment',
+		hint: (time: string) => `Pay by ${time} or the order is cancelled and nothing is charged.`,
+		pay: (amount: string) => `Pay ${amount}`,
+		preparing: 'Getting the payment ready...',
+		opening: 'Opening Razorpay...',
+		checking: 'Checking your payment...',
+		notConfirmed: "We haven't received the payment yet. If money left your account, it will show here in a minute; if the order is cancelled, it is refunded.",
+		failed: "The payment didn't go through. You can try again.",
+		unavailable: "Online payment isn't available right now. Cancel this order and choose cash or UPI on delivery.",
+		retry: 'Try again',
+		paid: 'Payment received. The store is preparing your order.',
+		scriptFailed: "Razorpay couldn't load. Check your connection and try again.",
+		refund: {
+			requesting: 'Your payment is being refunded.',
+			pending: 'Refund started. It usually reaches your account in 5 to 7 working days.',
+			processed: 'Refunded to your account.',
+			failed: 'We could not start your refund automatically. The store will refund you; please call them.'
+		}
 	},
 	upiQr: {
 		show: 'Pay by UPI: show QR',
@@ -333,6 +356,7 @@ export const strings = {
 		moved: 'This order has already changed. Showing the latest.',
 		failed: 'That did not go through. Check your connection and try again.',
 		status: {
+			awaiting_payment: 'Awaiting payment',
 			placed: 'Placed',
 			accepted: 'Accepted',
 			packed: 'Packed',
@@ -352,6 +376,7 @@ export const strings = {
 			categories: 'Categories',
 			delivery: 'Delivery',
 			pastOrders: 'Past orders',
+			payments: 'Payments',
 			settings: 'Settings',
 			users: 'Users'
 		},
@@ -636,6 +661,20 @@ export const strings = {
 					isActive: 'Something went wrong.',
 					isFeatured: 'Something went wrong.'
 				}
+			}
+		},
+		payments: {
+			title: 'Payments',
+			intro:
+				'Money taken through Razorpay: online at checkout and UPI QR at the door, newest first. Match these with the Razorpay dashboard. Cash is settled with the riders under Delivery.',
+			empty: 'No Razorpay payments yet.',
+			kind: { online: 'Online', upi_qr: 'UPI QR at the door' },
+			order: (n: number) => `Order #${n}`,
+			refund: {
+				requesting: 'Refund being requested',
+				pending: 'Refund pending',
+				processed: 'Refunded',
+				failed: 'Refund failed: refund it from the Razorpay dashboard'
 			}
 		},
 		pastOrders: {

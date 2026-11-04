@@ -234,6 +234,7 @@ export const markDelivered = mutation({
 	args: {
 		orderId: v.string(),
 		code: v.string(),
+		// The rider can only ever have collected cash; anything else is refused below
 		paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi')))
 	},
 	returns: v.union(

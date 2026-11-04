@@ -72,7 +72,8 @@ When the user dictates values, update this table first, then the code constants 
   2026-11-04): a single-use QR fixed to the order total, confirmed only by Razorpay's signed webhook
   or a status check against Razorpay, never by the rider's word or by the owner reading the bank
   statement (that manual design was tried and rejected). Until Razorpay enables QR Codes on the
-  account, the rider can only mark cash.
+  account, the rider can only mark cash. Customers can also pay online at checkout (step 7), with
+  refunds through Razorpay when a paid order is cancelled.
 - **Tests**: very few, and only tests that fail when behaviour breaks: security refusals, money and
   stock correctness, real invariants. No tests that restate a table, a string or static data.
   Pages are checked by the Playwright suite in `tests/e2e`, run locally against the dev deployment
@@ -194,19 +195,22 @@ those come first. Ordered by what unblocks what.
    composition scheme? which items at what rate; whether fees are taxed; the wording, for example
    "Tax invoice" or "Bill of supply"), the legal name and full address. Don't assert tax rules in
    code or copy.
-7. **Online payments through a payment gateway** (Razorpay; reuses the keys, webhook and `recordPayment` path from step 5). Customers pay before delivery. A separate plan
-   is needed before building. Prerequisites the founder must arrange: a gateway merchant account
-   with business KYC (Razorpay, Cashfree, PhonePe PG and similar are the usual choices; compare
-   current fees and settlement times yourself, none are verified here), test and live API keys,
-   and a webhook endpoint. Design rules that follow from this codebase:
-   - A new payment method value and a payment-attempt table; the order is created `pending` and
-     becomes `paid` **only from the gateway's signed webhook** (an HTTP action on the `.convex.site`
-     URL that verifies the signature). Never trust the browser's "payment succeeded" redirect.
-   - Idempotent webhook handling (gateways resend). Secrets only in Convex env vars.
-   - Stock is held when the order is placed, so an unpaid online order must expire (a scheduled
-     function) and put its stock back through `transitionOrder`.
-   - Refunds on cancellation and failed delivery, and a reconciliation view for the admin.
-   - Cash on delivery and UPI on delivery stay available.
+7. **Online payments through a payment gateway** (**built**, Razorpay, test mode). "Pay online now"
+   at checkout creates the order as `awaiting_payment` (stock held, not on the board) and a Razorpay
+   order (`onlinePayments` table, `store/payments.ts`); the order page opens Razorpay Checkout.
+   The order becomes `placed` and paid only from Razorpay's signed webhook (`payment.captured` /
+   `order.paid`) or a server-side check against Razorpay's API, never from the browser. Not paid
+   within 15 minutes (plus 3 minutes' grace) → cancelled by a scheduled job, stock back; money that
+   arrives after that is refunded. **Refunds**: cancelling any order paid through Razorpay (online
+   or UPI QR) starts a full refund in `transitionOrder` (idempotent receipt per order); the order's
+   `refund` tracks requesting → pending → processed/failed (webhook `refund.processed` /
+   `refund.failed`). `/admin/payments` lists Razorpay payments with refunds; a failed refund is
+   shown in red for a manual refund from the dashboard. `npx convex run store/upi:checkRazorpaySetup`
+   checks keys, orders and UPI QR. *Needs:* on each deployment, the webhook in the Razorpay
+   dashboard (URL `https://<deployment>.convex.site/razorpay-webhook`, events `payment.captured`,
+   `order.paid`, `refund.processed`, `refund.failed`, `qr_code.credited`) and
+   `RAZORPAY_WEBHOOK_SECRET`; UPI enabled by Razorpay for UPI in Checkout and QR at the door;
+   KYC and live keys before real money.
 8. **The designed UI**, last: colours, logo, layout, Hindi strings if wanted, inspired by
    slothbytes.dev and not by another company's branding.
 

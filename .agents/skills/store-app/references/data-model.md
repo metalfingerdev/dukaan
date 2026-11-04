@@ -20,6 +20,7 @@ export const orderStatus = v.union(
 	v.literal('out_for_delivery'),
 	v.literal('delivered'),
 	v.literal('delivery_failed'), // partner couldn't deliver; admin decides what happens next
+	// (and before `placed`: `awaiting_payment`, for an order paid online until Razorpay confirms)
 	v.literal('cancelled')
 );
 export const paymentMethod = v.union(v.literal('cod'), v.literal('upi_on_delivery'));
@@ -164,6 +165,21 @@ deliveryPartners: defineTable({
 	phoneNumber: v.string(), // E.164, matched against the user's verified phone
 	isActive: v.boolean()
 }).index('by_phoneNumber', ['phoneNumber']),
+
+// One row per Razorpay order made to take an online payment at checkout (store/payments.ts).
+// Only the gateway's signed webhook or a status check marks it paid.
+onlinePayments: defineTable({
+	orderId: v.id('orders'),
+	amountPaise: v.number(),
+	status: v.union(v.literal('creating'), v.literal('created'), v.literal('paid'), v.literal('failed')),
+	razorpayOrderId: v.optional(v.string()),
+	paymentId: v.optional(v.string()),
+	paidAt: v.optional(v.number()),
+	error: v.optional(v.string())
+})
+	.index('by_orderId', ['orderId'])
+	.index('by_razorpayOrderId', ['razorpayOrderId'])
+	.index('by_status', ['status']),
 
 // One row per Razorpay UPI QR made for an order (store/upi.ts). Single use, fixed to the order
 // total; only the gateway's signed webhook or a status check marks it paid.

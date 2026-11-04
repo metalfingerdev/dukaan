@@ -11,15 +11,16 @@ import { ConvexError, v } from 'convex/values';
 import { internal } from '../_generated/api';
 import type { Doc, Id } from '../_generated/dataModel';
 import type { MutationCtx, QueryCtx } from '../_generated/server';
-import { env, internalAction, internalMutation, internalQuery, mutation } from '../_generated/server';
+import { internalAction, internalMutation, internalQuery, mutation } from '../_generated/server';
 import { requireCustomer, requireDeliveryPartner } from '../model/store/access';
 import {
 	QR_LIFETIME_MS,
 	RazorpayError,
 	checkKeys,
+	createRazorpayOrder,
 	createUpiQr,
 	listQrPayments,
-	type RazorpayKeys
+	razorpayKeys
 } from '../model/store/razorpay';
 
 /** A QR still being made after this long is treated as lost, so a new one can be asked for */
@@ -127,10 +128,7 @@ export const checkPaymentAsCustomer = mutation({
 
 // ---- gateway work (internal) ----
 
-const keysOrThrow = (): RazorpayKeys => {
-	if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) throw new RazorpayError(0, 'Razorpay keys are not set');
-	return { keyId: env.RAZORPAY_KEY_ID, keySecret: env.RAZORPAY_KEY_SECRET };
-};
+const keysOrThrow = razorpayKeys;
 
 export const qrForWork = internalQuery({
 	args: { qrRowId: v.id('upiQrs') },
@@ -261,8 +259,9 @@ export const recordPayment = internalMutation({
 });
 
 /**
- * Checks that the Razorpay account can make UPI QRs (Razorpay's support switches this on), by
- * creating a ₹1 test QR that closes in 5 minutes. Test keys only.
+ * Checks the Razorpay setup with test keys: that the keys work, that orders can be created (paying
+ * online at checkout), and that UPI QRs can be made (Razorpay's support switches this on), using a
+ * ₹1 order and a ₹1 QR that closes in 5 minutes. Neither is ever paid.
  * Run: `npx convex run store/upi:checkRazorpaySetup`
  */
 export const checkRazorpaySetup = internalAction({
@@ -277,6 +276,12 @@ export const checkRazorpaySetup = internalAction({
 			} catch (error) {
 				return { ok: false, detail: `the keys don't work: ${error instanceof Error ? error.message : error}` };
 			}
+			// Orders API (paying online at checkout): a ₹1 order that is simply never paid
+			try {
+				await createRazorpayOrder(keys, { amountPaise: 100, receipt: `setup-check-${Date.now()}`, notes: { purpose: 'setup check' } });
+			} catch (error) {
+				return { ok: false, detail: `keys work, but creating a Razorpay order failed: ${error instanceof Error ? error.message : error}` };
+			}
 			const qr = await createUpiQr(keys, {
 				amountPaise: 100,
 				closeByMs: Date.now() + 5 * 60 * 1000,
@@ -284,10 +289,10 @@ export const checkRazorpaySetup = internalAction({
 				description: 'Setup check, not an order',
 				notes: { purpose: 'setup check' }
 			});
-			return { ok: true, detail: `created ${qr.id}: ${qr.image_url}` };
+			return { ok: true, detail: `online payments and UPI QR both work (test QR ${qr.id})` };
 		} catch (error) {
 			const detail = error instanceof RazorpayError ? error.message : String(error);
-			return { ok: false, detail: `keys work, but making a UPI QR failed (ask Razorpay to enable QR Codes): ${detail}` };
+			return { ok: false, detail: `online payments work; UPI QR at the door does not yet (ask Razorpay to enable UPI and QR Codes): ${detail}` };
 		}
 	}
 });

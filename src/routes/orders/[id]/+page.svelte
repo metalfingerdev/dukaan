@@ -5,6 +5,7 @@
 	import { api } from '#convex/_generated/api.js';
 	import { SLOT_MINUTES, STORE_NAME } from '#convex/model/store/storeProfile.js';
 
+	import PayOnline from '#lib/store/ui/PayOnline.svelte';
 	import UpiQrPay from '#lib/store/ui/UpiQrPay.svelte';
 	import SendLocation from '#lib/store/ui/SendLocation.svelte';
 	import ShopPage from '#lib/store/ui/ShopPage.svelte';
@@ -66,7 +67,7 @@
 			<a href={resolve('/orders')} class="btn preset-tonal">{strings.orders.backToOrders}</a>
 		</div>
 	{:else}
-		{#if justPlaced && order.status === 'placed'}
+		{#if justPlaced && order.status === 'placed' && order.paymentMethod !== 'online'}
 			<p class="card preset-tonal-success p-3" role="status">{strings.orders.placedBanner}</p>
 		{/if}
 
@@ -77,6 +78,22 @@
 			</div>
 			<span class="badge preset-filled-primary-500">{strings.orders.status[order.status]}</span>
 		</header>
+
+		{#if order.status === 'awaiting_payment' && order.onlinePayment}
+			<PayOnline
+				orderId={order._id}
+				orderNumber={order.orderNumber}
+				payment={order.onlinePayment}
+				contact={{ name: order.address.contactName, phone: order.address.contactPhone }}
+				openAtOnce={justPlaced}
+			/>
+		{:else if justPlaced && order.paymentMethod === 'online' && order.paymentStatus === 'paid' && order.status === 'placed'}
+			<p class="card preset-tonal-success p-3" role="status">{strings.payOnline.paid}</p>
+		{/if}
+
+		{#if order.refundStatus}
+			<p class="card preset-tonal-warning p-3 text-sm" role="status">{strings.payOnline.refund[order.refundStatus]}</p>
+		{/if}
 
 		{#if order.deliveryCode}
 			<section class="card preset-tonal-primary flex flex-col items-center gap-1 p-4 text-center">
@@ -189,7 +206,7 @@
 			{/if}
 		</section>
 
-		{#if order.status === 'placed'}
+		{#if order.status === 'placed' || order.status === 'awaiting_payment'}
 			<button type="button" class="btn preset-tonal-error min-h-12" disabled={cancelling} onclick={cancel}>
 				{strings.orders.cancel}
 			</button>
