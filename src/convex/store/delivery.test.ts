@@ -122,14 +122,12 @@ describe('the run', () => {
 		expect(done).not.toHaveProperty('customer');
 	});
 
-	it('records a UPI payment without adding to the cash the partner owes', async () => {
+	it("never takes the rider's word for a UPI payment", async () => {
 		const s = await setupRun();
 		await s.ravi.mutation(pickUp, { orderId: s.orderId });
-		await s.ravi.mutation(markDelivered, { orderId: s.orderId, code: s.code, paidWith: 'upi' });
-		const order = await s.t.run((ctx) => ctx.db.get(s.orderId));
-		expect(order).toMatchObject({ paymentStatus: 'paid', paidWith: 'upi' });
-		expect(order!.cashCollectedPaise).toBeUndefined();
-		expect(await s.admin.query(api.store.admin.delivery.cashToSettle, {})).toEqual([]);
+		const claim = s.ravi.mutation(markDelivered, { orderId: s.orderId, code: s.code, paidWith: 'upi' });
+		expect((await failure(claim)).code).toBe('UPI_NOT_CONFIRMED');
+		expect(await s.t.run((ctx) => ctx.db.get(s.orderId))).toMatchObject({ status: 'out_for_delivery', paymentStatus: 'pending' });
 	});
 
 	it('asks how the unpaid order was paid before it will deliver', async () => {
@@ -243,5 +241,101 @@ describe('finding the door', () => {
 			expectedTotalPaise: ORDER_TOTAL
 		});
 		expect((await failure(placing)).code).toBe('PIN_REQUIRED');
+	});
+});
+
+describe('UPI confirmed by Razorpay', () => {
+	const SECRET = 'test-webhook-secret';
+	beforeEach(() => vi.stubEnv('RAZORPAY_WEBHOOK_SECRET', SECRET));
+	afterEach(() => vi.unstubAllEnvs());
+
+	const sign = async (body: string, secret = SECRET) => {
+		const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [
+			'sign'
+		]);
+		const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body));
+		return [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, '0')).join('');
+	};
+
+	/** What Razorpay sends when a QR is paid */
+	const credited = (qrId: string, amount: number, paymentId = 'pay_test1') =>
+		JSON.stringify({
+			entity: 'event',
+			event: 'qr_code.credited',
+			contains: ['payment', 'qr_code'],
+			payload: {
+				payment: { entity: { id: paymentId, amount, currency: 'INR', status: 'captured', method: 'upi' } },
+				qr_code: { entity: { id: qrId, status: 'active' } }
+			}
+		});
+
+	const post = async (s: StoreTest, body: string, signature: string) =>
+		(await s.t.fetch('/razorpay-webhook', { method: 'POST', body, headers: { 'x-razorpay-signature': signature } })).status;
+
+	/** An order out for delivery with an open Razorpay QR, as if `createQr` had succeeded */
+	const withOpenQr = async () => {
+		const s = await setupRun();
+		await s.ravi.mutation(pickUp, { orderId: s.orderId });
+		await s.t.run((ctx) =>
+			ctx.db.insert('upiQrs', {
+				orderId: s.orderId,
+				amountPaise: ORDER_TOTAL,
+				status: 'active',
+				qrId: 'qr_test1',
+				imageUrl: 'https://rzp.io/i/test',
+				closeBy: NOON_IST + 60 * 60 * 1000
+			})
+		);
+		return s;
+	};
+	const order = (s: Awaited<ReturnType<typeof setupRun>>) => s.t.run((ctx) => ctx.db.get(s.orderId));
+
+	it('ignores a webhook whose signature does not match, however convincing the body', async () => {
+		const s = await withOpenQr();
+		const body = credited('qr_test1', ORDER_TOTAL);
+		expect(await post(s, body, await sign(body, 'someone-elses-secret'))).toBe(401);
+		expect(await post(s, body, '')).toBe(401);
+		// a signature for one body doesn't carry over to another
+		expect(await post(s, credited('qr_test1', ORDER_TOTAL, 'pay_forged'), await sign(body))).toBe(401);
+		expect(await order(s)).toMatchObject({ paymentStatus: 'pending' });
+	});
+
+	it('marks the order paid by UPI once, the rider delivers without collecting, and no cash is owed', async () => {
+		const s = await withOpenQr();
+		const body = credited('qr_test1', ORDER_TOTAL);
+		expect(await post(s, body, await sign(body))).toBe(200);
+		expect(await post(s, body, await sign(body))).toBe(200); // Razorpay resends; nothing changes twice
+		expect(await order(s)).toMatchObject({ paymentStatus: 'paid', paidWith: 'upi' });
+
+		const run = (await s.ravi.query(getRun, { orderId: s.orderId }))!;
+		expect(run.upiQr).toMatchObject({ status: 'paid' });
+		expect(run.collectPaise).toBe(0);
+
+		await s.ravi.mutation(markDelivered, { orderId: s.orderId, code: s.code });
+		expect((await order(s))!.cashCollectedPaise).toBeUndefined();
+		expect(await s.admin.query(api.store.admin.delivery.cashToSettle, {})).toEqual([]);
+	});
+
+	it('does not count a payment for a different amount or to a QR that is not ours', async () => {
+		const s = await withOpenQr();
+		for (const body of [credited('qr_test1', ORDER_TOTAL - 100), credited('qr_unknown', ORDER_TOTAL)]) {
+			expect(await post(s, body, await sign(body))).toBe(200);
+		}
+		expect(await order(s)).toMatchObject({ paymentStatus: 'pending' });
+	});
+
+	it('keeps one payable QR per order, so the customer cannot be asked to pay twice', async () => {
+		const s = await setupRun();
+		const ask = () => s.ravi.mutation(api.store.upi.requestQrAsPartner, { orderId: s.orderId });
+		expect((await failure(ask())).code).toBe('NOT_PAYABLE'); // still packed
+		await s.ravi.mutation(pickUp, { orderId: s.orderId });
+		await ask();
+		await ask();
+		await s.alice.mutation(api.store.upi.requestQrAsCustomer, { orderId: s.orderId });
+		const rows = await s.t.run((ctx) => ctx.db.query('upiQrs').collect());
+		expect(rows.map((r) => [r.status, r.amountPaise])).toEqual([['creating', ORDER_TOTAL]]);
+		// and another rider or customer can't ask for it
+		expect((await failure(s.sunil.mutation(api.store.upi.requestQrAsPartner, { orderId: s.orderId }))).code).toBe('ORDER_NOT_FOUND');
+		expect((await failure(s.bob.mutation(api.store.upi.requestQrAsCustomer, { orderId: s.orderId }))).code).toBe('ORDER_NOT_FOUND');
 	});
 });

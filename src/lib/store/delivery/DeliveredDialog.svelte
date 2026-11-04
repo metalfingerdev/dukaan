@@ -5,35 +5,40 @@
 
 	type Props = {
 		open: boolean;
-		/** What is still to collect at the door; 0 when the order is already paid */
+		/**
+		 * Cash still to collect at the door; 0 once the order is paid. A UPI payment only counts once
+		 * Razorpay confirms it, so it never appears here as a choice.
+		 */
 		collectPaise: number;
-		/** Which way the customer chose to pay, to pre-select the same here */
-		method: 'cod' | 'upi_on_delivery';
 		busy: boolean;
 		/** Shown under the code field after a wrong code or a failed call */
 		error: string;
-		onconfirm: (code: string, paidWith: 'cash' | 'upi' | undefined) => void;
+		onconfirm: (code: string, paidWith: 'cash' | undefined) => void;
 		onclose: () => void;
 	};
-	let { open, collectPaise, method, busy, error, onconfirm, onclose }: Props = $props();
+	let { open, collectPaise, busy, error, onconfirm, onclose }: Props = $props();
 	const text = strings.delivery;
 
 	let code = $state('');
-	let paidWith = $state<'cash' | 'upi'>('cash');
-	let invalid = $state(false);
+	let collected = $state(false);
+	let invalid = $state('');
 
 	$effect(() => {
 		if (open) {
 			code = '';
-			invalid = false;
-			paidWith = method === 'upi_on_delivery' ? 'upi' : 'cash';
+			collected = false;
+			invalid = '';
 		}
 	});
 
 	const submit = (event: SubmitEvent) => {
 		event.preventDefault();
-		invalid = !/^\d{4}$/.test(code.trim());
-		if (!invalid) onconfirm(code.trim(), collectPaise > 0 ? paidWith : undefined);
+		invalid = !/^\d{4}$/.test(code.trim())
+			? text.wrongCode
+			: collectPaise > 0 && !collected
+				? text.paymentRequired
+				: '';
+		if (!invalid) onconfirm(code.trim(), collectPaise > 0 ? 'cash' : undefined);
 	};
 </script>
 
@@ -54,28 +59,19 @@
 					autocomplete="off"
 					maxlength="4"
 					bind:value={code}
-					aria-invalid={invalid || error !== ''}
+					aria-invalid={invalid !== '' || error !== ''}
 				/>
 			</label>
 
 			{#if collectPaise > 0}
-				<fieldset class="flex flex-col gap-2">
-					<legend class="text-sm font-medium">{text.howPaid} ({formatPaise(collectPaise)})</legend>
-					<div class="grid grid-cols-2 gap-2">
-						{#each [['cash', text.paidCash], ['upi', text.paidUpi]] as const as [value, label] (value)}
-							<label
-								class="btn min-h-12 cursor-pointer {paidWith === value ? 'preset-filled-primary-500' : 'preset-tonal'}"
-							>
-								<input class="sr-only" type="radio" name="paid-with" {value} bind:group={paidWith} />
-								{label}
-							</label>
-						{/each}
-					</div>
-				</fieldset>
+				<label class="flex min-h-12 items-center gap-3">
+					<input type="checkbox" class="checkbox size-6" bind:checked={collected} />
+					<span class="font-medium">{text.collectedCash(formatPaise(collectPaise))}</span>
+				</label>
 			{/if}
 
 			{#if invalid || error}
-				<p class="text-error-600-400 text-sm" role="alert">{error || text.wrongCode}</p>
+				<p class="text-error-600-400 text-sm" role="alert">{error || invalid}</p>
 			{/if}
 
 			<Dialog.Footer class="w-full">

@@ -18,6 +18,8 @@ export const modules = import.meta.glob([
 	'/src/convex/store/**/*.ts',
 	'/src/convex/model/store/*.ts',
 	'/src/convex/otp/phone.ts',
+	// the HTTP router, for the Razorpay webhook (`t.fetch`)
+	'/src/convex/http.ts',
 	'!/src/convex/**/*.test.ts',
 	'!/src/convex/**/*.testutils.ts'
 ]);

@@ -14,6 +14,7 @@ import { DELIVERY_FAILURE_NOTES } from '../model/store/deliveryFailure';
 import { requireDeliveryPartner } from '../model/store/access';
 import { transitionOrder } from '../model/store/orderStatus';
 import { istDayStartMs } from '../model/store/time';
+import { upiQrFor, upiQrView } from './upi';
 import { deliveryRateLimiter } from './rateLimits';
 import { orderStatus, paymentMethod, paymentStatus } from './validators';
 
@@ -135,6 +136,8 @@ const runDetail = v.object({
 			mapsUrl: v.optional(v.string())
 		})
 	),
+	/** The Razorpay UPI QR for this order, while it is out for delivery or once paid by it */
+	upiQr: v.optional(upiQrView),
 	/** When the customer last moved the pin after ordering */
 	pinUpdatedAt: v.optional(v.number()),
 	/** After delivery the phone is only recognisable, not dialable */
@@ -189,6 +192,7 @@ export const getRun = query({
 					}
 				: {}),
 			pinUpdatedAt: open ? order.pinUpdatedAt : undefined,
+			upiQr: order.status === 'out_for_delivery' ? await upiQrFor(ctx, order._id) : undefined,
 			...(order.status === 'delivered' ? { phoneLast4: address.contactPhone.slice(-4) } : {}),
 			customerNote: open ? order.customerNote : undefined,
 			slotStartMs: open ? order.slotStartMs : undefined,
@@ -221,8 +225,10 @@ export const pickUp = mutation({
  * A wrong code is a normal answer, not an error: throwing would roll back the guess counter and
  * make the limit worthless. At most 5 guesses per order in 10 minutes, right or wrong.
  *
- * `paidWith` says how the partner was actually paid (cash or UPI) and is required while the order
- * is unpaid. Only cash is added to what the partner owes the store.
+ * While the order is unpaid the partner must have collected cash (`paidWith: 'cash'`), which is
+ * added to what they owe the store. UPI is never the partner's word: a UPI payment is recorded only
+ * by Razorpay (store/upi.ts), after which the order is already paid and needs no `paidWith`.
+ * Claiming UPI on an unpaid order throws `UPI_NOT_CONFIRMED`.
  */
 export const markDelivered = mutation({
 	args: {
@@ -243,6 +249,7 @@ export const markDelivered = mutation({
 			throw new ConvexError({ code: 'INVALID_TRANSITION', from: order.status, to: 'delivered' });
 		}
 		const owes = order.paymentStatus === 'pending';
+		if (owes && args.paidWith === 'upi') throw new ConvexError({ code: 'UPI_NOT_CONFIRMED' });
 		if (owes && !args.paidWith) throw new ConvexError({ code: 'PAYMENT_REQUIRED' });
 
 		const attempt = await deliveryRateLimiter.limit(ctx, 'deliveryCodeAttempt', { key: order._id });

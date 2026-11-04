@@ -152,6 +152,23 @@ const schema = defineSchema({
 		isActive: v.boolean()
 	}).index('by_phoneNumber', ['phoneNumber']),
 
+	// One row per UPI QR made for an order through Razorpay. Single use and fixed to the order total,
+	// so it can be paid once, for exactly that amount. Only the gateway's signed webhook (or a
+	// status check against the gateway) marks it paid; nobody's word does.
+	upiQrs: defineTable({
+		orderId: v.id('orders'),
+		amountPaise: v.number(),
+		status: v.union(v.literal('creating'), v.literal('active'), v.literal('paid'), v.literal('failed')),
+		qrId: v.optional(v.string()), // qr_... from Razorpay
+		imageUrl: v.optional(v.string()),
+		closeBy: v.optional(v.number()), // ms; Razorpay closes the QR then
+		paymentId: v.optional(v.string()), // pay_...
+		paidAt: v.optional(v.number()),
+		error: v.optional(v.string()) // what Razorpay said when it refused, for the admin
+	})
+		.index('by_orderId', ['orderId'])
+		.index('by_qrId', ['qrId']),
+
 	// Exactly one document
 	storeSettings: defineTable({
 		storeName: v.string(),
