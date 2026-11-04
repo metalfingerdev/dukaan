@@ -48,8 +48,8 @@
 
       <nav class="account">
         {#if PUBLIC_APP_ENV === "staging"}
-          <span class="staging" title="This is the staging site, not the real store">
-            Staging
+          <span class="staging" title={strings.header.stagingHint}>
+            {strings.header.staging}
           </span>
         {/if}
         {#if auth.isAuthenticated}

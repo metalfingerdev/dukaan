@@ -20,6 +20,8 @@ export const strings = {
 		maxPerOrder: (count: number) => `Up to ${count} per order`
 	},
 	header: {
+		staging: 'Staging',
+		stagingHint: 'This is the staging site, not the real store',
 		signIn: 'Sign in',
 		orders: 'Orders',
 		myCart: 'My cart'
