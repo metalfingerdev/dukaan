@@ -17,6 +17,10 @@
 	import { useRequireSignIn } from '#lib/store/requireSignIn.svelte.js';
 	import { strings } from '#lib/store/strings.js';
 	import { gotoApp } from '#lib/primitives/utils/navigation.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import Choice from '#lib/ui/Choice.svelte';
+	import Notice from '#lib/ui/Notice.svelte';
 
 	const auth = useRequireSignIn();
 	const client = useConvexClient();
@@ -109,179 +113,227 @@
 	<title>{strings.checkout.title} | {STORE_NAME}</title>
 </svelte:head>
 
-<ShopPage showCartBar={false}>
-	<h1 class="h4">{strings.checkout.title}</h1>
+<ShopPage showCartBar={false} closedNotice={false}>
+	<h1 class="title">{strings.checkout.title}</h1>
 
-	{#if placed}
-		<p class="text-surface-600-400" role="status">{strings.checkout.placing}</p>
-	{:else if cart.isLoading || addresses.data === undefined || !info}
-		<div class="flex flex-col gap-3" aria-busy="true" aria-label="Loading">
-			{#each { length: 3 } as _, i (i)}
-				<div class="bg-surface-100-900 h-24 animate-pulse rounded"></div>
-			{/each}
-		</div>
-	{:else if lines.length === 0}
-		<div class="flex flex-col items-start gap-3">
-			<p class="text-surface-600-400">{strings.cart.empty}</p>
-			<a href={resolve('/')} class="btn preset-filled">{strings.cart.keepShopping}</a>
-		</div>
-	{:else}
-		{#if open === false}
-			<p class="card preset-tonal-warning p-3 text-sm" role="status">{strings.checkout.closed}</p>
-		{/if}
+	<div class="steps">
+		{#if placed}
+			<p class="muted" role="status">{strings.checkout.placing}</p>
+		{:else if cart.isLoading || addresses.data === undefined || !info}
+			<!-- The same sections as the loaded page, drawn with placeholders -->
+			<div class="section" aria-busy="true" aria-label={strings.common.loading}>
+				{#each { length: 3 } as _, i (i)}
+					<h2 class="heading"><span class="bone">Section heading</span></h2>
+					<span class="block bone"></span>
+				{/each}
+			</div>
+		{:else if lines.length === 0}
+			<div class="empty">
+				<p class="muted">{strings.cart.empty}</p>
+				<Button href={resolve('/')} variant="primary">{strings.cart.keepShopping}</Button>
+			</div>
+		{:else}
+		<div class="main">
+			{#if open === false}
+				<Notice tone="warn" role="status">{strings.checkout.closed}</Notice>
+			{/if}
 
-		<section class="flex flex-col gap-2">
-			<h2 class="h5">{strings.checkout.address}</h2>
-			{#if pinningAddress && selectedAddress}
-				<AddressForm
-					areas={info.deliveryAreas}
-					address={selectedAddress}
-					{defaultName}
-					{defaultPhone}
-					onsaved={() => (pinningAddress = false)}
-					oncancel={() => (pinningAddress = false)}
-				/>
-			{:else if addressList.length > 0 && !addingAddress}
-				<ul class="flex flex-col gap-2">
-					{#each addressList as address (address._id)}
-						<li>
-							<label
-								class="card preset-outlined-surface-300-700 flex min-h-11 cursor-pointer items-start gap-3 p-3"
-							>
-								<input
-									type="radio"
+			<section class="section">
+				<h2 class="heading">{strings.checkout.address}</h2>
+				{#if pinningAddress && selectedAddress}
+					<AddressForm
+						areas={info.deliveryAreas}
+						address={selectedAddress}
+						{defaultName}
+						{defaultPhone}
+						onsaved={() => (pinningAddress = false)}
+						oncancel={() => (pinningAddress = false)}
+					/>
+				{:else if addressList.length > 0 && !addingAddress}
+					<ul class="choices">
+						{#each addressList as address (address._id)}
+							<li>
+								<Choice
 									name="address"
-									class="radio mt-1"
 									value={address._id}
 									checked={selectedAddress?._id === address._id}
 									onchange={() => (chosenAddressId = address._id)}
-								/>
-								<span class="flex flex-col">
-									<span class="font-medium">{address.label}</span>
+								>
+									<b>{address.label}</b>
 									<span>{address.line1}</span>
-									<span class="text-surface-600-400 text-sm">
+									<span class="small">
 										{address.area}{#if address.landmark} &middot; {address.landmark}{/if}
 									</span>
-									<span class="text-surface-600-400 text-sm">{address.contactName}, {address.contactPhone}</span>
-								</span>
-							</label>
-						</li>
-					{/each}
-				</ul>
-				{#if selectedAddress && !areaOk}
-					<p class="text-error-600-400 text-sm" role="alert">{strings.checkout.areaGone}</p>
-				{:else if selectedAddress && !pinOk}
-					<div class="card preset-tonal-warning flex flex-col items-start gap-2 p-3" role="alert">
-						<p class="text-sm">{strings.checkout.needPin}</p>
-						<button type="button" class="btn preset-filled min-h-11" onclick={() => (pinningAddress = true)}>
-							{strings.checkout.addPin}
-						</button>
-					</div>
-				{/if}
-				<div class="flex flex-wrap gap-2">
-					<button type="button" class="btn preset-tonal min-h-11" onclick={() => (addingAddress = true)}>
-						{strings.checkout.addAddress}
-					</button>
-					<a href={resolve('/account/addresses')} class="btn preset-tonal min-h-11">
-						{strings.checkout.manageAddresses}
-					</a>
-				</div>
-			{:else}
-				{#if addressList.length === 0}
-					<p class="text-surface-600-400 text-sm">{strings.checkout.needAddress}</p>
-				{/if}
-				<AddressForm
-					areas={info.deliveryAreas}
-					{defaultName}
-					{defaultPhone}
-					onsaved={(id) => {
-						chosenAddressId = id;
-						addingAddress = false;
-					}}
-					oncancel={() => (addingAddress = false)}
-				/>
-			{/if}
-		</section>
-
-		<section class="flex flex-col gap-2">
-			<h2 class="h5">{strings.checkout.delivery}</h2>
-			<select class="select min-h-11" bind:value={delivery} aria-label={strings.checkout.delivery}>
-				<option value="asap">{strings.checkout.asap(info.etaMinutes)}</option>
-				{#each slots as slot (slot)}
-					<option value={slot}>{formatSlot(slot, SLOT_MINUTES)}</option>
-				{/each}
-			</select>
-			{#if !slotOk}
-				<p class="text-warning-700-300 text-sm" role="alert">{strings.checkout.slotGone}</p>
-			{/if}
-		</section>
-
-		<section class="flex flex-col gap-2">
-			<h2 class="h5">{strings.checkout.payment}</h2>
-			<label class="card preset-outlined-surface-300-700 flex min-h-11 cursor-pointer items-center gap-3 p-3">
-				<input type="radio" name="payment" class="radio" value="cod" bind:group={payment} />
-				<span>{strings.checkout.cod}</span>
-			</label>
-			<label class="card preset-outlined-surface-300-700 flex min-h-11 cursor-pointer items-start gap-3 p-3">
-				<input type="radio" name="payment" class="radio mt-1" value="upi_on_delivery" bind:group={payment} />
-				<span class="flex flex-col">
-					<span>{strings.checkout.upi}</span>
-					<span class="text-surface-600-400 text-sm">{strings.checkout.upiHint}</span>
-				</span>
-			</label>
-			<label class="card preset-outlined-surface-300-700 flex min-h-11 cursor-pointer items-start gap-3 p-3">
-				<input type="radio" name="payment" class="radio mt-1" value="online" bind:group={payment} />
-				<span class="flex flex-col">
-					<span>{strings.checkout.online}</span>
-					<span class="text-surface-600-400 text-sm">{strings.checkout.onlineHint}</span>
-				</span>
-			</label>
-		</section>
-
-		<label class="label">
-			<span class="label-text">{strings.checkout.note}</span>
-			<textarea
-				class="textarea"
-				rows="2"
-				maxlength="300"
-				placeholder={strings.checkout.notePlaceholder}
-				bind:value={note}
-			></textarea>
-		</label>
-
-		{#if pricing}
-			<CartBill
-				{pricing}
-				freeDeliveryAbovePaise={info.freeDeliveryAbovePaise}
-				minOrderPaise={info.minOrderPaise}
-			/>
-		{/if}
-
-		{#if problem}
-			<div class="card preset-tonal-error flex flex-col gap-2 p-3" role="alert">
-				<p class="font-medium">{problem.message}</p>
-				{#if problem.lines.length > 0}
-					<ul class="list-inside list-disc text-sm">
-						{#each problem.lines as line (line)}
-							<li>{line}</li>
+									<span class="small">{address.contactName}, {address.contactPhone}</span>
+								</Choice>
+							</li>
 						{/each}
 					</ul>
+					{#if selectedAddress && !areaOk}
+						<p class="problem" role="alert">{strings.checkout.areaGone}</p>
+					{:else if selectedAddress && !pinOk}
+						<Notice tone="warn" role="alert">
+							<p>{strings.checkout.needPin}</p>
+							<Button variant="primary" onclick={() => (pinningAddress = true)}>
+								{strings.checkout.addPin}
+							</Button>
+						</Notice>
+					{/if}
+					<div class="row">
+						<Button onclick={() => (addingAddress = true)}>{strings.checkout.addAddress}</Button>
+						<Button href={resolve('/account/addresses')}>{strings.checkout.manageAddresses}</Button>
+					</div>
+				{:else}
+					{#if addressList.length === 0}
+						<p class="muted">{strings.checkout.needAddress}</p>
+					{/if}
+					<AddressForm
+						areas={info.deliveryAreas}
+						{defaultName}
+						{defaultPhone}
+						onsaved={(id) => {
+							chosenAddressId = id;
+							addingAddress = false;
+						}}
+						oncancel={() => (addingAddress = false)}
+					/>
 				{/if}
-				{#if problem.fix === 'cart'}
-					<a href={resolve('/cart')} class="btn preset-filled min-h-11 self-start">
-						{strings.checkout.reviewCart}
-					</a>
-				{/if}
-			</div>
-		{/if}
+			</section>
 
-		<button type="button" class="btn preset-filled min-h-12" disabled={!canPlace} onclick={placeOrder}>
-			{#if submitting}
-				{strings.checkout.placing}
-			{:else if pricing}
-				{strings.checkout.placeOrder(formatPaise(pricing.totalPaise))}
+			<section class="section">
+				<h2 class="heading">{strings.checkout.delivery}</h2>
+				<Field label={strings.checkout.delivery} hideLabel>
+					<select bind:value={delivery}>
+						<option value="asap">{strings.checkout.asap(info.etaMinutes)}</option>
+						{#each slots as slot (slot)}
+							<option value={slot}>{formatSlot(slot, SLOT_MINUTES)}</option>
+						{/each}
+					</select>
+				</Field>
+				{#if !slotOk}
+					<p class="warning" role="alert">{strings.checkout.slotGone}</p>
+				{/if}
+			</section>
+
+			<section class="section">
+				<h2 class="heading">{strings.checkout.payment}</h2>
+				<Choice name="payment" value="cod" checked={payment === 'cod'} onchange={() => (payment = 'cod')}>
+					{strings.checkout.cod}
+				</Choice>
+				<Choice
+					name="payment"
+					value="upi_on_delivery"
+					checked={payment === 'upi_on_delivery'}
+					onchange={() => (payment = 'upi_on_delivery')}
+				>
+					{strings.checkout.upi}
+					<span class="small">{strings.checkout.upiHint}</span>
+				</Choice>
+				<Choice name="payment" value="online" checked={payment === 'online'} onchange={() => (payment = 'online')}>
+					{strings.checkout.online}
+					<span class="small">{strings.checkout.onlineHint}</span>
+				</Choice>
+			</section>
+
+			<Field label={strings.checkout.note}>
+				<textarea rows="2" maxlength="300" placeholder={strings.checkout.notePlaceholder} bind:value={note}></textarea>
+			</Field>
+
+		</div>
+
+		<aside class="summary">
+			{#if pricing}
+				<CartBill
+					{pricing}
+					freeDeliveryAbovePaise={info.freeDeliveryAbovePaise}
+					minOrderPaise={info.minOrderPaise}
+				/>
 			{/if}
-		</button>
-		<a href={resolve('/cart')} class="text-primary-600-400 text-center text-sm">{strings.checkout.backToCart}</a>
-	{/if}
+
+			{#if problem}
+				<Notice tone="bad" role="alert">
+					<p class="strong">{problem.message}</p>
+					{#if problem.lines.length > 0}
+						<ul class="problem-lines">
+							{#each problem.lines as line (line)}
+								<li>{line}</li>
+							{/each}
+						</ul>
+					{/if}
+					{#if problem.fix === 'cart'}
+						<Button href={resolve('/cart')} variant="primary">{strings.checkout.reviewCart}</Button>
+					{/if}
+				</Notice>
+			{/if}
+
+			<Button variant="primary" large block disabled={!canPlace} onclick={placeOrder}>
+				{#if submitting}
+					{strings.checkout.placing}
+				{:else if pricing}
+					{strings.checkout.placeOrder(formatPaise(pricing.totalPaise))}
+				{/if}
+			</Button>
+			<a href={resolve('/cart')} class="back">{strings.checkout.backToCart}</a>
+		</aside>
+		{/if}
+	</div>
 </ShopPage>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	/* A phone: one column. A laptop: the form on the left, the bill and Place order on the right,
+	   which stays in view while the form scrolls */
+	.steps {
+		@apply flex w-full flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,40rem)_22rem] lg:items-start lg:gap-8;
+	}
+	.main,
+	.summary {
+		@apply flex min-w-0 flex-col gap-4;
+	}
+	.summary {
+		@apply lg:sticky lg:top-24;
+	}
+	.section {
+		@apply flex flex-col gap-2;
+	}
+	.heading {
+		@apply text-lg font-extrabold;
+	}
+	.choices {
+		@apply flex flex-col gap-2;
+	}
+	.row {
+		@apply flex flex-wrap gap-2;
+	}
+	.empty {
+		@apply flex flex-col items-start gap-3;
+	}
+	.block {
+		@apply block h-24 w-full;
+	}
+	.muted {
+		@apply text-text-muted;
+	}
+	.small {
+		@apply text-sm text-text-muted;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.warning {
+		@apply text-sm font-semibold text-warning;
+	}
+	.strong {
+		@apply font-bold;
+	}
+	.problem-lines {
+		@apply list-inside list-disc text-sm;
+	}
+	.back {
+		@apply text-center text-sm font-semibold text-primary;
+	}
+</style>

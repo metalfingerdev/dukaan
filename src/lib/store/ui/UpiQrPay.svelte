@@ -6,6 +6,8 @@
 	import { formatPaise, formatTime } from '../format.js';
 	import { createClock } from '../now.svelte.js';
 	import { strings } from '../strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
 
 	type Qr = {
 		status: 'creating' | 'active' | 'paid' | 'failed';
@@ -46,53 +48,79 @@
 	};
 </script>
 
-<section class="card preset-outlined-surface-300-700 flex flex-col items-center gap-3 p-4 text-center">
-	{#if qr?.status === 'paid'}
-		<p class="preset-filled-success-500 w-full rounded p-3 text-xl font-bold" role="status">
-			{text.paid} · {formatPaise(qr.amountPaise)}
-		</p>
-	{:else if qr?.status === 'creating'}
-		<p class="text-surface-600-400" role="status">{text.making}</p>
-	{:else if qr?.status === 'active' && !expired}
-		<p class="font-semibold">{text.scan(formatPaise(qr.amountPaise))}</p>
-		{#if qr.imageUrl}
-			<img
-				src={qr.imageUrl}
-				alt={text.qrLabel(formatPaise(qr.amountPaise))}
-				class="size-64 rounded bg-white object-contain"
-				referrerpolicy="no-referrer"
-			/>
+<Card as="section">
+	<div class="box">
+		{#if qr?.status === 'paid'}
+			<p class="paid" role="status">
+				{text.paid} · {formatPaise(qr.amountPaise)}
+			</p>
+		{:else if qr?.status === 'creating'}
+			<p class="muted" role="status">{text.making}</p>
+		{:else if qr?.status === 'active' && !expired}
+			<p class="scan">{text.scan(formatPaise(qr.amountPaise))}</p>
+			{#if qr.imageUrl}
+				<img
+					src={qr.imageUrl}
+					alt={text.qrLabel(formatPaise(qr.amountPaise))}
+					class="qr"
+					referrerpolicy="no-referrer"
+				/>
+			{/if}
+			<p class="small" role="status">{text.waiting}</p>
+			{#if qr.closeBy}
+				<p class="muted tiny">{text.expires(formatTime(qr.closeBy))}</p>
+			{/if}
+			<Button disabled={busy !== null} onclick={() => run('check', check)}>
+				{busy === 'check' ? text.checking : text.check}
+			</Button>
 		{/if}
-		<p class="text-sm" role="status">{text.waiting}</p>
-		{#if qr.closeBy}
-			<p class="text-surface-600-400 text-xs">{text.expires(formatTime(qr.closeBy))}</p>
-		{/if}
-		<button
-			type="button"
-			class="btn preset-tonal min-h-11"
-			disabled={busy !== null}
-			onclick={() => run('check', check)}
-		>
-			{busy === 'check' ? text.checking : text.check}
-		</button>
-	{/if}
 
-	{#if offerNew}
-		{#if qr?.status === 'failed'}
-			<p class="text-warning-700-300 text-sm" role="alert">{forRider ? text.failedRider : text.failed}</p>
+		{#if offerNew}
+			{#if qr?.status === 'failed'}
+				<p class="warning" role="alert">{forRider ? text.failedRider : text.failed}</p>
+			{/if}
+			<Button variant="primary" large disabled={busy !== null} onclick={() => run('request', request)}>
+				{qr?.status === 'failed' ? text.tryAgain : forRider ? text.showRider : text.show}
+				· {formatPaise(amountPaise)}
+			</Button>
 		{/if}
-		<button
-			type="button"
-			class="btn preset-filled-primary-500 min-h-12"
-			disabled={busy !== null}
-			onclick={() => run('request', request)}
-		>
-			{qr?.status === 'failed' ? text.tryAgain : forRider ? text.showRider : text.show}
-			· {formatPaise(amountPaise)}
-		</button>
-	{/if}
 
-	{#if problem}
-		<p class="text-error-600-400 text-sm" role="alert">{problem}</p>
-	{/if}
-</section>
+		{#if problem}
+			<p class="problem" role="alert">{problem}</p>
+		{/if}
+	</div>
+</Card>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.box {
+		@apply flex flex-col items-center gap-3 text-center;
+	}
+	.paid {
+		--fill: var(--color-success);
+		@apply edge-flat w-full rounded-base bg-success p-3 text-xl font-extrabold text-foreground;
+	}
+	.scan {
+		@apply font-bold;
+	}
+	/* A QR code needs a light background and no tint to scan, whatever the theme */
+	.qr {
+		@apply size-64 rounded-base bg-white object-contain;
+	}
+	.muted {
+		@apply text-text-muted;
+	}
+	.small {
+		@apply text-sm;
+	}
+	.tiny {
+		@apply text-xs;
+	}
+	.warning {
+		@apply text-sm font-semibold text-warning;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+</style>

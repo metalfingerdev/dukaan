@@ -129,7 +129,7 @@
     @apply ml-auto flex shrink-0 items-center gap-3;
   }
   .link {
-    @apply hidden text-sm font-semibold md:inline;
+    @apply text-sm font-semibold;
   }
   .link :global(a) {
     @apply flex items-center gap-1;
