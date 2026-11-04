@@ -17,6 +17,7 @@ import { isOpenStatus, transitionOrder } from '../model/store/orderStatus';
 import { priceCart } from '../model/store/pricing';
 import { isProductVisible, maxQuantityFor } from '../model/store/publicProjection';
 import { isInIndia } from '../model/store/address';
+import { upiQrFor, upiQrView } from './upi';
 import { isValidSlot } from '../model/store/slots';
 import { adjustStock } from '../model/store/stock';
 import { isOpenNow } from '../model/store/time';
@@ -281,6 +282,8 @@ const orderDetail = v.object({
 	invoiceNumber: v.optional(v.string()),
 	// Only while the order is open: the customer reads it out to the delivery partner
 	deliveryCode: v.optional(v.string()),
+	// The Razorpay UPI QR, while the order is out for delivery
+	upiQr: v.optional(upiQrView),
 	items: v.array(
 		v.object({
 			name: v.string(),
@@ -356,6 +359,7 @@ export const getOrder = query({
 			deliveredAt: order.deliveredAt,
 			invoiceNumber: order.invoiceNumber,
 			...(OPEN_FOR_CODE.includes(order.status) ? { deliveryCode: order.deliveryCode } : {}),
+			upiQr: order.status === 'out_for_delivery' ? await upiQrFor(ctx, order._id) : undefined,
 			items: items.map((item) => ({
 				name: item.name,
 				unitLabel: item.unitLabel,

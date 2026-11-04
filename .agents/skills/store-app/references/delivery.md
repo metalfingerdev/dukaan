@@ -73,12 +73,15 @@ minutes), or four digits can be guessed in a few taps.
 A wrong code is returned as a result (`{ ok: false, reason: 'WRONG_CODE' }`), not thrown: a thrown
 error rolls back the rate limiter's counter and the limit would never trip.
 
-The partner also says how they were actually paid (`paidWith`: cash or UPI). Only cash sets
-`cashCollectedPaise` (what they owe the store); UPI is recorded but is not cash to settle.
+**UPI is never the partner's word.** While an order is unpaid, "Delivered" needs the partner to
+confirm they collected the cash (`paidWith: 'cash'`, which sets `cashCollectedPaise`, what they owe
+the store). A customer paying by UPI scans a Razorpay QR fixed to the order total ("Customer paying
+by UPI? Show QR", `store/upi.ts`); only Razorpay's signed webhook, or a status check against
+Razorpay, marks the order paid, and the partner's screen shows "Paid by UPI" live. Claiming UPI on
+an unpaid order is refused (`UPI_NOT_CONFIRMED`).
 
-On success the mutation sets `deliveredAt`, `paymentStatus: 'paid'`, `cashCollectedPaise` (the order
-total for cash; for UPI, still the total, recorded with the method so the admin can reconcile) and
-assigns the invoice number (`admin.md`).
+On success the mutation sets `deliveredAt`, `paymentStatus: 'paid'` and, for cash,
+`cashCollectedPaise`; the invoice number comes with step 6 (`admin.md`).
 
 ## Resilience
 

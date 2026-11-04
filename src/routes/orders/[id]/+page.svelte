@@ -5,6 +5,7 @@
 	import { api } from '#convex/_generated/api.js';
 	import { SLOT_MINUTES, STORE_NAME } from '#convex/model/store/storeProfile.js';
 
+	import UpiQrPay from '#lib/store/ui/UpiQrPay.svelte';
 	import SendLocation from '#lib/store/ui/SendLocation.svelte';
 	import ShopPage from '#lib/store/ui/ShopPage.svelte';
 	import { getCartContext } from '#lib/store/cart.context.js';
@@ -87,6 +88,16 @@
 					{order.status === 'out_for_delivery' ? strings.orders.codeOnTheWay : strings.orders.codeKeep}
 				</p>
 			</section>
+		{/if}
+
+		{#if order.status === 'out_for_delivery' && (order.paymentStatus === 'pending' || order.upiQr?.status === 'paid')}
+			<UpiQrPay
+				qr={order.upiQr}
+				amountPaise={order.totalPaise}
+				forRider={false}
+				request={() => client.mutation(api.store.upi.requestQrAsCustomer, { orderId: order._id })}
+				check={() => client.mutation(api.store.upi.checkPaymentAsCustomer, { orderId: order._id })}
+			/>
 		{/if}
 
 		{#if order.status === 'out_for_delivery' || order.status === 'delivery_failed' || order.status === 'packed'}

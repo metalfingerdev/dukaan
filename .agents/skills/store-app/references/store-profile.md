@@ -68,11 +68,11 @@ When the user dictates values, update this table first, then the code constants 
   the key with a daily API quota (a budget alert only emails). The founder is creating the key.
   **No live rider tracking** until there is a rider app that can report location in the background
   (a web page stops reporting when the screen locks).
-- **Payment today**: cash on delivery or UPI on delivery. The rider carries the store's printed UPI
-  QR, as the store already works, and records on delivery whether he was paid in cash or by UPI.
-  **Payment gateway: Razorpay**, chosen 2026-11-04 and **parked** until the founder is ready. When
-  it is built, UPI must be confirmed by the gateway (a per-order QR plus a signed webhook), never by
-  the owner reading the bank statement; that manual design was tried and rejected.
+- **Payment**: cash on delivery or UPI on delivery. **UPI goes through Razorpay** (chosen
+  2026-11-04): a single-use QR fixed to the order total, confirmed only by Razorpay's signed webhook
+  or a status check against Razorpay, never by the rider's word or by the owner reading the bank
+  statement (that manual design was tried and rejected). Until Razorpay enables QR Codes on the
+  account, the rider can only mark cash.
 - **Tests**: very few, and only tests that fail when behaviour breaks: security refusals, money and
   stock correctness, real invariants. No tests that restate a table, a string or static data.
   Pages are checked by the Playwright suite in `tests/e2e`, run locally against the dev deployment
@@ -168,17 +168,22 @@ those come first. Ordered by what unblocks what.
    reason. A failed delivery lands in a "Needs you" section on the admin board (Pack again or
    Cancel). The header shows a "Deliveries" link to partners. *Needs:* a partner signed in on a real
    phone to try it end to end.
-5. **UPI on delivery** (built as far as the store works today: the rider uses the store's printed
-   QR and records `paidWith` cash or UPI on delivery; only cash counts toward `cashCollectedPaise`).
-   **Gateway-confirmed UPI is parked** with step 7 and will use Razorpay: when an unpaid order goes
-   out, the server creates a single-use, fixed-amount UPI QR for it; the gateway's signed webhook
-   (`qr_code.credited`) marks it paid and the rider's screen shows "Paid" live; a status-check call
-   covers a late webhook. Razorpay's UPI QR has to be enabled on the account by their support.
-   *Needs:* Razorpay test keys (set with `npx convex env set`), then KYC for live.
+5. **UPI on delivery** (**built**, waiting on Razorpay to enable QR Codes). When an unpaid order is
+   out for delivery, the rider ("Customer paying by UPI? Show QR") or the customer (on their order
+   page) asks for a QR; `store/upi.ts` creates a single-use Razorpay `upi_qr` fixed to the order
+   total (`upiQrs` table, one payable QR per order, closes after 115 minutes, a new one after
+   that). Razorpay's webhook (`/razorpay-webhook` in `http.ts`, HMAC-checked) or "Check payment"
+   (asks Razorpay) records the payment; the order turns paid on both screens live. The rider can no
+   longer claim UPI (`UPI_NOT_CONFIRMED`); only cash is cash to settle.
+   `npx convex run store/upi:checkRazorpaySetup` tells whether the account can make QRs (test keys).
+   *Needs:* Razorpay support to enable QR Codes (on 2026-11-04 the test keys worked but QR creation
+   returned "The requested URL was not found"); the webhook (URL below) and
+   `RAZORPAY_WEBHOOK_SECRET`; KYC and live keys for real payments. Refunds (a UPI-paid order that
+   fails or is cancelled) are not built: refund from the Razorpay dashboard for now.
 6. **Invoices** (`admin.md`). Numbered only when an order is delivered, immutable, printable.
    *Needs:* a decision with the founder's accountant on GST (registered? GSTIN? composition
    scheme?), the legal name and address. Don't assert tax rules in code or copy.
-7. **Online payments through a payment gateway** (Razorpay, parked). Customers pay before delivery. A separate plan
+7. **Online payments through a payment gateway** (Razorpay; reuses the keys, webhook and `recordPayment` path from step 5). Customers pay before delivery. A separate plan
    is needed before building. Prerequisites the founder must arrange: a gateway merchant account
    with business KYC (Razorpay, Cashfree, PhonePe PG and similar are the usual choices; compare
    current fees and settlement times yourself, none are verified here), test and live API keys,

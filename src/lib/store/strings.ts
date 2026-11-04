@@ -220,6 +220,22 @@ export const strings = {
 			cancelled: 'Cancelled'
 		}
 	},
+	upiQr: {
+		show: 'Pay by UPI: show QR',
+		showRider: 'Customer paying by UPI? Show QR',
+		making: 'Making the QR...',
+		scan: (amount: string) => `Scan with any UPI app to pay ${amount}`,
+		qrLabel: (amount: string) => `UPI QR code for ${amount}`,
+		waiting: 'Waiting for the payment. This updates by itself.',
+		expires: (time: string) => `Works until ${time}`,
+		check: 'Check payment',
+		checking: 'Checking...',
+		paid: 'Paid by UPI',
+		failed: "UPI QR isn't available right now.",
+		failedRider: "UPI QR isn't available right now. Collect cash, or try again.",
+		tryAgain: 'Try again',
+		notPayable: 'This order can no longer be paid here.'
+	},
 	delivery: {
 		title: 'Deliveries',
 		accessDenied: 'Access denied',
@@ -262,14 +278,13 @@ export const strings = {
 		deliveredTitle: 'Mark delivered',
 		codeLabel: "Customer's 4-digit code",
 		codeHint: 'Ask the customer to read out the code from their order page.',
-		howPaid: 'How were you paid?',
-		paidCash: 'Cash',
-		paidUpi: 'UPI',
+		collectedCash: (amount: string) => `I collected ${amount} in cash`,
+		upiNotConfirmed: 'That UPI payment is not confirmed yet. Wait for "Paid by UPI", or collect cash.',
 		confirmDelivered: 'Mark delivered',
 		confirming: 'Checking…',
 		wrongCode: 'That code is not right. Check with the customer.',
 		tooManyAttempts: 'Too many wrong codes. Wait a few minutes and try again.',
-		paymentRequired: 'Choose how you were paid.',
+		paymentRequired: 'Confirm you collected the cash.',
 		failedTitle: "Couldn't deliver this order?",
 		failedHint: 'Pick the reason. The store sees it and decides what happens next.',
 		reasons: {

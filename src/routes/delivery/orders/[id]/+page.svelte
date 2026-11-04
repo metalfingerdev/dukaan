@@ -9,6 +9,7 @@
 	import { api } from '#convex/_generated/api.js';
 
 	import DeliveredDialog from '#lib/store/delivery/DeliveredDialog.svelte';
+	import UpiQrPay from '#lib/store/ui/UpiQrPay.svelte';
 	import PinPreview from '#lib/store/delivery/PinPreview.svelte';
 	import FailedDialog from '#lib/store/delivery/FailedDialog.svelte';
 	import { directionsUrl } from '#lib/store/directions.js';
@@ -40,6 +41,7 @@
 			const code = errorCode(error);
 			if (code === 'INVALID_TRANSITION' || code === 'ORDER_NOT_FOUND') toast.info(text.moved);
 			else if (code === 'PAYMENT_REQUIRED') codeError = text.paymentRequired;
+			else if (code === 'UPI_NOT_CONFIRMED') codeError = text.upiNotConfirmed;
 			else toast.error(text.failed);
 			dialog = null;
 			return undefined;
@@ -50,7 +52,7 @@
 
 	const pickUp = () => act(() => client.mutation(api.store.delivery.pickUp, { orderId }));
 
-	const deliver = async (code: string, paidWith: 'cash' | 'upi' | undefined) => {
+	const deliver = async (code: string, paidWith: 'cash' | undefined) => {
 		codeError = '';
 		const outcome = await act(() => client.mutation(api.store.delivery.markDelivered, { orderId, code, paidWith }));
 		if (!outcome) return;
@@ -100,6 +102,16 @@
 
 	{#if run.status === 'packed' || run.status === 'out_for_delivery'}
 		<p class="card preset-filled-primary-500 p-4 text-2xl font-bold">{collectLabel(run)}</p>
+	{/if}
+
+	{#if run.status === 'out_for_delivery' && (run.collectPaise > 0 || run.upiQr?.status === 'paid')}
+		<UpiQrPay
+			qr={run.upiQr}
+			amountPaise={run.totalPaise}
+			forRider={true}
+			request={() => client.mutation(api.store.upi.requestQrAsPartner, { orderId })}
+			check={() => client.mutation(api.store.upi.checkPaymentAsPartner, { orderId })}
+		/>
 	{/if}
 
 	{#if run.customer}
@@ -207,7 +219,6 @@
 	<DeliveredDialog
 		open={dialog === 'delivered'}
 		collectPaise={run.collectPaise}
-		method={run.paymentMethod}
 		{busy}
 		error={codeError}
 		onconfirm={deliver}

@@ -52,6 +52,8 @@ and builds.
    | `RESEND_API_KEY`, `EMAIL_SEND_FROM` | see [07 – Email verification](./07-email-verification.md) |
    | `OTP_CHANNELS`, `TEXTBEE_API_KEY` | see [06 – Phone sign-in](./06-phone-otp.md). Use `textbee` once anyone besides you tests |
    | `ADMIN_USER_IDS` | your user id (after your first sign-in on staging) |
+   | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Razorpay API keys (test keys on dev and staging). The secret never goes in the repo, chat or `.env.local` |
+   | `RAZORPAY_WEBHOOK_SECRET` | the secret you type when creating the webhook in Razorpay: URL `https://<deployment>.convex.site/razorpay-webhook`, event `qr_code.credited` |
 
    `OTP_ALLOW_CONSOLE` is acceptable on staging only while you're the sole tester, since codes go to
    logs only you can read. Never set it on real production.

@@ -165,6 +165,22 @@ deliveryPartners: defineTable({
 	isActive: v.boolean()
 }).index('by_phoneNumber', ['phoneNumber']),
 
+// One row per Razorpay UPI QR made for an order (store/upi.ts). Single use, fixed to the order
+// total; only the gateway's signed webhook or a status check marks it paid.
+upiQrs: defineTable({
+	orderId: v.id('orders'),
+	amountPaise: v.number(),
+	status: v.union(v.literal('creating'), v.literal('active'), v.literal('paid'), v.literal('failed')),
+	qrId: v.optional(v.string()),
+	imageUrl: v.optional(v.string()),
+	closeBy: v.optional(v.number()),
+	paymentId: v.optional(v.string()),
+	paidAt: v.optional(v.number()),
+	error: v.optional(v.string())
+})
+	.index('by_orderId', ['orderId'])
+	.index('by_qrId', ['qrId']),
+
 // Exactly one document. Read it with a plain `.first()`.
 storeSettings: defineTable({
 	storeName: v.string(),
