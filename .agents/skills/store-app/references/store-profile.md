@@ -93,9 +93,12 @@ store phone, UPI id), `/admin/users` (the user dashboard, moved from `/admin`),
 add, edit, photo; opening stock only on creation). A hidden category hides its products from
 customers everywhere (`isProductVisible` in `model/store/publicProjection.ts`), and `placeOrder`
 treats such a line as unavailable. Products and categories are hidden, never deleted. Category
-photos are not built.
+photos are not built. On `/admin/products` each row has a Stock panel (Received, Damaged, a shelf
+count and the last 20 changes) and the list has Low stock / Out of stock filters; every change goes
+through `adjustStock` (`store/admin/stock.ts`). A count sets stock to *count minus what placed and
+accepted orders hold* (`heldByOpenOrders`) and is refused if the stock moved since it was shown.
 
-**Not built**: the stock screen (after creation, stock changes only through orders), the order board and anything for the
+**Not built**: CSV import and export, the order board and anything for the
 delivery partner, so **an order stays at "Order placed" forever**; payments beyond cash; invoices;
 the designed UI.
 
@@ -107,9 +110,8 @@ those come first. Ordered by what unblocks what.
 1. **Admin: catalogue, stock and settings** (`admin.md`). Product, category and stock screens
    (stock through `adjustStock` only), and a settings page that replaces the placeholders: hours,
    fees, delivery areas, store phone, UPI id (**built**; `store/seed:setDeliveryAreas` is gone).
-   The user dashboard moved from `/admin` to `/admin/users` (**built**). Still to come, one PR
-   each: the stock screen (received, counted, damaged,
-   history); CSV export and import with the stock modes above. *Needs from the founder:* real products with
+   The user dashboard moved from `/admin` to `/admin/users` (**built**). Categories, products with photos and the
+   stock panel are **built**. Still to come: CSV export and import with the stock modes above. *Needs from the founder:* real products with
    prices and stock, real hours and fees, the real delivery areas, the store phone number.
 2. **Admin: the live order board**. Columns by status, one-tap Accept, Reject (with a reason), Mark
    packed, Assign partner; new-order alert; all moves through `transitionOrder`. Orders finally move.

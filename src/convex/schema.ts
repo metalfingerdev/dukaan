@@ -67,6 +67,7 @@ const schema = defineSchema({
 		.index('by_slug', ['slug'])
 		.index('by_categoryId_and_isActive', ['categoryId', 'isActive'])
 		.index('by_isFeatured_and_isActive', ['isFeatured', 'isActive'])
+		.index('by_stock', ['stock'])
 		.searchIndex('search_name', { searchField: 'name', filterFields: ['isActive', 'categoryId'] }),
 
 	// A signed-in customer's cart; guests keep theirs in localStorage
