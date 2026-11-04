@@ -19,7 +19,8 @@ http.route({
 
 /**
  * Razorpay's webhook. Anyone can POST here, so the body is trusted only after its HMAC signature
- * checks out. A captured payment to one of our UPI QRs marks the order paid (store/upi.ts).
+ * checks out. A captured payment to one of our UPI QRs (store/upi.ts) or Razorpay orders
+ * (store/payments.ts) marks the order paid; refund events update the order's refund.
  * Answers 200 to every verified event, including ones we don't use, so Razorpay stops resending.
  */
 http.route({
@@ -43,23 +44,35 @@ http.route({
 		const { event: name, payload } = (event ?? {}) as {
 			event?: unknown;
 			payload?: {
-				payment?: { entity?: { id?: unknown; amount?: unknown; status?: unknown } };
+				payment?: { entity?: { id?: unknown; amount?: unknown; status?: unknown; order_id?: unknown } };
 				qr_code?: { entity?: { id?: unknown } };
+				refund?: { entity?: { id?: unknown; status?: unknown } };
 			};
 		};
 		const payment = payload?.payment?.entity;
+		const captured =
+			typeof payment?.id === 'string' && typeof payment.amount === 'number' && payment.status === 'captured'
+				? { paymentId: payment.id, amountPaise: payment.amount }
+				: null;
+
+		// UPI QR at the door (store/upi.ts)
 		const qrId = payload?.qr_code?.entity?.id;
-		if (
-			name === 'qr_code.credited' &&
-			typeof qrId === 'string' &&
-			typeof payment?.id === 'string' &&
-			typeof payment.amount === 'number' &&
-			payment.status === 'captured'
-		) {
-			await ctx.runMutation(internal.store.upi.recordPayment, {
-				qrId,
-				paymentId: payment.id,
-				amountPaise: payment.amount
+		if (name === 'qr_code.credited' && captured && typeof qrId === 'string') {
+			await ctx.runMutation(internal.store.upi.recordPayment, { qrId, ...captured });
+		}
+		// Paid online at checkout (store/payments.ts). Both events may arrive; the second changes nothing.
+		if ((name === 'payment.captured' || name === 'order.paid') && captured && typeof payment?.order_id === 'string') {
+			await ctx.runMutation(internal.store.payments.recordOnlinePayment, {
+				razorpayOrderId: payment.order_id,
+				...captured
+			});
+		}
+		// A refund we asked for has finished
+		const refund = payload?.refund?.entity;
+		if ((name === 'refund.processed' || name === 'refund.failed') && typeof refund?.id === 'string') {
+			await ctx.runMutation(internal.store.payments.recordRefundEvent, {
+				refundId: refund.id,
+				status: name === 'refund.processed' ? 'processed' : 'failed'
 			});
 		}
 		return new Response(null, { status: 200 });

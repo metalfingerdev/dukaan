@@ -29,6 +29,7 @@
 		{ href: '/admin/categories', label: strings.admin.nav.categories },
 		{ href: '/admin/delivery', label: strings.admin.nav.delivery },
 		{ href: '/admin/orders', label: strings.admin.nav.pastOrders },
+		{ href: '/admin/payments', label: strings.admin.nav.payments },
 		{ href: '/admin/settings', label: strings.admin.nav.settings },
 		{ href: '/admin/users', label: strings.admin.nav.users }
 	] as const;

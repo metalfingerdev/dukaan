@@ -18,6 +18,7 @@ import { priceCart } from '../model/store/pricing';
 import { isProductVisible, maxQuantityFor } from '../model/store/publicProjection';
 import { isInIndia } from '../model/store/address';
 import { invoiceFor } from '../model/store/invoice';
+import { beginOnlinePayment, onlinePaymentFor, onlinePaymentView } from './payments';
 import { upiQrFor, upiQrView } from './upi';
 import { isValidSlot } from '../model/store/slots';
 import { adjustStock } from '../model/store/stock';
@@ -161,12 +162,14 @@ export const placeOrder = mutation({
 			throw new ConvexError({ code: 'BELOW_MINIMUM', minOrderPaise: settings.minOrderPaise });
 		}
 
+		const online = args.paymentMethod === 'online';
 		const orderNumber = await nextCounterValue(ctx, 'order');
 		const orderId = await ctx.db.insert('orders', {
 			orderNumber,
 			userId,
 			idempotencyKey: args.idempotencyKey,
-			status: 'placed',
+			// Paying online: off the board until Razorpay confirms the payment
+			status: online ? 'awaiting_payment' : 'placed',
 			paymentMethod: args.paymentMethod,
 			paymentStatus: 'pending',
 			subtotalPaise: pricing.subtotalPaise,
@@ -215,10 +218,12 @@ export const placeOrder = mutation({
 
 		await ctx.db.insert('orderEvents', {
 			orderId,
-			status: 'placed',
+			status: online ? 'awaiting_payment' : 'placed',
 			actorKind: 'customer',
 			actorId: userId
 		});
+		// The stock is held from now; if the payment doesn't come in time the order is cancelled
+		if (online) await beginOnlinePayment(ctx, orderId, pricing.totalPaise);
 
 		for (const cartLine of cartLines) await ctx.db.delete(cartLine._id);
 
@@ -227,8 +232,8 @@ export const placeOrder = mutation({
 });
 
 /**
- * The customer cancels their own order, which they may do only while it is still `placed`. Stock
- * goes back on the shelf. Cancelling twice is harmless: the second call changes nothing.
+ * The customer cancels their own order, which they may do only while it is still `placed` (or
+ * waiting for its online payment). Stock goes back on the shelf, and money paid online is refunded. Cancelling twice is harmless: the second call changes nothing.
  */
 export const cancelOrder = mutation({
 	args: { orderId: v.string() },
@@ -241,7 +246,7 @@ export const cancelOrder = mutation({
 		if (!order || order.userId !== user._id) throw new ConvexError({ code: 'ORDER_NOT_FOUND' });
 
 		if (order.status === 'cancelled') return { status: 'cancelled' as const };
-		if (order.status !== 'placed') {
+		if (order.status !== 'placed' && order.status !== 'awaiting_payment') {
 			throw new ConvexError({ code: 'CANNOT_CANCEL', status: order.status });
 		}
 		await transitionOrder(ctx, {
@@ -285,6 +290,10 @@ const orderDetail = v.object({
 	deliveryCode: v.optional(v.string()),
 	// The Razorpay UPI QR, while the order is out for delivery
 	upiQr: v.optional(upiQrView),
+	// Paying online: what the page needs to open Razorpay Checkout
+	onlinePayment: v.optional(onlinePaymentView),
+	// Money going back for a cancelled order paid through Razorpay
+	refundStatus: v.optional(v.union(v.literal('requesting'), v.literal('pending'), v.literal('processed'), v.literal('failed'))),
 	items: v.array(
 		v.object({
 			name: v.string(),
@@ -361,6 +370,8 @@ export const getOrder = query({
 			invoiceNumber: order.invoiceNumber,
 			...(OPEN_FOR_CODE.includes(order.status) ? { deliveryCode: order.deliveryCode } : {}),
 			upiQr: order.status === 'out_for_delivery' ? await upiQrFor(ctx, order._id) : undefined,
+			onlinePayment: await onlinePaymentFor(ctx, order),
+			refundStatus: order.refund?.status,
 			items: items.map((item) => ({
 				name: item.name,
 				unitLabel: item.unitLabel,

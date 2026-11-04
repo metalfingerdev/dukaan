@@ -4,9 +4,11 @@ import {
 	deliveryAddress,
 	invoiceSeller,
 	orderActorKind,
+	paidWith,
 	orderStatus,
 	paymentMethod,
 	paymentStatus,
+	refundState,
 	stockAdjustmentReason
 } from './store/validators';
 
@@ -107,7 +109,8 @@ const schema = defineSchema({
 		invoiceNumber: v.optional(v.string()), // given on delivery (model/store/invoice.ts)
 		invoiceIssuedAt: v.optional(v.number()),
 		invoiceSeller: v.optional(invoiceSeller), // the seller's details when it was issued; never rewritten
-		paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi'))), // how the partner was actually paid
+		paidWith: v.optional(paidWith), // how it was actually paid
+		refund: v.optional(refundState), // a cancelled order paid through Razorpay gets its money back
 		cashCollectedPaise: v.optional(v.number()), // set only when paid in cash
 		cashSettledAt: v.optional(v.number()) // the admin received this cash from the partner
 	})
@@ -115,7 +118,8 @@ const schema = defineSchema({
 		.index('by_userId_and_idempotencyKey', ['userId', 'idempotencyKey'])
 		.index('by_orderNumber', ['orderNumber'])
 		.index('by_status', ['status'])
-		.index('by_assignedPartnerId_and_status', ['assignedPartnerId', 'status']),
+		.index('by_assignedPartnerId_and_status', ['assignedPartnerId', 'status'])
+		.index('by_refundId', ['refund.refundId']),
 
 	orderItems: defineTable({
 		orderId: v.id('orders'),
@@ -155,6 +159,22 @@ const schema = defineSchema({
 		isActive: v.boolean()
 	}).index('by_phoneNumber', ['phoneNumber']),
 
+	// One row per Razorpay order made to take an online payment for one of our orders. The customer
+	// pays in Razorpay Checkout; only Razorpay's signed webhook or a status check against Razorpay
+	// marks it paid, never the browser's word.
+	onlinePayments: defineTable({
+		orderId: v.id('orders'),
+		amountPaise: v.number(),
+		status: v.union(v.literal('creating'), v.literal('created'), v.literal('paid'), v.literal('failed')),
+		razorpayOrderId: v.optional(v.string()), // order_...
+		paymentId: v.optional(v.string()), // pay_...
+		paidAt: v.optional(v.number()),
+		error: v.optional(v.string())
+	})
+		.index('by_orderId', ['orderId'])
+		.index('by_razorpayOrderId', ['razorpayOrderId'])
+		.index('by_status', ['status']),
+
 	// One row per UPI QR made for an order through Razorpay. Single use and fixed to the order total,
 	// so it can be paid once, for exactly that amount. Only the gateway's signed webhook (or a
 	// status check against the gateway) marks it paid; nobody's word does.
@@ -170,7 +190,8 @@ const schema = defineSchema({
 		error: v.optional(v.string()) // what Razorpay said when it refused, for the admin
 	})
 		.index('by_orderId', ['orderId'])
-		.index('by_qrId', ['qrId']),
+		.index('by_qrId', ['qrId'])
+		.index('by_status', ['status']),
 
 	// Exactly one document
 	storeSettings: defineTable({

@@ -12,8 +12,8 @@ describe('order state machine', () => {
 		expect(canTransition('cancelled', 'placed')).toBe(false);
 	});
 
-	it('has no way into "placed": only placeOrder creates one', () => {
-		for (const from of all) expect(canTransition(from, 'placed'), from).toBe(false);
+	it('has one way into "placed": a confirmed online payment (placeOrder creates the rest)', () => {
+		for (const from of all) expect(canTransition(from, 'placed'), from).toBe(from === 'awaiting_payment');
 	});
 
 });

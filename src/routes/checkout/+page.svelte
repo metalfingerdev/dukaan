@@ -52,7 +52,7 @@
 	// An address saved before pins were required is opened here to add one
 	let pinningAddress = $state(false);
 	let delivery = $state<'asap' | number>('asap');
-	let payment = $state<'cod' | 'upi_on_delivery'>('cod');
+	let payment = $state<'cod' | 'upi_on_delivery' | 'online'>('cod');
 	let note = $state('');
 	let submitting = $state(false);
 	let placed = $state(false);
@@ -227,6 +227,13 @@
 				<span class="flex flex-col">
 					<span>{strings.checkout.upi}</span>
 					<span class="text-surface-600-400 text-sm">{strings.checkout.upiHint}</span>
+				</span>
+			</label>
+			<label class="card preset-outlined-surface-300-700 flex min-h-11 cursor-pointer items-start gap-3 p-3">
+				<input type="radio" name="payment" class="radio mt-1" value="online" bind:group={payment} />
+				<span class="flex flex-col">
+					<span>{strings.checkout.online}</span>
+					<span class="text-surface-600-400 text-sm">{strings.checkout.onlineHint}</span>
 				</span>
 			</label>
 		</section>
