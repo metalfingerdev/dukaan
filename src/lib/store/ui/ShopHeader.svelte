@@ -31,19 +31,16 @@
   const cart = getCartContext();
 </script>
 
-<!-- Storefront header: brand and delivery time, the search bar, then account and cart. One row
-  on a laptop; on a phone the search bar drops to its own full-width row. The cart button shows
-  from md up; on a phone the bottom cart bar does that job. -->
-<header class="header">
-  <div class="inner">
-    <div class="brand">
-      <a href={resolve("/")} class="wordmark">{STORE_NAME}</a>
-      <StoreStatus />
-    </div>
+<!-- Two halves. The top (brand, delivery time, account) scrolls away with the page; the bar
+  under it (search and cart) sticks to the top of the screen. They are siblings in the layout's
+  page column, not wrapped in one element, because a sticky element only sticks inside its
+  parent. The cart button shows from md up; on a phone the bottom cart bar does that job. -->
+<div class="top print:hidden">
+  <div class="inner top-inner">
+    <a href={resolve("/")} class="wordmark">{STORE_NAME}</a>
+    <div class="status"><StoreStatus /></div>
 
-    <div class="search"><SearchBox /></div>
-
-    <nav class="actions">
+    <nav class="account">
       {#if PUBLIC_APP_ENV === "staging"}
         <span class="staging" title="This is the staging site, not the real store">
           Staging
@@ -52,7 +49,7 @@
       {#if auth.isAuthenticated}
         <a href={resolve("/orders")} class="link">{strings.header.orders}</a>
         <!-- Render only for admins / delivery partners; their routes and functions check access -->
-        <span class="link"><AdminButton /></span>
+        <span class="link"><AdminButton class="" /></span>
         <span class="link"><DeliveryLink /></span>
       {/if}
       {#if AUTH_CONSTANTS.organizations}
@@ -63,49 +60,55 @@
           <Button onclick={open}>{strings.header.signIn}</Button>
         {/snippet}
       </UserButton>
-      <a href={resolve("/cart")} class="cart">
-        <ShoppingCartIcon class="size-5" aria-hidden="true" />
-        {#if cart.count > 0}
-          <span class="cart-text">
-            <span>{strings.cart.items(cart.count)}</span>
-            {#if cart.pricing}
-              <span>{formatPaise(cart.pricing.subtotalPaise)}</span>
-            {/if}
-          </span>
-        {:else}
-          <span>{strings.header.myCart}</span>
-        {/if}
-      </a>
     </nav>
   </div>
-</header>
+</div>
+
+<div class="bar print:hidden">
+  <div class="inner bar-inner">
+    <div class="search"><SearchBox /></div>
+    <a href={resolve("/cart")} class="cart">
+      <ShoppingCartIcon class="size-5" aria-hidden="true" />
+      {#if cart.count > 0}
+        <span class="cart-text">
+          <span>{strings.cart.items(cart.count)}</span>
+          {#if cart.pricing}
+            <span>{formatPaise(cart.pricing.subtotalPaise)}</span>
+          {/if}
+        </span>
+      {:else}
+        <span>{strings.header.myCart}</span>
+      {/if}
+    </a>
+  </div>
+</div>
 
 <style lang="postcss">
   @reference 'src/app.css';
 
-  .header {
-    @apply sticky top-0 z-20 bg-foreground print:hidden;
-    border-bottom: 2px solid
-      color-mix(in oklch, var(--color-foreground), black 30%);
-  }
+  /* Same width as the page (ShopPage) so the edges line up */
   .inner {
-    @apply mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2 sm:px-4 md:flex-nowrap md:py-3;
+    @apply mx-auto flex w-full max-w-screen-2xl items-center gap-3 px-3 sm:px-4 lg:px-8;
   }
-  .brand {
-    @apply flex min-w-0 flex-col md:flex-row md:items-center md:gap-4;
+
+  .top {
+    @apply bg-foreground;
+  }
+  .top-inner {
+    @apply min-h-14 flex-wrap gap-y-1 py-2;
   }
   .wordmark {
-    @apply text-xl leading-tight font-extrabold tracking-tight text-primary sm:text-2xl;
+    @apply shrink-0 text-xl leading-tight font-extrabold tracking-tight text-primary sm:text-2xl;
   }
-  /* A phone: its own full-width row under the brand. A laptop: the middle of the bar */
-  .search {
-    @apply order-last basis-full md:order-none md:max-w-2xl md:flex-1 md:basis-auto;
+  /* A phone: its own line under the brand. Wider: between the brand and the account links */
+  .status {
+    @apply order-last min-w-0 basis-full sm:order-none sm:basis-auto;
   }
-  .actions {
+  .account {
     @apply ml-auto flex shrink-0 items-center gap-3;
   }
   .link {
-    @apply hidden text-sm font-semibold sm:inline;
+    @apply hidden text-sm font-semibold md:inline;
   }
   .link :global(a) {
     @apply flex items-center gap-1;
@@ -114,9 +117,21 @@
     --fill: var(--color-secondary);
     @apply edge-flat rounded-full bg-secondary px-2 text-xs font-bold text-on-secondary uppercase;
   }
+
+  .bar {
+    @apply sticky top-0 z-20 bg-foreground;
+    border-bottom: 2px solid
+      color-mix(in oklch, var(--color-foreground), black 30%);
+  }
+  .bar-inner {
+    @apply pt-1 pb-2;
+  }
+  .search {
+    @apply min-w-0 flex-1 lg:max-w-3xl;
+  }
   .cart {
     --fill: var(--color-primary);
-    @apply edge edge-press hidden min-h-11 items-center gap-2 rounded-base bg-primary px-3 font-bold text-foreground md:flex;
+    @apply edge edge-press ml-auto hidden min-h-11 shrink-0 items-center gap-2 rounded-base bg-primary px-3 font-bold text-foreground md:flex;
   }
   .cart-text {
     @apply flex flex-col text-xs leading-tight;

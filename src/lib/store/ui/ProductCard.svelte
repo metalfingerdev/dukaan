@@ -37,6 +37,12 @@
               loading="lazy"
             />
           {/if}
+          <!-- On the photo, not in the price row, so the price row never wraps -->
+          {#if off !== null}
+            <span class="off">
+              <Pill tone="warn">{strings.product.percentOff(off)}</Pill>
+            </span>
+          {/if}
         </div>
         <h3 class="name">{product.name}</h3>
         <p class="unit">{product.unitLabel}</p>
@@ -44,14 +50,16 @@
           <b>{formatPaise(product.pricePaise)}</b>
           {#if off !== null}
             <s class="mrp">{formatPaise(product.mrpPaise)}</s>
-            <Pill tone="warn">{strings.product.percentOff(off)}</Pill>
           {/if}
         </p>
-        {#if !product.inStock}
-          <p class="out">{strings.product.outOfStock}</p>
-        {:else if product.lowStock && product.stockLeft !== undefined}
-          <p class="low">{strings.product.onlyLeft(product.stockLeft)}</p>
-        {/if}
+        <!-- Always present, empty when there is nothing to say, so every card lines up -->
+        <p class="stock">
+          {#if !product.inStock}
+            <span class="out">{strings.product.outOfStock}</span>
+          {:else if product.lowStock && product.stockLeft !== undefined}
+            <span class="low">{strings.product.onlyLeft(product.stockLeft)}</span>
+          {/if}
+        </p>
       </a>
       <AddToCart {product} />
     </div>
@@ -64,6 +72,7 @@
         <h3 class="name"><span class="bone">Product name</span></h3>
         <p class="unit"><span class="bone">500 g</span></p>
         <p class="price"><b class="bone">₹000</b></p>
+        <p class="stock"></p>
       </div>
       <span class="button bone"></span>
     </div>
@@ -81,7 +90,10 @@
   }
   .photo {
     --fill: var(--color-background);
-    @apply edge-flat aspect-square w-full overflow-hidden rounded-base bg-background;
+    @apply edge-flat relative aspect-square w-full overflow-hidden rounded-base bg-background;
+  }
+  .off {
+    @apply absolute top-1.5 left-1.5;
   }
   .photo img {
     @apply size-full object-cover;
@@ -93,16 +105,19 @@
     @apply text-sm text-text-muted;
   }
   .price {
-    @apply flex flex-wrap items-baseline gap-x-2 text-lg;
+    @apply flex items-baseline gap-x-2 text-lg whitespace-nowrap;
   }
   .mrp {
     @apply text-sm text-text-muted;
   }
+  .stock {
+    @apply min-h-[1lh] text-sm font-semibold;
+  }
   .out {
-    @apply text-sm font-semibold text-danger;
+    @apply text-danger;
   }
   .low {
-    @apply text-sm font-semibold text-warning;
+    @apply text-warning;
   }
   /* Same height as the Add button */
   .button {

@@ -31,7 +31,7 @@
   @reference 'src/app.css';
 
   .page {
-    @apply mx-auto flex w-full max-w-6xl flex-col gap-4 p-3 sm:p-4;
+    @apply mx-auto flex w-full max-w-screen-2xl flex-col gap-4 p-3 sm:p-4 lg:px-8;
   }
   /* Room for the bottom cart bar, which only phones get */
   .with-bar {

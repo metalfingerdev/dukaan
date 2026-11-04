@@ -59,9 +59,16 @@
 <style lang="postcss">
   @reference 'src/app.css';
 
-  /* Picture on top, name under it: four across on a phone, eight on a laptop */
+  /* Picture on top, name under it. Fluid: four across on a phone, ten or more on a wide screen */
   .tiles {
-    @apply grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8;
+    --tile-min: 5rem;
+    @apply grid gap-2 sm:gap-3;
+    grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  }
+  @media (min-width: 768px) {
+    .tiles {
+      --tile-min: 6.5rem;
+    }
   }
   .tiles :global(.card) {
     @apply h-full p-2;

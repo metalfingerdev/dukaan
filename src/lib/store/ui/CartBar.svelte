@@ -25,6 +25,6 @@
 
   .bar {
     --fill: var(--color-primary);
-    @apply edge edge-press fixed inset-x-3 bottom-3 z-10 mx-auto flex min-h-14 max-w-6xl items-center justify-between rounded-container bg-primary px-4 py-2 font-bold text-foreground md:hidden;
+    @apply edge edge-press fixed inset-x-3 bottom-3 z-10 mx-auto flex min-h-14 max-w-screen-2xl items-center justify-between rounded-container bg-primary px-4 py-2 font-bold text-foreground md:hidden;
   }
 </style>
