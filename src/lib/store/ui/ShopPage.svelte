@@ -2,8 +2,7 @@
   import type { Snippet } from "svelte";
 
   import { getCartContext } from "../cart.context.js";
-  import StoreStrip from "./StoreStrip.svelte";
-  import SearchBox from "./SearchBox.svelte";
+  import ClosedBanner from "./ClosedBanner.svelte";
   import CartBar from "./CartBar.svelte";
 
   let {
@@ -14,13 +13,13 @@
   const cart = getCartContext();
 </script>
 
-<!-- The frame every storefront page shares: open/closed strip, search, then the page.
+<!-- The frame every storefront page shares: the closed-store notice, then the page (the
+  search bar and delivery time are in the header, ShopHeader).
   A wrapper component rather than a route group, since a group would rename the "/" route ID
   that the rest of the app passes to resolve(). The bottom padding keeps the last row clear of
   the fixed cart bar. -->
 <div class="page" class:with-bar={showCartBar && cart.count > 0}>
-  <StoreStrip />
-  <SearchBox />
+  <ClosedBanner />
   {@render children()}
 </div>
 
@@ -32,9 +31,10 @@
   @reference 'src/app.css';
 
   .page {
-    @apply mx-auto flex w-full max-w-5xl flex-col gap-4 p-3 sm:p-4;
+    @apply mx-auto flex w-full max-w-6xl flex-col gap-4 p-3 sm:p-4;
   }
+  /* Room for the bottom cart bar, which only phones get */
   .with-bar {
-    @apply pb-24;
+    @apply pb-24 md:pb-4;
   }
 </style>

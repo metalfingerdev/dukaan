@@ -22,6 +22,7 @@
   import ImpersonationBanner from "#lib/admin/ui/ImpersonationBanner.svelte";
   import AdminButton from "#lib/admin/ui/AdminButton.svelte";
   import DeliveryLink from "#lib/store/delivery/DeliveryLink.svelte";
+  import ShopHeader from "#lib/store/ui/ShopHeader.svelte";
 
   let { children, data } = $props();
 
@@ -45,28 +46,32 @@
     {#if AUTH_CONSTANTS.admin}
       <div class="print:hidden"><ImpersonationBanner /></div>
     {/if}
-    <header class="site-header">
-      <a href={resolve("/")} class="wordmark">{STORE_NAME}</a>
-      {#if PUBLIC_APP_ENV === "staging"}
-        <span
-          class="badge preset-filled-warning-500 text-xs font-semibold uppercase"
-          title="This is the staging site, not the real store"
-        >
-          Staging
-        </span>
-      {/if}
-      {#if auth.isAuthenticated}
-        <a href={resolve("/orders")} class="text-sm font-medium">Orders</a>
-        <!-- Renders only for admins; /admin and every admin function check access themselves -->
-        <AdminButton class="flex items-center gap-1 text-sm font-medium" />
-        <!-- Renders only for delivery partners; /delivery and its functions check access themselves -->
-        <DeliveryLink class="text-sm font-medium" />
-      {/if}
-      {#if AUTH_CONSTANTS.organizations}
-        <OrganizationSwitcher initialData={data.initialData} />
-      {/if}
-      <UserButton initialData={data.initialData} />
-    </header>
+    {#if shop}
+      <ShopHeader initialData={data.initialData} orgInitialData={data.initialData} />
+    {:else}
+      <header class="site-header">
+        <a href={resolve("/")} class="wordmark">{STORE_NAME}</a>
+        {#if PUBLIC_APP_ENV === "staging"}
+          <span
+            class="badge preset-filled-warning-500 text-xs font-semibold uppercase"
+            title="This is the staging site, not the real store"
+          >
+            Staging
+          </span>
+        {/if}
+        {#if auth.isAuthenticated}
+          <a href={resolve("/orders")} class="text-sm font-medium">Orders</a>
+          <!-- Renders only for admins; /admin and every admin function check access themselves -->
+          <AdminButton class="flex items-center gap-1 text-sm font-medium" />
+          <!-- Renders only for delivery partners; /delivery and its functions check access themselves -->
+          <DeliveryLink class="text-sm font-medium" />
+        {/if}
+        {#if AUTH_CONSTANTS.organizations}
+          <OrganizationSwitcher initialData={data.initialData} />
+        {/if}
+        <UserButton initialData={data.initialData} />
+      </header>
+    {/if}
     <main>
       {@render children()}
     </main>
@@ -94,13 +99,5 @@
 
   .shop {
     @apply bg-midground text-text;
-  }
-  .shop .site-header {
-    @apply bg-foreground;
-    border-bottom: 2px solid
-      color-mix(in oklch, var(--color-foreground), black 30%);
-  }
-  .shop .wordmark {
-    @apply font-extrabold tracking-tight text-primary;
   }
 </style>

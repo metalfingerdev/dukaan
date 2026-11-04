@@ -7,7 +7,6 @@
 
   import ShopPage from "#lib/store/ui/ShopPage.svelte";
   import ProductGrid from "#lib/store/ui/ProductGrid.svelte";
-  import GridSkeleton from "#lib/store/ui/GridSkeleton.svelte";
   import Card from "#lib/ui/Card.svelte";
   import { strings } from "#lib/store/strings.js";
 
@@ -31,7 +30,9 @@
   {:else if results.error}
     <p class="error">{strings.common.error}</p>
   {:else if results.data === undefined}
-    <GridSkeleton />
+    <h1 class="title">{strings.search.resultsFor(query)}</h1>
+    <p class="muted"><span class="bone">{strings.search.count(10)}</span></p>
+    <ProductGrid products={undefined} />
   {:else if results.data.length === 0}
     <Card>
       <div class="empty">
