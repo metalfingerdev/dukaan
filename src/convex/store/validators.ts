@@ -52,3 +52,41 @@ export const stockAdjustmentReason = v.union(
 	v.literal('damaged'),
 	v.literal('correction')
 );
+
+/** The seller's details as copied onto an order when its invoice is issued */
+export const invoiceSeller = v.object({
+	legalName: v.string(),
+	addressLine: v.string(),
+	gstin: v.optional(v.string())
+});
+
+/** What the printable invoice shows (model/store/invoice.ts `invoiceFor`) */
+export const invoiceView = v.object({
+	invoiceNumber: v.string(),
+	issuedAt: v.number(),
+	orderNumber: v.number(),
+	seller: invoiceSeller,
+	buyer: v.object({ name: v.string(), line1: v.string(), area: v.string(), landmark: v.optional(v.string()) }),
+	paymentMethod,
+	paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi'))),
+	lines: v.array(
+		v.object({
+			name: v.string(),
+			unitLabel: v.string(),
+			quantity: v.number(),
+			ratePaise: v.number(),
+			amountPaise: v.number(),
+			hsn: v.optional(v.string()),
+			gstRatePercent: v.optional(v.number()),
+			taxablePaise: v.optional(v.number()),
+			cgstPaise: v.optional(v.number()),
+			sgstPaise: v.optional(v.number())
+		})
+	),
+	subtotalPaise: v.number(),
+	deliveryFeePaise: v.number(),
+	smallCartFeePaise: v.number(),
+	savingsPaise: v.number(),
+	totalPaise: v.number(),
+	taxTotals: v.optional(v.object({ taxablePaise: v.number(), cgstPaise: v.number(), sgstPaise: v.number() }))
+});

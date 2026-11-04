@@ -13,7 +13,9 @@ import type { QueryCtx } from '../../_generated/server';
 import { mutation, query } from '../../_generated/server';
 import { requireAppAdmin } from '../../model/store/access';
 import { transitionOrder } from '../../model/store/orderStatus';
-import { orderStatus, paymentMethod, paymentStatus } from '../validators';
+import { invoiceView, orderStatus, paymentMethod, paymentStatus } from '../validators';
+import { invoiceFor } from '../../model/store/invoice';
+import { paginationOptsValidator, paginationResultValidator } from 'convex/server';
 
 const BOARD_COLUMN_SIZE = 50;
 const MAX_ITEMS_PER_ORDER = 50;
@@ -211,5 +213,57 @@ export const repackOrder = mutation({
 			actor: { kind: 'admin', id: admin._id }
 		});
 		return null;
+	}
+});
+
+/** Any order's invoice, for the admin; `null` before delivery */
+export const getInvoice = query({
+	args: { orderId: v.string() },
+	returns: v.union(v.null(), invoiceView),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		const id = ctx.db.normalizeId('orders', args.orderId);
+		const order = id ? await ctx.db.get(id) : null;
+		return order ? await invoiceFor(ctx, order) : null;
+	}
+});
+
+/** Delivered orders, newest first, a page at a time: where the admin finds invoices */
+export const listDelivered = query({
+	args: { paginationOpts: paginationOptsValidator },
+	returns: paginationResultValidator(
+		v.object({
+			_id: v.id('orders'),
+			orderNumber: v.number(),
+			deliveredAt: v.optional(v.number()),
+			totalPaise: v.number(),
+			paymentMethod,
+			paidWith: v.optional(v.union(v.literal('cash'), v.literal('upi'))),
+			contactName: v.string(),
+			area: v.string(),
+			invoiceNumber: v.optional(v.string())
+		})
+	),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		const page = await ctx.db
+			.query('orders')
+			.withIndex('by_status', (q) => q.eq('status', 'delivered'))
+			.order('desc')
+			.paginate(args.paginationOpts);
+		return {
+			...page,
+			page: page.page.map((order) => ({
+				_id: order._id,
+				orderNumber: order.orderNumber,
+				deliveredAt: order.deliveredAt,
+				totalPaise: order.totalPaise,
+				paymentMethod: order.paymentMethod,
+				paidWith: order.paidWith,
+				contactName: order.address.contactName,
+				area: order.address.area,
+				invoiceNumber: order.invoiceNumber
+			}))
+		};
 	}
 });

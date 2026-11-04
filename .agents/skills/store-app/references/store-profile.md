@@ -180,9 +180,20 @@ those come first. Ordered by what unblocks what.
    returned "The requested URL was not found"); the webhook (URL below) and
    `RAZORPAY_WEBHOOK_SECRET`; KYC and live keys for real payments. Refunds (a UPI-paid order that
    fails or is cancelled) are not built: refund from the Razorpay dashboard for now.
-6. **Invoices** (`admin.md`). Numbered only when an order is delivered, immutable, printable.
-   *Needs:* a decision with the founder's accountant on GST (registered? GSTIN? composition
-   scheme?), the legal name and address. Don't assert tax rules in code or copy.
+6. **Invoices** (**built**, with placeholder details). The number is given in `transitionOrder` when
+   an order is delivered (`model/store/invoice.ts`): `<prefix>/<financial year>/<6 digits>`, from
+   the `invoice:<FY>` counter in the same transaction, so cancelled orders leave no gaps; a new
+   financial year (1 April, IST) starts again at 000001. The seller's details are copied onto the
+   order when issued (`invoiceSeller`), so editing them later never rewrites an old invoice.
+   Printable at `/orders/[id]/invoice` (customer) and `/admin/orders/[id]/invoice` (admin), full
+   page or receipt size, "Print → Save as PDF". `/admin/orders` ("Past orders") lists delivered
+   orders with their invoices. `/admin/settings` has an "Invoice details" form (legal name,
+   address, GSTIN, prefix). Without a GSTIN (today) invoices print without tax columns; with one,
+   the tax inside each price is shown (CGST/SGST halves, `splitInclusiveTax`) for products that have
+   a GST rate. *Needs:* a decision with the founder's accountant on GST (registered? GSTIN?
+   composition scheme? which items at what rate; whether fees are taxed; the wording, for example
+   "Tax invoice" or "Bill of supply"), the legal name and full address. Don't assert tax rules in
+   code or copy.
 7. **Online payments through a payment gateway** (Razorpay; reuses the keys, webhook and `recordPayment` path from step 5). Customers pay before delivery. A separate plan
    is needed before building. Prerequisites the founder must arrange: a gateway merchant account
    with business KYC (Razorpay, Cashfree, PhonePe PG and similar are the usual choices; compare

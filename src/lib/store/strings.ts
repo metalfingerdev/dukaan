@@ -195,6 +195,7 @@ export const strings = {
 		note: 'Your note',
 		cancel: 'Cancel order',
 		confirmCancel: 'Cancel this order?',
+		viewInvoice: 'View invoice',
 		sendLocation: 'Send my current location',
 		sendLocationHint: "Delivery partner can't find you? Stand at your door and send your location.",
 		sendingLocation: 'Finding you...',
@@ -219,6 +220,39 @@ export const strings = {
 			delivery_failed: 'Delivery attempt failed',
 			cancelled: 'Cancelled'
 		}
+	},
+	invoice: {
+		title: 'Invoice',
+		titleWithNumber: (number: string) => `Invoice ${number}`,
+		view: 'View invoice',
+		print: 'Print or save as PDF',
+		receipt: 'Receipt size',
+		fullPage: 'Full page',
+		back: 'Back to the order',
+		notReady: 'The invoice is ready once the order is delivered.',
+		gstin: 'GSTIN',
+		number: 'Invoice no.',
+		date: 'Date',
+		order: 'Order',
+		billTo: 'Bill to',
+		item: 'Item',
+		hsn: 'HSN',
+		qty: 'Qty',
+		rate: 'Rate',
+		amount: 'Amount',
+		gstRate: 'GST %',
+		taxable: 'Taxable value',
+		cgst: 'CGST',
+		sgst: 'SGST',
+		itemTotal: 'Item total',
+		deliveryFee: 'Delivery fee',
+		smallCartFee: 'Small order fee',
+		total: 'Total',
+		youSaved: (amount: string) => `You saved ${amount} on MRP`,
+		taxIncluded: 'Prices include tax.',
+		paidBy: { cash: 'Paid in cash', upi: 'Paid by UPI' },
+		payment: { cod: 'Cash on delivery', upi_on_delivery: 'UPI on delivery' },
+		thanks: 'Thank you for shopping with us.'
 	},
 	upiQr: {
 		show: 'Pay by UPI: show QR',
@@ -317,6 +351,7 @@ export const strings = {
 			products: 'Products',
 			categories: 'Categories',
 			delivery: 'Delivery',
+			pastOrders: 'Past orders',
 			settings: 'Settings',
 			users: 'Users'
 		},
@@ -601,6 +636,32 @@ export const strings = {
 					isActive: 'Something went wrong.',
 					isFeatured: 'Something went wrong.'
 				}
+			}
+		},
+		pastOrders: {
+			title: 'Past orders',
+			intro: 'Delivered orders, newest first. Open one to see or print its invoice.',
+			empty: 'No delivered orders yet.',
+			loadMore: 'Show older orders',
+			invoice: 'Invoice'
+		},
+		invoiceDetails: {
+			title: 'Invoice details',
+			hint: 'Printed on every new invoice. Invoices already issued keep the details they were issued with. Confirm these with your accountant before the first real invoice.',
+			legalName: 'Legal name of the business',
+			addressLine: 'Address on invoices',
+			gstin: 'GSTIN (leave empty if not registered)',
+			gstinHint: 'With a GSTIN, invoices show the tax inside each price. Without one, they print without tax columns.',
+			invoicePrefix: 'Invoice number prefix (1 to 3 letters)',
+			prefixHint: (example: string) => `Numbers look like ${example}.`,
+			save: 'Save invoice details',
+			saving: 'Saving…',
+			saved: 'Saved.',
+			errors: {
+				legalName: 'Enter the legal name, up to 100 characters.',
+				addressLine: 'Enter the address, up to 200 characters.',
+				gstin: 'That does not look like a GSTIN (15 characters, like 23ABCDE1234F1Z5).',
+				invoicePrefix: 'Use 1 to 3 letters.'
 			}
 		},
 		settings: {
