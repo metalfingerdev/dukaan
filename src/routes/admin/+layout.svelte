@@ -27,6 +27,7 @@
 		{ href: '/admin', label: strings.admin.nav.home },
 		{ href: '/admin/products', label: strings.admin.nav.products },
 		{ href: '/admin/categories', label: strings.admin.nav.categories },
+		{ href: '/admin/delivery', label: strings.admin.nav.delivery },
 		{ href: '/admin/settings', label: strings.admin.nav.settings },
 		{ href: '/admin/users', label: strings.admin.nav.users }
 	] as const;

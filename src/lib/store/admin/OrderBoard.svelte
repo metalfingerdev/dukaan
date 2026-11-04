@@ -26,6 +26,9 @@
 		out_for_delivery: useQuery(api.store.admin.orders.listOrders, { status: 'out_for_delivery' })
 	};
 
+	const partners = useQuery(api.store.admin.delivery.listPartners, {});
+	const activePartners = $derived((partners.data ?? []).filter((partner) => partner.isActive));
+
 	const alerts = createOrderAlerts(() => lists.placed.data?.map((order) => order._id));
 
 	// On a phone one column shows at a time; from lg up all four sit side by side
@@ -43,6 +46,12 @@
 			if (code === 'INVALID_TRANSITION') {
 				rejecting = null;
 				toast.info(text.alreadyMoved);
+			} else if (code === 'NOT_PACKED') {
+				toast.info(text.notPacked);
+			} else if (code === 'PARTNER_NOT_FOUND') {
+				toast.error(text.partnerGone);
+			} else if (code === 'NO_PARTNER') {
+				toast.error(text.needPartner);
 			} else if (code === 'INVALID_REASON') {
 				toast.error(text.reasonRequired);
 			} else {
@@ -57,6 +66,10 @@
 		run(orderId, () => client.mutation(api.store.admin.orders.acceptOrder, { orderId }));
 	const pack = (orderId: Id<'orders'>) =>
 		run(orderId, () => client.mutation(api.store.admin.orders.packOrder, { orderId }));
+	const assign = (orderId: Id<'orders'>, partnerId: Id<'deliveryPartners'>) =>
+		run(orderId, () => client.mutation(api.store.admin.orders.assignPartner, { orderId, partnerId }));
+	const start = (orderId: Id<'orders'>) =>
+		run(orderId, () => client.mutation(api.store.admin.orders.startDelivery, { orderId }));
 	const reject = (orderId: Id<'orders'>, reason: string) =>
 		run(orderId, () => client.mutation(api.store.admin.orders.cancelOrder, { orderId, reason }));
 </script>
@@ -111,6 +124,9 @@
 							{order}
 							now={clock.now}
 							busy={busyId === order._id}
+							partners={activePartners}
+							onassign={(partnerId) => assign(order._id, partnerId)}
+							onstart={() => start(order._id)}
 							onaccept={() => accept(order._id)}
 							onpack={() => pack(order._id)}
 							onreject={() => (rejecting = { _id: order._id, orderNumber: order.orderNumber, status: order.status })}

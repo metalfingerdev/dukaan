@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../_generated/api';
 import { failure, idOf, setupStore as setup, stockOf, type StoreTest } from '../harness.testutils';
 
-const { listOrders, acceptOrder, packOrder, cancelOrder } = api.store.admin.orders;
+const { listOrders, acceptOrder, packOrder, cancelOrder, assignPartner, startDelivery } = api.store.admin.orders;
 
 // 12:00 IST on 3 Nov 2026: inside the placeholder opening hours
 beforeEach(() => {
@@ -80,5 +80,38 @@ describe('the board', () => {
 		const order = await s.alice.query(api.store.orders.getOrder, { orderId });
 		expect(order!.status).toBe('cancelled');
 		expect(order!.events[order!.events.length - 1]).toMatchObject({ status: 'cancelled', note: 'Out of fresh milk' });
+	});
+});
+
+describe('handing over to a partner', () => {
+	it('needs an active partner, and only a packed order can be assigned', async () => {
+		const s = await setup();
+		const orderId = await placeOrder(s);
+		const partnerId = await s.admin.mutation(api.store.admin.delivery.addPartner, { name: 'Ravi', phoneNumber: '98765 43210' });
+
+		expect((await failure(s.admin.mutation(assignPartner, { orderId, partnerId }))).code).toBe('NOT_PACKED');
+		await s.admin.mutation(acceptOrder, { orderId });
+		await s.admin.mutation(packOrder, { orderId });
+		expect((await failure(s.admin.mutation(startDelivery, { orderId }))).code).toBe('NO_PARTNER');
+
+		await s.admin.mutation(api.store.admin.delivery.setPartnerActive, { partnerId, isActive: false });
+		expect((await failure(s.admin.mutation(assignPartner, { orderId, partnerId }))).code).toBe('PARTNER_NOT_FOUND');
+		await s.admin.mutation(api.store.admin.delivery.setPartnerActive, { partnerId, isActive: true });
+
+		await s.admin.mutation(assignPartner, { orderId, partnerId });
+		const [packed] = await s.admin.query(listOrders, { status: 'packed' });
+		expect(packed.assignedPartnerName).toBe('Ravi');
+
+		await s.admin.mutation(startDelivery, { orderId });
+		expect(await s.admin.query(listOrders, { status: 'packed' })).toHaveLength(0);
+		expect(await s.admin.query(listOrders, { status: 'out_for_delivery' })).toHaveLength(1);
+	});
+
+	it('is refused for customers', async () => {
+		const s = await setup();
+		const orderId = await placeOrder(s);
+		const partnerId = await s.admin.mutation(api.store.admin.delivery.addPartner, { name: 'Ravi', phoneNumber: '9876543210' });
+		await expect(s.alice.mutation(assignPartner, { orderId, partnerId })).rejects.toThrow(/Forbidden/);
+		await expect(s.alice.mutation(startDelivery, { orderId })).rejects.toThrow(/Forbidden/);
 	});
 });
