@@ -1,0 +1,44 @@
+@theme {
+  --color-background: var(--background);
+  --color-midground: var(--midground);
+  --color-foreground: var(--foreground);
+
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+
+  --color-highlight: var(--highlight);
+  --color-border: var(--border);
+  --color-border-muted: var(--border-muted);
+
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* Layers: background is always the darkest, foreground the lightest, in both modes */
+  --background:   light-dark(oklch(0.92 0.03 150), oklch(0.14 0.02 150));
+  --midground:    light-dark(oklch(0.96 0.03 150), oklch(0.18 0.02 150));
+  --foreground:   light-dark(oklch(1    0.03 150), oklch(0.20 0.02 150));
+
+  --text:         light-dark(oklch(0.15 0.06 150), oklch(0.96 0.02 150));
+  --text-muted:   light-dark(oklch(0.4  0.06 150), oklch(0.7  0.02 150));
+
+  --highlight:    light-dark(oklch(1    0.06 150), oklch(0.25 0.02 150));
+  --border:       light-dark(oklch(0.6  0.06 150), oklch(0.35 0.02 150));
+  --border-muted: light-dark(oklch(0.7  0.06 150), oklch(0.3  0.02 150));
+
+  --primary:      light-dark(oklch(0.4  0.1  150), oklch(0.65 0.12 150));
+  --secondary:    light-dark(oklch(0.4  0.1  330), oklch(0.65 0.12 330));
+
+  --danger:       light-dark(oklch(0.5  0.06 30),  oklch(0.65 0.1  30));
+  --warning:      light-dark(oklch(0.5  0.06 100), oklch(0.65 0.1  100));
+  --success:      light-dark(oklch(0.5  0.06 160), oklch(0.65 0.1  160));
+  --info:         light-dark(oklch(0.5  0.06 260), oklch(0.65 0.1  260));
+}
