@@ -320,7 +320,6 @@
 							onValueChange={(v: { value: string[] }): void => {
 								expirationOption = v.value[0] as typeof expirationOption;
 							}}
-							class="w-56"
 						>
 							<Select.Trigger
 								placeholder="Select expiration"
