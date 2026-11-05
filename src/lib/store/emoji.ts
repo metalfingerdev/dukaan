@@ -5,6 +5,38 @@
  */
 
 const PRODUCT_EMOJI: [RegExp, string][] = [
+  // Specific words first, so "Baby Cereal" is not just cereal and "Chocolate Muffins" not chocolate
+  [/baby cereal|feeding bottle/i, "🍼"],
+  [/diaper|wipes|baby powder/i, "👶"],
+  [/muffin/i, "🧁"],
+  [/cake/i, "🍰"],
+  [/rusk/i, "🍞"],
+  [/popcorn/i, "🍿"],
+  [/papad|paratha/i, "🫓"],
+  [/french fries|\bfries\b/i, "🍟"],
+  [/kulfi|\bcone\b/i, "🍦"],
+  [/\bpeas\b/i, "🌱"],
+  [/pomegranate/i, "🍎"],
+  [/almond|cashew|walnut|peanut|chikki/i, "🥜"],
+  [/raisin/i, "🍇"],
+  [/\bdates\b/i, "🌴"],
+  [/oats|muesli|corn ?flakes|cereal/i, "🥣"],
+  [/upma|idli|dosa/i, "🍲"],
+  [/syrup/i, "🍹"],
+  [/turmeric|cumin|pepper/i, "🧂"],
+  [/dish ?wash|scrub/i, "🧽"],
+  [/hand ?wash|face ?wash|sanitizer/i, "🧼"],
+  [/deodorant|talcum|body lotion/i, "🧴"],
+  [/\bpads?\b|sanitary/i, "🌸"],
+  [/razor/i, "🪒"],
+  [/garbage|trash bag/i, "🗑️"],
+  [/match ?box/i, "🔥"],
+  [/candle/i, "🕯️"],
+  [/foil/i, "📦"],
+  [/\bbulb\b|\bled\b/i, "💡"],
+  [/highlighter|marker|crayon/i, "🖍️"],
+  [/eraser|geometry/i, "📐"],
+  [/glue|sticky/i, "📌"],
   [/tomato/i, "🍅"],
   [/onion/i, "🧅"],
   [/potato/i, "🥔"],
@@ -65,6 +97,10 @@ const PRODUCT_EMOJI: [RegExp, string][] = [
 ];
 
 const CATEGORY_EMOJI: [RegExp, string][] = [
+  // Before the broad ones: "Baby Care" is not personal care, "Dry Fruits" is not fruit
+  [/baby/i, "🍼"],
+  [/ice cream|frozen/i, "🍨"],
+  [/dry fruit|cereal/i, "🥜"],
   [/fruit|vegetable|sabzi/i, "🥦"],
   [/dairy|egg|milk/i, "🥛"],
   [/atta|rice|dal|grain/i, "🌾"],
