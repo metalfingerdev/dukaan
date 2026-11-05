@@ -7,6 +7,9 @@
 
 	import { formatPaise } from '#lib/store/format.js';
 	import { strings } from '#lib/store/strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
 
 	const client = useConvexClient();
 	const partners = useQuery(api.store.admin.delivery.listPartners, {});
@@ -87,109 +90,168 @@
 	<title>{text.title}</title>
 </svelte:head>
 
-<h1 class="h3">{text.title}</h1>
+<h1 class="title">{text.title}</h1>
 
 {#if message}
-	<p class="text-error-600-400 text-sm" role="alert">{message}</p>
+	<p class="problem" role="alert">{message}</p>
 {/if}
 
-<section class="flex flex-col gap-3" aria-labelledby="cash-title">
+<section class="section" aria-labelledby="cash-title">
 	<div>
-		<h2 id="cash-title" class="h5">{text.cashTitle}</h2>
-		<p class="text-surface-600-400 text-sm">{text.cashHint}</p>
+		<h2 id="cash-title" class="heading">{text.cashTitle}</h2>
+		<p class="muted">{text.cashHint}</p>
 	</div>
 	{#if cash.error}
-		<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+		<p class="problem">{strings.common.error}</p>
 	{:else if cash.data === undefined}
-		<div class="bg-surface-100-900 h-20 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+		<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
 	{:else if cash.data.length === 0}
-		<p class="text-surface-600-400 text-sm">{text.cashEmpty}</p>
+		<p class="muted">{text.cashEmpty}</p>
 	{:else}
-		<ul class="flex flex-col gap-3">
+		<ul class="rows">
 			{#each cash.data as row (row.partner._id)}
-				<li class="card preset-outlined-surface-300-700 flex flex-col gap-2 p-3">
-					<h3 class="font-semibold">{row.partner.name}</h3>
-					<ul class="flex flex-col gap-2">
-						{#each row.days as day (day.dayStartMs)}
-							<li class="flex flex-wrap items-center justify-between gap-2">
-								<span>
-									{dayFormatter.format(day.dayStartMs)}
-									<span class="text-surface-600-400 text-sm">· {text.orders(day.orderCount)}</span>
-								</span>
-								<span class="flex items-center gap-3">
-									<span class="font-semibold">{formatPaise(day.totalPaise)}</span>
-									<button
-										type="button"
-										class="btn preset-filled-primary-500 min-h-11"
-										disabled={busyKey === `${row.partner._id}:${day.dayStartMs}`}
-										onclick={() => settle(row.partner._id, day.dayStartMs, day.totalPaise)}
-									>
-										{busyKey === `${row.partner._id}:${day.dayStartMs}` ? text.settling : text.markSettled}
-									</button>
-								</span>
-							</li>
-						{/each}
-					</ul>
+				<li>
+					<Card dense>
+						<div class="partner">
+							<h3 class="name">{row.partner.name}</h3>
+							<ul class="days">
+								{#each row.days as day (day.dayStartMs)}
+									<li class="day">
+										<span>
+											{dayFormatter.format(day.dayStartMs)}
+											<span class="muted">· {text.orders(day.orderCount)}</span>
+										</span>
+										<span class="settle">
+											<b>{formatPaise(day.totalPaise)}</b>
+											<Button
+												variant="primary"
+												disabled={busyKey === `${row.partner._id}:${day.dayStartMs}`}
+												onclick={() => settle(row.partner._id, day.dayStartMs, day.totalPaise)}
+											>
+												{busyKey === `${row.partner._id}:${day.dayStartMs}` ? text.settling : text.markSettled}
+											</Button>
+										</span>
+									</li>
+								{/each}
+							</ul>
+						</div>
+					</Card>
 				</li>
 			{/each}
 		</ul>
 	{/if}
 </section>
 
-<section class="flex flex-col gap-3" aria-labelledby="partners-title">
+<section class="section" aria-labelledby="partners-title">
 	<div>
-		<h2 id="partners-title" class="h5">{text.partnersTitle}</h2>
-		<p class="text-surface-600-400 text-sm">{text.partnersHint}</p>
+		<h2 id="partners-title" class="heading">{text.partnersTitle}</h2>
+		<p class="muted">{text.partnersHint}</p>
 	</div>
 
-	<form class="card preset-outlined-surface-300-700 flex flex-col gap-3 p-3 sm:flex-row sm:items-end" onsubmit={add}>
-		<label class="flex flex-1 flex-col gap-1">
-			<span class="text-sm font-medium">{text.name}</span>
-			<input class="input min-h-12" type="text" maxlength="60" required autocomplete="off" bind:value={name} />
-		</label>
-		<label class="flex flex-1 flex-col gap-1">
-			<span class="text-sm font-medium">{text.phone}</span>
-			<input
-				class="input min-h-12"
-				type="tel"
-				inputmode="numeric"
-				required
-				autocomplete="off"
-				placeholder={text.phonePlaceholder}
-				bind:value={phone}
-			/>
-		</label>
-		<button type="submit" class="btn preset-filled-primary-500 min-h-12" disabled={adding}>
-			{adding ? text.adding : text.add}
-		</button>
-	</form>
+	<Card dense>
+		<form class="add" onsubmit={add}>
+			<span class="grow">
+				<Field label={text.name}>
+					<input type="text" maxlength="60" required autocomplete="off" bind:value={name} />
+				</Field>
+			</span>
+			<span class="grow">
+				<Field label={text.phone}>
+					<input
+						type="tel"
+						inputmode="numeric"
+						required
+						autocomplete="off"
+						placeholder={text.phonePlaceholder}
+						bind:value={phone}
+					/>
+				</Field>
+			</span>
+			<Button type="submit" variant="primary" disabled={adding}>
+				{adding ? text.adding : text.add}
+			</Button>
+		</form>
+	</Card>
 
 	{#if partners.error}
-		<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+		<p class="problem">{strings.common.error}</p>
 	{:else if partners.data === undefined}
-		<div class="bg-surface-100-900 h-20 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+		<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
 	{:else if partners.data.length === 0}
-		<p class="text-surface-600-400 text-sm">{text.empty}</p>
+		<p class="muted">{text.empty}</p>
 	{:else}
-		<ul class="flex flex-col gap-2">
+		<ul class="rows">
 			{#each partners.data as partner (partner._id)}
-				<li class="card preset-outlined-surface-300-700 flex flex-wrap items-center justify-between gap-2 p-3">
-					<div>
-						<p class="font-semibold">{partner.name}</p>
-						<p class="text-surface-600-400 text-sm">
-							{partner.phoneNumber} · {partner.isActive ? text.active : text.off}
-						</p>
-					</div>
-					<button
-						type="button"
-						class="btn min-h-11 {partner.isActive ? 'preset-tonal' : 'preset-filled-success-500'}"
-						disabled={busyKey === partner._id}
-						onclick={() => setActive(partner._id, !partner.isActive)}
-					>
-						{partner.isActive ? text.switchOff : text.switchOn}
-					</button>
+				<li>
+					<Card dense>
+						<div class="line">
+							<div>
+								<b>{partner.name}</b>
+								<p class="muted">
+									{partner.phoneNumber} · {partner.isActive ? text.active : text.off}
+								</p>
+							</div>
+							<Button
+								variant={partner.isActive ? 'plain' : 'success'}
+								disabled={busyKey === partner._id}
+								onclick={() => setActive(partner._id, !partner.isActive)}
+							>
+								{partner.isActive ? text.switchOff : text.switchOn}
+							</Button>
+						</div>
+					</Card>
 				</li>
 			{/each}
 		</ul>
 	{/if}
 </section>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.section {
+		@apply flex max-w-3xl flex-col gap-3;
+	}
+	.heading {
+		@apply text-lg font-extrabold;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.rows {
+		@apply flex flex-col gap-2;
+	}
+	.partner {
+		@apply flex flex-col gap-2;
+	}
+	.name {
+		@apply font-extrabold;
+	}
+	.days {
+		@apply flex flex-col gap-2;
+	}
+	.day {
+		@apply flex flex-wrap items-center justify-between gap-2;
+	}
+	.settle {
+		@apply flex items-center gap-3;
+	}
+	.add {
+		@apply flex flex-col gap-3 sm:flex-row sm:items-end;
+	}
+	.grow {
+		@apply flex-1;
+	}
+	.line {
+		@apply flex flex-wrap items-center justify-between gap-2;
+	}
+	.placeholder {
+		@apply block h-20 w-full;
+	}
+</style>
