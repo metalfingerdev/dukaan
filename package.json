@@ -44,7 +44,6 @@
 		"#convex/*": "./src/convex/*"
 	},
 	"dependencies": {
-		"@ark-ui/svelte": "^5.25.1",
 		"@better-auth/api-key": "1.6.16",
 		"@convex-dev/better-auth": "0.12.5",
 		"@convex-dev/migrations": "^0.3.7",
