@@ -23,13 +23,17 @@
   import AdminButton from "#lib/admin/ui/AdminButton.svelte";
   import DeliveryLink from "#lib/store/delivery/DeliveryLink.svelte";
   import ShopHeader from "#lib/store/ui/ShopHeader.svelte";
+  import RiderHeader from "#lib/store/delivery/RiderHeader.svelte";
   import CartDrawer from "#lib/store/ui/CartDrawer.svelte";
 
   let { children, data } = $props();
 
-  // The designed look applies to the storefront; admin, delivery and sign-in keep the old one
-  // until their turn in the redesign
-  const shop = $derived(!/^\/(admin|delivery|\(auth\)\/(reset-password|device))/.test(page.route.id ?? ""));
+  // The designed look applies to the storefront and the rider screens; admin and the other
+  // auth pages keep the old one until their turn in the redesign
+  const route = $derived(page.route.id ?? "");
+  const rider = $derived(route.startsWith("/delivery"));
+  const legacy = $derived(/^\/(admin|\(auth\)\/(reset-password|device))/.test(route));
+  const shop = $derived(!rider && !legacy);
 
   createSvelteAuthClient({ authClient, getServerState: () => data.authState });
   const auth = useAuth();
@@ -43,12 +47,14 @@
 
 <Toaster position="top-center" />
 <AuthProvider {api} {authClient} authConstants={AUTH_CONSTANTS}>
-  <div class="shell" class:shop>
+  <div class="shell" class:shop={shop || rider}>
     {#if AUTH_CONSTANTS.admin}
       <div class="print:hidden"><ImpersonationBanner /></div>
     {/if}
     {#if shop}
       <ShopHeader initialData={data.initialData} orgInitialData={data.initialData} />
+    {:else if rider}
+      <RiderHeader initialData={data.initialData} />
     {:else}
       <header class="site-header">
         <a href={resolve("/")} class="wordmark">{STORE_NAME}</a>
