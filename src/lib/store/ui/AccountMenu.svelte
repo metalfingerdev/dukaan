@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from "$app/state";
   import { resolve } from "$app/paths";
   import { refreshAll } from "$app/navigation";
   import { Popover, Avatar } from "bits-ui";
@@ -10,15 +9,12 @@
   import { getAuthContext } from "#lib/auth/context.svelte.js";
   import type { GetActiveUserType } from "#lib/auth/types.js";
   import SignIn from "#lib/auth/ui/SignIn.svelte";
-  import { gotoApp } from "#lib/primitives/utils/navigation.js";
-  import { DIALOG_KEY } from "#lib/users/utils/user.constants.js";
   import Button from "#lib/ui/Button.svelte";
   import Modal from "#lib/ui/Modal.svelte";
 
   import { strings } from "../strings.js";
 
-  // The signed-in customer's menu (or the Sign in button). The profile dialog it opens is the
-  // existing one, reached through the `?dialog=` URL, until the auth screens are redesigned.
+  // The signed-in customer's menu (or the Sign in button). The name opens the account page.
   let {
     initialData,
   }: { initialData?: { activeUser?: GetActiveUserType } } = $props();
@@ -49,15 +45,6 @@
     user?.email && !user.email.endsWith(".invalid") ? user.email : "",
   );
 
-  const openProfile = () => {
-    menuOpen = false;
-    const url = new URL(page.url.href);
-    if (url.searchParams.get("dialog") !== DIALOG_KEY) {
-      url.searchParams.set("dialog", DIALOG_KEY);
-      void gotoApp(url, { replace: false, reset: false });
-    }
-  };
-
   const signOut = async () => {
     const result = await authClient.signOut();
     if (result.data?.success) {
@@ -78,7 +65,7 @@
     </Popover.Trigger>
     <Popover.Portal>
       <Popover.Content class="ui-account-menu" align="end" sideOffset={8}>
-        <button type="button" class="who" onclick={openProfile}>
+        <a href={resolve("/account")} class="who" onclick={() => (menuOpen = false)}>
           <Avatar.Root class="ui-avatar big">
             <Avatar.Image src={user.image} alt="" class="ui-avatar-image" />
             <Avatar.Fallback class="ui-account-initials">{initials}</Avatar.Fallback>
@@ -87,7 +74,7 @@
             <b>{user.name}</b>
             {#if secondLine}<span class="small">{secondLine}</span>{/if}
           </span>
-        </button>
+        </a>
         <a href={resolve("/orders")} class="item" onclick={() => (menuOpen = false)}>
           {strings.header.orders}
         </a>
