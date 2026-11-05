@@ -62,15 +62,15 @@
 	}
 	:global(.ui-toast-success) {
 		--fill: var(--color-success);
-		@apply bg-success/15;
+		@apply bg-success-tint;
 	}
 	:global(.ui-toast-error) {
 		--fill: var(--color-danger);
-		@apply bg-danger/10;
+		@apply bg-danger-tint;
 	}
 	:global(.ui-toast-warning) {
 		--fill: var(--color-secondary);
-		@apply bg-secondary/25;
+		@apply bg-secondary-tint;
 	}
 	:global(.ui-toast-title) {
 		@apply text-sm leading-tight font-bold break-words;

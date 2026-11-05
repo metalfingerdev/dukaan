@@ -194,7 +194,7 @@
 	}
 	.failed {
 		--fill: var(--color-secondary);
-		@apply edge-flat flex flex-col gap-2 rounded-container bg-secondary/20 p-3;
+		@apply edge-flat flex flex-col gap-2 rounded-container bg-secondary-tint p-3;
 	}
 	.failed-title {
 		@apply font-extrabold;

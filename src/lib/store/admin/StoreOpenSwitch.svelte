@@ -66,11 +66,11 @@
 	/* Green when the store is taking orders, gold when it is not */
 	.switch {
 		--fill: var(--color-secondary);
-		@apply edge-flat flex flex-col gap-2 rounded-container bg-secondary/25 p-3;
+		@apply edge-flat flex flex-col gap-2 rounded-container bg-secondary-tint p-3;
 	}
 	.switch.on {
 		--fill: var(--color-success);
-		@apply bg-success/15;
+		@apply bg-success-tint;
 	}
 	.row {
 		@apply flex flex-wrap items-center justify-between gap-3;

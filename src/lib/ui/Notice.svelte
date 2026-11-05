@@ -25,10 +25,10 @@
   }
   .warn {
     --fill: var(--color-secondary);
-    @apply bg-secondary/20;
+    @apply bg-secondary-tint;
   }
   .bad {
     --fill: var(--color-danger);
-    @apply bg-danger/10;
+    @apply bg-danger-tint;
   }
 </style>

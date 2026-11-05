@@ -260,7 +260,7 @@
 	}
 	.bad {
 		--fill: var(--color-danger);
-		@apply bg-danger/10;
+		@apply bg-danger-tint;
 	}
 	.what {
 		@apply min-w-0 truncate;

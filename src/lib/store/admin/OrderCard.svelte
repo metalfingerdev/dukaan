@@ -136,7 +136,7 @@
 	}
 	/* An order waiting too long gets a gold wash and a ring, so it is hard to miss */
 	.late {
-		@apply -m-2.5 rounded-base bg-secondary/25 p-2.5 outline-2 outline-secondary;
+		@apply -m-2.5 rounded-base bg-secondary-tint p-2.5 outline-2 outline-secondary;
 	}
 	.head {
 		@apply flex items-baseline justify-between gap-2;
