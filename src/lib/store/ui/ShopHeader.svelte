@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import { PUBLIC_APP_ENV } from "$app/env/public";
   import type { ComponentProps } from "svelte";
   import { useAuth } from "@mmailaender/convex-better-auth-svelte/svelte";
@@ -7,15 +8,15 @@
 
   import { AUTH_CONSTANTS } from "#convex/auth.constants.js";
   import { STORE_NAME } from "#convex/model/store/storeProfile.js";
-  import UserButton from "#lib/users/ui/UserButton.svelte";
+  import AccountMenu from "./AccountMenu.svelte";
   import OrganizationSwitcher from "#lib/organizations/ui/OrganizationSwitcher.svelte";
   import AdminButton from "#lib/admin/ui/AdminButton.svelte";
   import DeliveryLink from "../delivery/DeliveryLink.svelte";
-  import Button from "#lib/ui/Button.svelte";
 
   import { getCartContext } from "../cart.context.js";
   import { formatPaise } from "../format.js";
   import { strings } from "../strings.js";
+  import { cartDrawer } from "../cartDrawer.svelte.js";
   import SearchBox from "./SearchBox.svelte";
   import StoreStatus from "./StoreStatus.svelte";
 
@@ -23,7 +24,7 @@
     initialData,
     orgInitialData,
   }: {
-    initialData: ComponentProps<typeof UserButton>["initialData"];
+    initialData: ComponentProps<typeof AccountMenu>["initialData"];
     orgInitialData: ComponentProps<typeof OrganizationSwitcher>["initialData"];
   } = $props();
 
@@ -48,8 +49,8 @@
 
       <nav class="account">
         {#if PUBLIC_APP_ENV === "staging"}
-          <span class="staging" title="This is the staging site, not the real store">
-            Staging
+          <span class="staging" title={strings.header.stagingHint}>
+            {strings.header.staging}
           </span>
         {/if}
         {#if auth.isAuthenticated}
@@ -61,11 +62,7 @@
         {#if AUTH_CONSTANTS.organizations}
           <OrganizationSwitcher initialData={orgInitialData} />
         {/if}
-        <UserButton {initialData}>
-          {#snippet signInTrigger({ open })}
-            <Button onclick={open}>{strings.header.signIn}</Button>
-          {/snippet}
-        </UserButton>
+        <AccountMenu {initialData} />
       </nav>
     </div>
   </div>
@@ -73,7 +70,16 @@
   <div class="bar">
     <div class="inner bar-inner">
       <div class="search"><SearchBox /></div>
-      <a href={resolve("/cart")} class="cart">
+      <a
+      href={resolve("/cart")}
+      class="cart"
+      onclick={(event) => {
+        // The cart page is the full cart; elsewhere the cart opens over the page
+        if (page.url.pathname === resolve("/cart")) return;
+        event.preventDefault();
+        cartDrawer.open = true;
+      }}
+    >
         <ShoppingCartIcon class="size-5" aria-hidden="true" />
         {#if cart.count > 0}
           <span class="cart-text">
@@ -118,7 +124,7 @@
     @apply ml-auto flex shrink-0 items-center gap-3;
   }
   .link {
-    @apply hidden text-sm font-semibold md:inline;
+    @apply text-sm font-semibold;
   }
   .link :global(a) {
     @apply flex items-center gap-1;

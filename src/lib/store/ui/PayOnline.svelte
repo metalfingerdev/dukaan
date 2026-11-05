@@ -8,6 +8,8 @@
 	import { formatPaise, formatTime } from '../format.js';
 	import { openRazorpayCheckout } from '../razorpayCheckout.js';
 	import { strings } from '../strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
 
 	type Payment = {
 		status: 'creating' | 'created' | 'paid' | 'failed';
@@ -80,22 +82,38 @@
 	});
 </script>
 
-<section class="card preset-tonal-primary flex flex-col gap-3 p-4">
-	<h2 class="h5">{text.title}</h2>
-	<p class="text-sm">{text.hint(formatTime(payment.payBy))}</p>
+<Card as="section">
+	<div class="box">
+		<h2 class="title">{text.title}</h2>
+		<p class="hint">{text.hint(formatTime(payment.payBy))}</p>
 
-	{#if payment.status === 'creating'}
-		<p class="text-sm" role="status">{text.preparing}</p>
-	{:else if payment.status === 'failed'}
-		<p class="text-sm" role="alert">{text.unavailable}</p>
-		<button type="button" class="btn preset-tonal min-h-11 self-start" onclick={retry}>{text.retry}</button>
-	{:else if ready}
-		<button type="button" class="btn preset-filled-primary-500 min-h-12" disabled={busy !== null} onclick={pay}>
-			{busy === 'opening' ? text.opening : busy === 'checking' ? text.checking : text.pay(formatPaise(payment.amountPaise))}
-		</button>
-	{/if}
+		{#if payment.status === 'creating'}
+			<p class="hint" role="status">{text.preparing}</p>
+		{:else if payment.status === 'failed'}
+			<p class="hint" role="alert">{text.unavailable}</p>
+			<Button onclick={retry}>{text.retry}</Button>
+		{:else if ready}
+			<Button variant="primary" large block disabled={busy !== null} onclick={pay}>
+				{busy === 'opening' ? text.opening : busy === 'checking' ? text.checking : text.pay(formatPaise(payment.amountPaise))}
+			</Button>
+		{/if}
 
-	{#if note}
-		<p class="text-sm" role="status">{note}</p>
-	{/if}
-</section>
+		{#if note}
+			<p class="hint" role="status">{note}</p>
+		{/if}
+	</div>
+</Card>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.box {
+		@apply flex flex-col items-start gap-3;
+	}
+	.title {
+		@apply text-lg font-extrabold;
+	}
+	.hint {
+		@apply text-sm;
+	}
+</style>

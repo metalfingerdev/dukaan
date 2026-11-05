@@ -20,8 +20,13 @@ export const strings = {
 		maxPerOrder: (count: number) => `Up to ${count} per order`
 	},
 	header: {
+		staging: 'Staging',
+		stagingHint: 'This is the staging site, not the real store',
 		signIn: 'Sign in',
 		orders: 'Orders',
+		addresses: 'Saved addresses',
+		account: 'Your account',
+		signOut: 'Sign out',
 		myCart: 'My cart'
 	},
 	home: {
@@ -58,6 +63,7 @@ export const strings = {
 		empty: 'Your cart is empty.',
 		keepShopping: 'Keep shopping',
 		viewCart: 'View cart',
+		openFull: 'Open the full cart page',
 		items: (count: number) => `${count} ${count === 1 ? 'item' : 'items'}`,
 		removeOne: 'Remove one',
 		addOne: 'Add one',
@@ -214,6 +220,8 @@ export const strings = {
 		note: 'Your note',
 		cancel: 'Cancel order',
 		confirmCancel: 'Cancel this order?',
+		confirmCancelText: 'The store will not pack it. If you paid online, the money goes back to you.',
+		keepOrder: 'Keep the order',
 		viewInvoice: 'View invoice',
 		sendLocation: 'Send my current location',
 		sendLocationHint: "Delivery partner can't find you? Stand at your door and send your location.",
@@ -226,6 +234,7 @@ export const strings = {
 		callStore: 'Call the store',
 		contactStore: 'Please contact the store.',
 		codeTitle: 'Your delivery code',
+		codeLabel: 'Delivery code',
 		codeOnTheWay: 'Tell this to your delivery partner when you receive your order.',
 		codeKeep: 'Keep this code. You will need it when your order arrives.',
 		paymentMethod: { cod: 'Cash on delivery', upi_on_delivery: 'UPI on delivery', online: 'Paid online' },
@@ -767,6 +776,7 @@ export const strings = {
 	common: {
 		backHome: 'Back to home',
 		loading: 'Loading',
+		close: 'Close',
 		error: 'Something went wrong. Please try again.'
 	}
 } as const;

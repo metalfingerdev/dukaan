@@ -75,7 +75,7 @@
       --tile-min: 6.5rem;
     }
   }
-  .tiles :global(.card) {
+  .tiles :global(.ui-card) {
     @apply h-full p-2;
   }
   .tile {

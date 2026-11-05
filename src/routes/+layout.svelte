@@ -23,12 +23,13 @@
   import AdminButton from "#lib/admin/ui/AdminButton.svelte";
   import DeliveryLink from "#lib/store/delivery/DeliveryLink.svelte";
   import ShopHeader from "#lib/store/ui/ShopHeader.svelte";
+  import CartDrawer from "#lib/store/ui/CartDrawer.svelte";
 
   let { children, data } = $props();
 
   // The designed look applies to the storefront; admin, delivery and sign-in keep the old one
   // until their turn in the redesign
-  const shop = $derived(!/^\/(admin|delivery|\(auth\))/.test(page.route.id ?? ""));
+  const shop = $derived(!/^\/(admin|delivery|\(auth\)\/(reset-password|device))/.test(page.route.id ?? ""));
 
   createSvelteAuthClient({ authClient, getServerState: () => data.authState });
   const auth = useAuth();
@@ -75,6 +76,9 @@
     <main>
       {@render children()}
     </main>
+    {#if shop}
+      <CartDrawer />
+    {/if}
   </div>
 
   <UserProfileHost initialData={data.initialData} />

@@ -5,6 +5,7 @@
 
 	import { findPlace, loadGoogleMaps, type LatLngValue, type MapInstance } from '../maps.js';
 	import { strings } from '../strings.js';
+	import Button from '#lib/ui/Button.svelte';
 
 	// Used only when the customer has no pin yet: the town, looked up by name, so no coordinates
 	// are written into the code
@@ -71,46 +72,61 @@
 	};
 </script>
 
-<div class="flex flex-col gap-2">
+<div class="picker">
 	{#if status === 'unavailable'}
-		<p class="text-warning-700-300 text-sm" role="status">{strings.address.mapUnavailable}</p>
-		<button type="button" class="btn preset-tonal min-h-11 self-start" onclick={oncancel}>
-			{strings.address.cancel}
-		</button>
+		<p class="warning" role="status">{strings.address.mapUnavailable}</p>
+		<Button onclick={oncancel}>{strings.address.cancel}</Button>
 	{:else}
-		<p class="text-sm font-medium">{strings.address.pinTitle}</p>
+		<p class="title">{strings.address.pinTitle}</p>
 		<!-- The pin stays in the middle and the map moves under it, so the position is whatever is
 			at the centre. Its tip is at the exact centre, hence the upward shift. -->
-		<div class="relative h-72 w-full overflow-hidden rounded">
+		<div class="map">
 			<!-- Left empty on purpose: Google fills this element with its own markup -->
-			<div bind:this={element} class="bg-surface-100-900 size-full"></div>
+			<div bind:this={element} class="canvas"></div>
 			{#if status === 'loading'}
-				<p class="text-surface-600-400 absolute top-0 left-0 p-3 text-sm">{strings.address.mapLoading}</p>
+				<p class="loading">{strings.address.mapLoading}</p>
 			{:else if status === 'ready'}
-				<MapPinIcon
-					class="text-error-500 pointer-events-none absolute top-1/2 left-1/2 size-9 -translate-x-1/2 -translate-y-full"
-					aria-hidden="true"
-				/>
+				<MapPinIcon class="pin" aria-hidden="true" />
 			{/if}
 		</div>
-		<div class="flex flex-wrap gap-2">
-			<button
-				type="button"
-				class="btn preset-filled min-h-11"
-				disabled={status !== 'ready'}
-				onclick={confirm}>{strings.address.usePin}</button
-			>
-			<button
-				type="button"
-				class="btn preset-tonal min-h-11"
-				disabled={status !== 'ready' || locating}
-				onclick={panToMe}
-			>
+		<div class="row">
+			<Button variant="primary" disabled={status !== 'ready'} onclick={confirm}>
+				{strings.address.usePin}
+			</Button>
+			<Button disabled={status !== 'ready' || locating} onclick={panToMe}>
 				{locating ? strings.address.locating : strings.address.useLocation}
-			</button>
-			<button type="button" class="btn preset-tonal min-h-11" onclick={oncancel}>
-				{strings.address.cancel}
-			</button>
+			</Button>
+			<Button onclick={oncancel}>{strings.address.cancel}</Button>
 		</div>
 	{/if}
 </div>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.picker {
+		@apply flex flex-col gap-2;
+	}
+	.title {
+		@apply text-sm font-bold;
+	}
+	.warning {
+		@apply text-sm font-semibold text-warning;
+	}
+	.map {
+		--fill: var(--color-background);
+		@apply edge-flat relative h-72 w-full overflow-hidden rounded-base;
+	}
+	.canvas {
+		@apply size-full bg-background;
+	}
+	.loading {
+		@apply absolute top-0 left-0 p-3 text-sm text-text-muted;
+	}
+	.map :global(.pin) {
+		@apply pointer-events-none absolute top-1/2 left-1/2 size-9 -translate-x-1/2 -translate-y-full text-primary;
+	}
+	.row {
+		@apply flex flex-wrap gap-2;
+	}
+</style>

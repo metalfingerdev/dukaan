@@ -10,6 +10,10 @@
 	import { loadGoogleMaps, suggestAddress } from '../maps.js';
 	import { strings } from '../strings.js';
 	import MapPinPicker from './MapPinPicker.svelte';
+	import Button from '#lib/ui/Button.svelte';
+	import Field from '#lib/ui/Field.svelte';
+	import Choice from '#lib/ui/Choice.svelte';
+	import Card from '#lib/ui/Card.svelte';
 
 	type SavedAddress = FunctionReturnType<typeof api.store.addresses.listAddresses>[number];
 	type Kind = SavedAddress['kind'];
@@ -163,12 +167,13 @@
 	};
 </script>
 
-<form class="card preset-outlined-surface-300-700 flex flex-col gap-3 p-3" onsubmit={submit}>
-	<fieldset class="flex flex-col items-start gap-2">
-		<legend class="font-semibold">{strings.address.pinStep}</legend>
-		<p class="text-surface-600-400 text-sm">{strings.address.pinWhy}</p>
+<Card as="div">
+<form class="form" onsubmit={submit}>
+	<fieldset class="group">
+		<legend class="legend">{strings.address.pinStep}</legend>
+		<p class="muted">{strings.address.pinWhy}</p>
 		{#if pickingPin}
-			<div class="w-full">
+			<div class="picker">
 				<MapPinPicker
 					start={hasLocation ? { lat: lat!, lng: lng! } : undefined}
 					onconfirm={(pin) => {
@@ -180,150 +185,168 @@
 				/>
 			</div>
 		{:else if hasLocation}
-			<p class="text-success-600-400 text-sm" role="status">{strings.address.locationSaved}</p>
-			<div class="flex flex-wrap gap-2">
+			<p class="saved" role="status">{strings.address.locationSaved}</p>
+			<div class="row">
 				{#if mapsEnabled}
-					<button type="button" class="btn preset-tonal min-h-11" onclick={() => (pickingPin = true)}>
-						{strings.address.changePin}
-					</button>
-					<button type="button" class="btn preset-tonal min-h-11" disabled={suggesting} onclick={suggestFromPin}>
+					<Button onclick={() => (pickingPin = true)}>{strings.address.changePin}</Button>
+					<Button disabled={suggesting} onclick={suggestFromPin}>
 						{suggesting ? strings.address.suggesting : strings.address.suggestFromPin}
-					</button>
+					</Button>
 				{:else}
-					<button type="button" class="btn preset-tonal min-h-11" disabled={locating} onclick={useMyLocation}>
+					<Button disabled={locating} onclick={useMyLocation}>
 						{locating ? strings.address.locating : strings.address.useLocation}
-					</button>
+					</Button>
 					<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an external Maps link -->
-					<a
-						class="btn preset-tonal min-h-11"
+					<Button
 						href="https://www.google.com/maps/search/?api=1&query={encodeURIComponent(`${lat},${lng}`)}"
 						target="_blank"
-						rel="noopener noreferrer">{strings.address.checkPin}</a
+						rel="noopener noreferrer">{strings.address.checkPin}</Button
 					>
 				{/if}
 			</div>
 		{:else}
-			<div class="flex flex-wrap gap-2">
+			<div class="row">
 				{#if mapsEnabled}
-					<button type="button" class="btn preset-filled min-h-11" onclick={() => (pickingPin = true)}>
+					<Button variant="primary" onclick={() => (pickingPin = true)}>
 						{strings.address.setPin}
-					</button>
+					</Button>
 				{/if}
-				<button
-					type="button"
-					class="btn min-h-11 {mapsEnabled ? 'preset-tonal' : 'preset-filled'}"
+				<Button
+					variant={mapsEnabled ? 'plain' : 'primary'}
 					disabled={locating}
 					onclick={useMyLocation}
 				>
 					{locating ? strings.address.locating : strings.address.useLocation}
-				</button>
+				</Button>
 			</div>
-			<p class="text-surface-600-400 text-sm">{strings.address.pinStandAtDoor}</p>
+			<p class="muted">{strings.address.pinStandAtDoor}</p>
 		{/if}
 		{#if locationNote}
-			<p class="text-warning-700-300 text-sm" role="status">{locationNote}</p>
+			<p class="warning" role="status">{locationNote}</p>
 		{/if}
 	</fieldset>
 
-	<label class="label">
-		<span class="label-text">{strings.address.label}</span>
-		<input class="input min-h-11" bind:value={label} placeholder={strings.address.labelHint} maxlength="30" required />
-	</label>
+	<Field label={strings.address.label}>
+		<input bind:value={label} placeholder={strings.address.labelHint} maxlength="30" required />
+	</Field>
 
-	<fieldset class="flex flex-wrap gap-2">
-		<legend class="label-text mb-1">{strings.address.kind}</legend>
-		{#each ['house', 'hostel', 'shop'] as const as option (option)}
-			<label class="btn min-h-11 {kind === option ? 'preset-filled' : 'preset-tonal'}">
-				<input type="radio" class="sr-only" name="kind" value={option} bind:group={kind} />
-				{strings.address.kinds[option]}
-			</label>
-		{/each}
+	<fieldset class="group">
+		<legend class="legend">{strings.address.kind}</legend>
+		<div class="row">
+			{#each ['house', 'hostel', 'shop'] as const as option (option)}
+				<Choice chip name="kind" value={option} checked={kind === option} onchange={() => (kind = option)}>
+					{strings.address.kinds[option]}
+				</Choice>
+			{/each}
+		</div>
 	</fieldset>
 
-	<label class="label">
-		<span class="label-text">{strings.address.line1[kind]}</span>
-		<input class="input min-h-11" bind:value={line1} maxlength="200" required />
-	</label>
+	<Field label={strings.address.line1[kind]}>
+		<input bind:value={line1} maxlength="200" required />
+	</Field>
 
-	<label class="label">
-		<span class="label-text">{strings.address.area}</span>
-		<select class="select min-h-11" bind:value={area} required>
+	<Field label={strings.address.area}>
+		<select bind:value={area} required>
 			<option value="" disabled>{strings.address.areaPlaceholder}</option>
 			{#each areas as option (option)}
 				<option value={option}>{option}</option>
 			{/each}
 		</select>
-	</label>
+	</Field>
 
-	<label class="label">
-		<span class="label-text">{strings.address.landmark}</span>
-		<input class="input min-h-11" bind:value={landmark} maxlength="200" />
-	</label>
+	<Field label={strings.address.landmark}>
+		<input bind:value={landmark} maxlength="200" />
+	</Field>
 
-	<fieldset class="flex flex-wrap gap-2">
-		<legend class="label-text mb-1">{strings.address.receiver}</legend>
-		{#each [['myself', strings.address.myself], ['other', strings.address.someoneElse]] as const as [who, text] (who)}
-			<label class="btn min-h-11 {receiver === who ? 'preset-filled' : 'preset-tonal'}">
-				<input
-					type="radio"
-					class="sr-only"
-					name="receiver"
-					value={who}
-					checked={receiver === who}
-					onchange={() => chooseReceiver(who)}
-				/>
-				{text}
-			</label>
-		{/each}
+	<fieldset class="group">
+		<legend class="legend">{strings.address.receiver}</legend>
+		<div class="row">
+			{#each [['myself', strings.address.myself], ['other', strings.address.someoneElse]] as const as [who, text] (who)}
+				<Choice chip name="receiver" value={who} checked={receiver === who} onchange={() => chooseReceiver(who)}>
+					{text}
+				</Choice>
+			{/each}
+		</div>
 	</fieldset>
 
-	<label class="label">
-		<span class="label-text">{strings.address.contactName}</span>
-		<input class="input min-h-11" bind:value={contactName} maxlength="80" autocomplete="name" required />
-	</label>
+	<Field label={strings.address.contactName}>
+		<input bind:value={contactName} maxlength="80" autocomplete="name" required />
+	</Field>
 
-	<label class="label">
-		<span class="label-text">{strings.address.contactPhone}</span>
-		<input
-			class="input min-h-11"
-			bind:value={contactPhone}
-			type="tel"
-			inputmode="tel"
-			autocomplete="tel"
-			required
-		/>
-	</label>
+	<Field label={strings.address.contactPhone}>
+		<input bind:value={contactPhone} type="tel" inputmode="tel" autocomplete="tel" required />
+	</Field>
 
-	<label class="label">
-		<span class="label-text">{strings.address.mapsLink}</span>
+	<Field label={strings.address.mapsLink} hint={strings.address.mapsLinkHint}>
 		<input
-			class="input min-h-11"
 			type="url"
 			inputmode="url"
 			bind:value={mapsUrl}
 			maxlength="500"
 			placeholder="https://maps.app.goo.gl/..."
 		/>
-		<span class="text-surface-600-400 text-xs">{strings.address.mapsLinkHint}</span>
-	</label>
+	</Field>
 
 	{#if !address?.isDefault}
-		<label class="flex items-center gap-2">
-			<input type="checkbox" class="checkbox size-5" bind:checked={makeDefault} />
+		<label class="check">
+			<input type="checkbox" bind:checked={makeDefault} />
 			<span>{strings.address.makeDefaultCheckbox}</span>
 		</label>
 	{/if}
 
 	{#if error}
-		<p class="text-error-600-400 text-sm" role="alert">{error}</p>
+		<p class="problem" role="alert">{error}</p>
 	{/if}
 
-	<div class="flex gap-2">
-		<button type="submit" class="btn preset-filled min-h-11 flex-1" disabled={saving}>
+	<div class="actions">
+		<Button type="submit" variant="primary" large disabled={saving}>
 			{strings.address.save}
-		</button>
-		<button type="button" class="btn preset-tonal min-h-11" onclick={oncancel}>
-			{strings.address.cancel}
-		</button>
+		</Button>
+		<Button large onclick={oncancel}>{strings.address.cancel}</Button>
 	</div>
 </form>
+</Card>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.form {
+		@apply flex flex-col gap-4;
+	}
+	.group {
+		@apply flex flex-col items-start gap-2;
+	}
+	.legend {
+		@apply font-extrabold;
+	}
+	.row {
+		@apply flex flex-wrap gap-2;
+	}
+	.picker {
+		@apply w-full;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.saved {
+		@apply text-sm font-semibold text-success;
+	}
+	.warning {
+		@apply text-sm font-semibold text-warning;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.check {
+		@apply flex min-h-11 items-center gap-3;
+	}
+	.check input {
+		@apply size-5 text-primary;
+	}
+	.actions {
+		@apply flex gap-2;
+	}
+	.actions :global(button:first-child) {
+		@apply flex-1;
+	}
+</style>

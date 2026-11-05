@@ -1,5 +1,6 @@
 <script lang="ts">
   import ProductCard from "./ProductCard.svelte";
+  import { strings } from "../strings.js";
   import type { PublicProduct } from "../types.js";
 
   // `products` undefined means loading: the same grid fills with skeleton cards
@@ -17,7 +18,7 @@
     {/each}
   </ul>
 {:else}
-  <ul class="grid" aria-busy="true" aria-label="Loading">
+  <ul class="grid" aria-busy="true" aria-label={strings.common.loading}>
     {#each { length: loadingCount } as _, i (i)}
       <li><ProductCard /></li>
     {/each}
@@ -43,7 +44,7 @@
   .grid li {
     @apply flex flex-col;
   }
-  .grid li > :global(.card) {
+  .grid li > :global(.ui-card) {
     @apply flex-1;
   }
 </style>

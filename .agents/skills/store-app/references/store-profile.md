@@ -243,6 +243,20 @@ those come first. Ordered by what unblocks what.
      skeletons had drifted away from the real layout.
    - *Emoji stand-ins* for products and categories without a photo (`src/lib/store/emoji.ts`,
      matched on words in the name). Real photos replace them.
+   - *Cart opens over the page* as a sheet (Bits `Dialog`, `src/lib/ui/Sheet.svelte`; bottom sheet
+     on a phone, side panel from md up) from the cart bar and the header cart button; `/cart`
+     stays as the full page. Why: adding things should never take a customer off the shelves.
+   - *Checkout is two columns on a laptop*: the form on the left, the bill and "Place order"
+     sticky on the right. Dropdowns stay native `<select>` (cheap Android phones show their own
+     picker; the e2e tests drive them).
+   - *Confirmations are in-page dialogs* (Bits `AlertDialog`, `ConfirmDialog.svelte`), never the
+     browser's `confirm()`: cancel order, delete address.
+   - *Account menu* (`AccountMenu.svelte`, Bits `Popover`) and the sign-in `Modal` replace
+     `UserButton` on the storefront; `UserButton` and the profile dialog stay for the old header
+     until the auth area is redesigned. Orders, Admin and Deliveries links stay visible on phones.
+   - *Not built*: a "call your delivery partner" button on order tracking, because the customer's
+     order does not expose the partner's name or phone (riders phone customers). It needs a
+     privacy decision first.
 
 **Smaller items, any time**: the founder enters the real delivery areas, hours, fees and store
 phone in `/admin/settings` on staging; create the Maps key (`docs/08-environments-and-deployment.md`); push or SMS

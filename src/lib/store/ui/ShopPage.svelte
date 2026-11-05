@@ -8,7 +8,13 @@
   let {
     children,
     showCartBar = true,
-  }: { children: Snippet; showCartBar?: boolean } = $props();
+    closedNotice = true,
+  }: {
+    children: Snippet;
+    showCartBar?: boolean;
+    /** Checkout says it in its own words, so it turns this one off */
+    closedNotice?: boolean;
+  } = $props();
 
   const cart = getCartContext();
 </script>
@@ -19,7 +25,7 @@
   that the rest of the app passes to resolve(). The bottom padding keeps the last row clear of
   the fixed cart bar. -->
 <div class="page" class:with-bar={showCartBar && cart.count > 0}>
-  <ClosedBanner />
+  {#if closedNotice}<ClosedBanner />{/if}
   {@render children()}
 </div>
 

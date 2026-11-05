@@ -4,6 +4,8 @@
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '#convex/_generated/api.js';
 	import { strings } from '../strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
 
 	let { orderId }: { orderId: string } = $props();
 	const client = useConvexClient();
@@ -36,14 +38,33 @@
 	};
 </script>
 
-<section class="card preset-outlined-surface-300-700 flex flex-col items-start gap-2 p-3">
-	<p class="text-sm">{text.sendLocationHint}</p>
-	<button type="button" class="btn preset-tonal min-h-11" disabled={status === 'locating'} onclick={send}>
-		{status === 'locating' ? text.sendingLocation : text.sendLocation}
-	</button>
-	{#if status === 'sent'}
-		<p class="text-success-600-400 text-sm" role="status">{text.locationSent}</p>
-	{:else if status === 'failed'}
-		<p class="text-warning-700-300 text-sm" role="alert">{text.locationFailed}</p>
-	{/if}
-</section>
+<Card as="section">
+	<div class="box">
+		<p class="hint">{text.sendLocationHint}</p>
+		<Button disabled={status === 'locating'} onclick={send}>
+			{status === 'locating' ? text.sendingLocation : text.sendLocation}
+		</Button>
+		{#if status === 'sent'}
+			<p class="sent" role="status">{text.locationSent}</p>
+		{:else if status === 'failed'}
+			<p class="failed" role="alert">{text.locationFailed}</p>
+		{/if}
+	</div>
+</Card>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.box {
+		@apply flex flex-col items-start gap-2;
+	}
+	.hint {
+		@apply text-sm;
+	}
+	.sent {
+		@apply text-sm font-semibold text-success;
+	}
+	.failed {
+		@apply text-sm font-semibold text-warning;
+	}
+</style>

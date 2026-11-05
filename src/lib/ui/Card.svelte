@@ -16,14 +16,14 @@
   } & HTMLAttributes<HTMLElement> = $props();
 </script>
 
-<svelte:element this={as} class="card" class:pressable {...rest}>
+<svelte:element this={as} class="ui-card" class:pressable {...rest}>
   {@render children()}
 </svelte:element>
 
 <style lang="postcss">
   @reference 'src/app.css';
 
-  .card {
+  .ui-card {
     --fill: var(--color-foreground);
     @apply edge block rounded-container bg-foreground p-3;
   }
