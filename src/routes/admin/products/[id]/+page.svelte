@@ -19,18 +19,38 @@
 	<title>{text.form.editTitle} | {strings.admin.title}</title>
 </svelte:head>
 
-<a href={resolve('/admin/products')} class="text-primary-600-400 text-sm">&larr; {text.form.back}</a>
-<h1 class="h3">{text.form.editTitle}</h1>
+<a href={resolve('/admin/products')} class="back">&larr; {text.form.back}</a>
+<h1 class="title">{text.form.editTitle}</h1>
 
 {#if product.error || categories.error}
-	<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+	<p class="problem">{strings.common.error}</p>
 {:else if product.data === undefined || categories.data === undefined}
-	<div class="bg-surface-100-900 h-64 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+	<div class="bone loading" aria-busy="true" aria-label={strings.common.loading}></div>
 {:else if product.data === null}
-	<p class="text-sm">{text.form.notFound}</p>
+	<p class="muted">{text.form.notFound}</p>
 {:else}
 	<!-- Keyed on the id: the form is filled once from its props, so another product needs a new one -->
 	{#key product.data._id}
 		<ProductForm categories={categories.data} product={product.data} />
 	{/key}
 {/if}
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.back {
+		@apply text-sm font-semibold text-primary;
+	}
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.muted {
+		@apply text-sm;
+	}
+	.loading {
+		@apply block h-64 w-full;
+	}
+</style>

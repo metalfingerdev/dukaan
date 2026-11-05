@@ -9,6 +9,7 @@
 	import { createOrderAlerts } from './orderAlerts.svelte.js';
 	import OrderCard from './OrderCard.svelte';
 	import RejectDialog from './RejectDialog.svelte';
+	import Button from '#lib/ui/Button.svelte';
 
 	const text = strings.admin.board;
 	const client = useConvexClient();
@@ -77,25 +78,24 @@
 		run(orderId, () => client.mutation(api.store.admin.orders.cancelOrder, { orderId, reason }));
 </script>
 
-<section class="flex flex-col gap-3" aria-label={text.title}>
-	<div class="flex flex-wrap items-center justify-between gap-2">
-		<h1 class="h3">{text.title}</h1>
-		<button
-			type="button"
-			class="btn btn-sm min-h-11 {alerts.soundOn ? 'preset-filled-primary-500' : 'preset-tonal'}"
+<section class="board" aria-label={text.title}>
+	<div class="head">
+		<h1 class="title">{text.title}</h1>
+		<Button
+			variant={alerts.soundOn ? 'primary' : 'plain'}
 			aria-pressed={alerts.soundOn}
 			onclick={alerts.toggleSound}
 			title={text.alerts.hint}
 		>
 			{alerts.soundOn ? text.alerts.on : text.alerts.off}
-		</button>
+		</Button>
 	</div>
 
 	{#if lists.delivery_failed.data?.length}
-		<section class="flex flex-col gap-2" aria-labelledby="failed-title">
-			<h2 id="failed-title" class="text-warning-700-300 font-semibold">{text.failedTitle}</h2>
-			<p class="text-surface-600-400 text-sm">{text.failedHint}</p>
-			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+		<section class="failed" aria-labelledby="failed-title">
+			<h2 id="failed-title" class="failed-title">{text.failedTitle}</h2>
+			<p class="small">{text.failedHint}</p>
+			<div class="cards">
 				{#each lists.delivery_failed.data as order (order._id)}
 					<OrderCard
 						{order}
@@ -114,36 +114,38 @@
 		</section>
 	{/if}
 
-	<div class="grid grid-cols-4 gap-1 lg:hidden" role="tablist" aria-label={text.title}>
+	<!-- A phone shows one column at a time, chosen here; a laptop shows all four -->
+	<div class="tabs" role="tablist" aria-label={text.title}>
 		{#each columns as column (column)}
 			{@const count = lists[column].data?.length}
 			<button
 				type="button"
 				role="tab"
 				aria-selected={selected === column}
-				class="btn min-h-12 flex-col gap-0 px-1 text-xs {selected === column ? 'preset-filled-primary-500' : 'preset-tonal'}"
+				class="tab"
+				class:on={selected === column}
 				onclick={() => (selected = column)}
 			>
 				<span>{text.columns[column]}</span>
-				<span class="font-semibold">{count ?? '–'}</span>
+				<b>{count ?? '–'}</b>
 			</button>
 		{/each}
 	</div>
 
-	<div class="grid gap-4 lg:grid-cols-4">
+	<div class="columns">
 		{#each columns as column (column)}
 			{@const list = lists[column]}
-			<div class="flex-col gap-3 {selected === column ? 'flex' : 'hidden'} lg:flex" role="tabpanel">
-				<h2 class="hidden font-semibold lg:block">
+			<div class="column" class:shown={selected === column} role="tabpanel">
+				<h2 class="column-title">
 					{text.columns[column]}
-					<span class="text-surface-600-400">{list.data?.length ?? ''}</span>
+					<span class="small">{list.data?.length ?? ''}</span>
 				</h2>
 				{#if list.error}
-					<p class="text-error-600-400 text-sm" role="alert">{strings.common.error}</p>
+					<p class="problem" role="alert">{strings.common.error}</p>
 				{:else if list.data === undefined}
-					<div class="bg-surface-100-900 h-28 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+					<div class="bone holder" aria-busy="true" aria-label={strings.common.loading}></div>
 				{:else if list.data.length === 0}
-					<p class="text-surface-600-400 text-sm">{text.empty[column]}</p>
+					<p class="small">{text.empty[column]}</p>
 				{:else}
 					{#each list.data as order (order._id)}
 						<OrderCard
@@ -171,3 +173,59 @@
 	onconfirm={(reason) => rejecting && reject(rejecting._id, reason)}
 	onclose={() => (rejecting = null)}
 />
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.board {
+		@apply flex flex-col gap-3;
+	}
+	.head {
+		@apply flex flex-wrap items-center justify-between gap-2;
+	}
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.small {
+		@apply text-sm text-text-muted;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.failed {
+		--fill: var(--color-secondary);
+		@apply edge-flat flex flex-col gap-2 rounded-container bg-secondary/20 p-3;
+	}
+	.failed-title {
+		@apply font-extrabold;
+	}
+	.cards {
+		@apply grid gap-3 sm:grid-cols-2 xl:grid-cols-4;
+	}
+	.tabs {
+		@apply grid grid-cols-4 gap-1 lg:hidden;
+	}
+	.tab {
+		--fill: var(--color-foreground);
+		@apply edge-flat flex min-h-12 flex-col items-center justify-center rounded-base bg-foreground px-1 text-xs;
+	}
+	.tab.on {
+		--fill: var(--color-primary);
+		@apply bg-primary text-foreground;
+	}
+	.columns {
+		@apply grid gap-4 lg:grid-cols-4 lg:items-start;
+	}
+	.column {
+		@apply hidden flex-col gap-3 lg:flex;
+	}
+	.column.shown {
+		@apply flex;
+	}
+	.column-title {
+		@apply hidden font-extrabold lg:block;
+	}
+	.holder {
+		@apply h-28 w-full;
+	}
+</style>

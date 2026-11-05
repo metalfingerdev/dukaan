@@ -7,6 +7,9 @@
 	import type { Id } from '#convex/_generated/dataModel.js';
 
 	import { strings } from '#lib/store/strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
 
 	const client = useConvexClient();
 	const categories = useQuery(api.store.admin.categories.listCategories, {});
@@ -72,125 +75,174 @@
 	<title>{text.title} | {strings.admin.title}</title>
 </svelte:head>
 
-<h1 class="h3">{text.title}</h1>
-<p class="text-surface-600-400 text-sm">{text.intro}</p>
+<h1 class="title">{text.title}</h1>
+<p class="muted">{text.intro}</p>
 
-<form class="flex items-end gap-2" onsubmit={add}>
-	<label class="label flex-1">
-		<span class="label-text">{text.name}</span>
-		<input class="input" bind:value={newName} maxlength={40} autocomplete="off" />
-	</label>
-	<button type="submit" class="btn preset-filled-primary-500 min-h-11" disabled={adding || !newName.trim()}>
+<form class="add" onsubmit={add}>
+	<span class="grow">
+		<Field label={text.name}>
+			<input bind:value={newName} maxlength={40} autocomplete="off" />
+		</Field>
+	</span>
+	<Button type="submit" variant="primary" disabled={adding || !newName.trim()}>
 		{adding ? text.adding : text.addButton}
-	</button>
+	</Button>
 </form>
 {#if message}
-	<p class="text-error-600-400 text-sm" role="alert">{message}</p>
+	<p class="problem" role="alert">{message}</p>
 {/if}
 
 {#if categories.error}
-	<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+	<p class="problem">{strings.common.error}</p>
 {:else if categories.data === undefined}
-	<div class="bg-surface-100-900 h-48 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+	<ul class="rows" aria-busy="true" aria-label={strings.common.loading}>
+		{#each { length: 4 } as _, i (i)}
+			<li aria-hidden="true">
+				<Card dense>
+					<div class="bone placeholder"></div>
+				</Card>
+			</li>
+		{/each}
+	</ul>
 {:else if categories.data.length === 0}
-	<p class="text-surface-600-400 text-sm">{text.empty}</p>
+	<p class="muted">{text.empty}</p>
 {:else}
-	<ul class="flex flex-col gap-2">
+	<ul class="rows">
 		{#each categories.data as category, index (category._id)}
-			<li
-				class="card preset-outlined-surface-300-700 flex flex-col gap-2 p-3 {category.isActive ? '' : 'opacity-70'}"
-			>
-				{#if renaming?.id === category._id}
-					<form
-						class="flex items-end gap-2"
-						onsubmit={(event) => {
-							event.preventDefault();
-							void saveName(category);
-						}}
-					>
-						<label class="label flex-1">
-							<span class="label-text">{text.rename}</span>
-							<input class="input" bind:value={renaming.name} maxlength={40} autocomplete="off" />
-						</label>
-						<button type="submit" class="btn preset-filled-primary-500 min-h-11" disabled={busyId === category._id}>
-							{text.save}
-						</button>
-						<button type="button" class="btn preset-tonal min-h-11" onclick={() => (renaming = null)}>
-							{text.cancel}
-						</button>
-					</form>
-				{:else}
-					<div class="flex items-center justify-between gap-2">
-						<div class="min-w-0">
-							<div class="truncate font-semibold">{category.name}</div>
-							{#if !category.isActive}
-								<div class="text-warning-700-300 text-xs">{text.hidden}</div>
-							{/if}
-						</div>
-						<a
-							href="{resolve('/admin/products')}?category={category._id}"
-							class="text-primary-600-400 shrink-0 text-sm"
-						>
-							{text.viewProducts}
-						</a>
+			<li>
+				<Card dense>
+					<div class="item" class:dim={!category.isActive}>
+						{#if renaming?.id === category._id}
+							<form
+								class="add"
+								onsubmit={(event) => {
+									event.preventDefault();
+									void saveName(category);
+								}}
+							>
+								<span class="grow">
+									<Field label={text.rename}>
+										<input bind:value={renaming.name} maxlength={40} autocomplete="off" />
+									</Field>
+								</span>
+								<Button type="submit" variant="primary" disabled={busyId === category._id}>
+									{text.save}
+								</Button>
+								<Button onclick={() => (renaming = null)}>{text.cancel}</Button>
+							</form>
+						{:else}
+							<div class="top">
+								<div class="names">
+									<b class="name">{category.name}</b>
+									{#if !category.isActive}
+										<span class="warn">{text.hidden}</span>
+									{/if}
+								</div>
+								<a href="{resolve('/admin/products')}?category={category._id}" class="link">
+									{text.viewProducts}
+								</a>
+							</div>
+							<div class="buttons">
+								<Button
+									icon
+									aria-label="{text.moveUp}: {category.name}"
+									disabled={index === 0 || busyId === category._id}
+									onclick={() =>
+										change(category._id, () =>
+											client.mutation(api.store.admin.categories.moveCategory, {
+												categoryId: category._id,
+												direction: 'up'
+											})
+										)}
+								>
+									↑
+								</Button>
+								<Button
+									icon
+									aria-label="{text.moveDown}: {category.name}"
+									disabled={index === categories.data.length - 1 || busyId === category._id}
+									onclick={() =>
+										change(category._id, () =>
+											client.mutation(api.store.admin.categories.moveCategory, {
+												categoryId: category._id,
+												direction: 'down'
+											})
+										)}
+								>
+									↓
+								</Button>
+								<Button onclick={() => (renaming = { id: category._id, name: category.name })}>
+									{text.rename}
+								</Button>
+								<Button
+									aria-label="{category.isActive ? text.hide : text.show}: {category.name}"
+									disabled={busyId === category._id}
+									onclick={() =>
+										change(category._id, () =>
+											client.mutation(api.store.admin.categories.updateCategory, {
+												categoryId: category._id,
+												name: category.name,
+												isActive: !category.isActive
+											})
+										)}
+								>
+									{category.isActive ? text.hide : text.show}
+								</Button>
+							</div>
+						{/if}
 					</div>
-					<div class="flex flex-wrap gap-2">
-						<button
-							type="button"
-							class="btn preset-tonal min-h-11"
-							aria-label="{text.moveUp}: {category.name}"
-							disabled={index === 0 || busyId === category._id}
-							onclick={() =>
-								change(category._id, () =>
-									client.mutation(api.store.admin.categories.moveCategory, {
-										categoryId: category._id,
-										direction: 'up'
-									})
-								)}
-						>
-							↑
-						</button>
-						<button
-							type="button"
-							class="btn preset-tonal min-h-11"
-							aria-label="{text.moveDown}: {category.name}"
-							disabled={index === categories.data.length - 1 || busyId === category._id}
-							onclick={() =>
-								change(category._id, () =>
-									client.mutation(api.store.admin.categories.moveCategory, {
-										categoryId: category._id,
-										direction: 'down'
-									})
-								)}
-						>
-							↓
-						</button>
-						<button
-							type="button"
-							class="btn preset-tonal min-h-11"
-							onclick={() => (renaming = { id: category._id, name: category.name })}
-						>
-							{text.rename}
-						</button>
-						<button
-							type="button"
-							class="btn preset-tonal min-h-11"
-							aria-label="{category.isActive ? text.hide : text.show}: {category.name}"
-							disabled={busyId === category._id}
-							onclick={() =>
-								change(category._id, () =>
-									client.mutation(api.store.admin.categories.updateCategory, {
-										categoryId: category._id,
-										name: category.name,
-										isActive: !category.isActive
-									})
-								)}
-						>
-							{category.isActive ? text.hide : text.show}
-						</button>
-					</div>
-				{/if}
+				</Card>
 			</li>
 		{/each}
 	</ul>
 {/if}
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.add {
+		@apply flex max-w-xl items-end gap-2;
+	}
+	.grow {
+		@apply flex-1;
+	}
+	.rows {
+		@apply grid max-w-3xl gap-2;
+	}
+	.item {
+		@apply flex flex-col gap-2;
+	}
+	.dim {
+		@apply opacity-70;
+	}
+	.top {
+		@apply flex items-center justify-between gap-2;
+	}
+	.names {
+		@apply flex min-w-0 flex-col;
+	}
+	.name {
+		@apply truncate;
+	}
+	.warn {
+		@apply text-xs font-semibold text-warning;
+	}
+	.link {
+		@apply shrink-0 text-sm font-semibold text-primary;
+	}
+	.buttons {
+		@apply flex flex-wrap gap-2;
+	}
+	.placeholder {
+		@apply block h-12 w-full;
+	}
+</style>

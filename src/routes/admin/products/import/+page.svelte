@@ -13,6 +13,8 @@
 
 	import { parseCsv, toCsv } from '#lib/store/csv.js';
 	import { strings } from '#lib/store/strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Choice from '#lib/ui/Choice.svelte';
 
 	const client = useConvexClient();
 	const text = strings.admin.import;
@@ -131,90 +133,136 @@
 	<title>{text.title} | {strings.admin.title}</title>
 </svelte:head>
 
-<a href={resolve('/admin/products')} class="text-primary-600-400 text-sm">&larr; {text.back}</a>
-<h1 class="h3">{text.title}</h1>
+<a href={resolve('/admin/products')} class="back">&larr; {text.back}</a>
+<h1 class="title">{text.title}</h1>
 
-<section class="flex flex-col gap-2">
-	<h2 class="h5">{text.exportTitle}</h2>
-	<p class="text-surface-600-400 text-sm">{text.exportHint}</p>
-	<div>
-		<button type="button" class="btn preset-tonal min-h-11" onclick={download}>{text.exportButton}</button>
-	</div>
-	{#if exportNote}<p class="text-sm" role="status">{exportNote}</p>{/if}
-</section>
+<div class="page">
+	<section class="section">
+		<h2 class="heading">{text.exportTitle}</h2>
+		<p class="muted">{text.exportHint}</p>
+		<div><Button onclick={download}>{text.exportButton}</Button></div>
+		{#if exportNote}<p class="message" role="status">{exportNote}</p>{/if}
+	</section>
 
-<section class="flex flex-col gap-3">
-	<h2 class="h5">{text.importTitle}</h2>
-	<p class="text-surface-600-400 text-sm">{text.importHint}</p>
-	<p class="text-surface-600-400 text-xs">{text.columnsNote}</p>
-	<input class="input" type="file" accept=".csv,text/csv" aria-label={text.chooseFile} onchange={chooseFile} />
+	<section class="section">
+		<h2 class="heading">{text.importTitle}</h2>
+		<p class="muted">{text.importHint}</p>
+		<p class="muted small">{text.columnsNote}</p>
+		<input class="file" type="file" accept=".csv,text/csv" aria-label={text.chooseFile} onchange={chooseFile} />
 
-	{#if rows}
-		<fieldset class="flex flex-col gap-2">
-			<legend class="mb-1 font-semibold">{text.modeTitle}</legend>
-			{#each ['keep', 'add', 'set'] as const as option (option)}
-				<label class="flex min-h-11 items-start gap-3">
-					<input
-						class="radio mt-1"
-						type="radio"
+		{#if rows}
+			<fieldset class="modes">
+				<legend class="legend">{text.modeTitle}</legend>
+				{#each ['keep', 'add', 'set'] as const as option (option)}
+					<Choice
 						name="stock-mode"
+						value={option}
 						checked={mode === option}
 						onchange={() => changeMode(option)}
-						disabled={busy}
-					/>
-					<span>
+					>
 						{text.modes[option].label}
-						<span class="text-surface-600-400 block text-xs">{text.modes[option].hint}</span>
-					</span>
-				</label>
-			{/each}
-		</fieldset>
-	{/if}
-
-	{#if busy && !preview}<p class="text-sm" aria-busy="true">{text.previewing}</p>{/if}
-
-	{#if preview}
-		<p class="font-semibold" role="status">{text.summary(createdCount, updatedCount, errorCount)}</p>
-		{#if preview.newCategories.length > 0}
-			<p class="text-sm">{text.newCategories(preview.newCategories.join(', '))}</p>
+						<span class="muted small">{text.modes[option].hint}</span>
+					</Choice>
+				{/each}
+			</fieldset>
 		{/if}
-		<ul class="flex max-h-96 flex-col gap-1 overflow-y-auto text-sm">
-			{#each preview.rows as row (row.row)}
-				<li
-					class="card flex flex-wrap justify-between gap-x-3 p-2 {row.kind === 'error'
-						? 'preset-tonal-error'
-						: 'preset-outlined-surface-300-700'}"
-				>
-					<span class="min-w-0 truncate">
-						<span class="text-surface-600-400">{text.row(row.row)}</span>
-						{row.name}
-					</span>
-					<span>
-						{#if row.problem}
-							{problemText(row.problem)}
-						{:else if row.kind === 'update' && row.stockFrom !== row.stockTo}
-							{text.kind.update}: {text.stockChange(row.stockFrom ?? 0, row.stockTo ?? 0)}
-						{:else if row.kind === 'new'}
-							{text.kind.new}{row.stockTo ? `: ${text.openingStock(row.stockTo)}` : ''}
-						{:else}
-							{text.kind[row.kind]}
-						{/if}
-					</span>
-				</li>
-			{/each}
-		</ul>
-		{#if errorCount > 0}
-			<p class="text-sm">{text.fixFirst}</p>
-		{/if}
-		<button
-			type="button"
-			class="btn preset-filled-primary-500 min-h-12"
-			disabled={busy || errorCount > 0 || preview.rows.length === 0}
-			onclick={apply}
-		>
-			{busy ? text.applying : text.apply}
-		</button>
-	{/if}
 
-	{#if message}<p class="text-sm" role="status">{message}</p>{/if}
-</section>
+		{#if busy && !preview}<p class="muted" aria-busy="true">{text.previewing}</p>{/if}
+
+		{#if preview}
+			<p class="strong" role="status">{text.summary(createdCount, updatedCount, errorCount)}</p>
+			{#if preview.newCategories.length > 0}
+				<p class="small">{text.newCategories(preview.newCategories.join(', '))}</p>
+			{/if}
+			<ul class="preview">
+				{#each preview.rows as row (row.row)}
+					<li class="row" class:bad={row.kind === 'error'}>
+						<span class="what">
+							<span class="muted">{text.row(row.row)}</span>
+							{row.name}
+						</span>
+						<span>
+							{#if row.problem}
+								{problemText(row.problem)}
+							{:else if row.kind === 'update' && row.stockFrom !== row.stockTo}
+								{text.kind.update}: {text.stockChange(row.stockFrom ?? 0, row.stockTo ?? 0)}
+							{:else if row.kind === 'new'}
+								{text.kind.new}{row.stockTo ? `: ${text.openingStock(row.stockTo)}` : ''}
+							{:else}
+								{text.kind[row.kind]}
+							{/if}
+						</span>
+					</li>
+				{/each}
+			</ul>
+			{#if errorCount > 0}
+				<p class="small">{text.fixFirst}</p>
+			{/if}
+			<Button
+				variant="primary"
+				large
+				disabled={busy || errorCount > 0 || preview.rows.length === 0}
+				onclick={apply}
+			>
+				{busy ? text.applying : text.apply}
+			</Button>
+		{/if}
+
+		{#if message}<p class="message" role="status">{message}</p>{/if}
+	</section>
+</div>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.back {
+		@apply text-sm font-semibold text-primary;
+	}
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.page {
+		@apply flex max-w-3xl flex-col gap-6;
+	}
+	.section {
+		@apply flex flex-col items-start gap-3;
+	}
+	.heading {
+		@apply text-lg font-extrabold;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.small {
+		@apply text-xs;
+	}
+	.strong {
+		@apply font-extrabold;
+	}
+	.message {
+		@apply text-sm font-semibold;
+	}
+	.file {
+		@apply min-h-11;
+	}
+	.modes {
+		@apply flex w-full flex-col gap-2;
+	}
+	.legend {
+		@apply mb-1 font-extrabold;
+	}
+	.preview {
+		@apply flex max-h-96 w-full flex-col gap-1 overflow-y-auto text-sm;
+	}
+	.row {
+		--fill: var(--color-foreground);
+		@apply edge-flat flex flex-wrap justify-between gap-x-3 rounded-base bg-foreground p-2;
+	}
+	.bad {
+		--fill: var(--color-danger);
+		@apply bg-danger/10;
+	}
+	.what {
+		@apply min-w-0 truncate;
+	}
+</style>

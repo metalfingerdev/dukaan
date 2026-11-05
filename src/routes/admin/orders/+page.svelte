@@ -5,6 +5,8 @@
 	import { api } from '#convex/_generated/api.js';
 	import { formatDateTime, formatPaise } from '#lib/store/format.js';
 	import { strings } from '#lib/store/strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
 
 	const text = strings.admin.pastOrders;
 	const orders = usePaginatedQuery(api.store.admin.orders.listDelivered, {}, { initialNumItems: 20 });
@@ -14,41 +16,66 @@
 	<title>{text.title}</title>
 </svelte:head>
 
-<h1 class="h3">{text.title}</h1>
-<p class="text-surface-600-400 text-sm">{text.intro}</p>
+<h1 class="title">{text.title}</h1>
+<p class="muted">{text.intro}</p>
 
 {#if orders.error}
-	<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+	<p class="problem">{strings.common.error}</p>
 {:else if orders.status === 'LoadingFirstPage'}
-	<div class="bg-surface-100-900 h-40 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+	<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
 {:else if orders.results.length === 0}
-	<p class="text-surface-600-400 text-sm">{text.empty}</p>
+	<p class="muted">{text.empty}</p>
 {:else}
-	<ul class="flex flex-col gap-2">
+	<ul class="rows">
 		{#each orders.results as order (order._id)}
-			<li class="card preset-outlined-surface-300-700 flex flex-wrap items-center justify-between gap-2 p-3">
-				<div>
-					<p class="font-semibold">#{order.orderNumber} · {formatPaise(order.totalPaise)}</p>
-					<p class="text-surface-600-400 text-sm">
-						{order.contactName} · {order.area}{#if order.deliveredAt} · {formatDateTime(order.deliveredAt)}{/if}
-					</p>
-				</div>
-				{#if order.invoiceNumber}
-					<a href={resolve('/admin/orders/[id]/invoice', { id: order._id })} class="btn preset-tonal min-h-11">
-						{text.invoice} {order.invoiceNumber}
-					</a>
-				{/if}
+			<li>
+				<Card dense>
+					<div class="line">
+						<div>
+							<p class="strong">#{order.orderNumber} · {formatPaise(order.totalPaise)}</p>
+							<p class="muted">
+								{order.contactName} · {order.area}{#if order.deliveredAt} · {formatDateTime(order.deliveredAt)}{/if}
+							</p>
+						</div>
+						{#if order.invoiceNumber}
+							<Button href={resolve('/admin/orders/[id]/invoice', { id: order._id })}>
+								{text.invoice} {order.invoiceNumber}
+							</Button>
+						{/if}
+					</div>
+				</Card>
 			</li>
 		{/each}
 	</ul>
 	{#if orders.status === 'CanLoadMore' || orders.status === 'LoadingMore'}
-		<button
-			type="button"
-			class="btn preset-tonal min-h-11 self-start"
-			disabled={orders.status === 'LoadingMore'}
-			onclick={() => orders.loadMore(20)}
-		>
+		<Button disabled={orders.status === 'LoadingMore'} onclick={() => orders.loadMore(20)}>
 			{text.loadMore}
-		</button>
+		</Button>
 	{/if}
 {/if}
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.rows {
+		@apply flex max-w-4xl flex-col gap-2;
+	}
+	.line {
+		@apply flex flex-wrap items-center justify-between gap-2;
+	}
+	.strong {
+		@apply font-extrabold;
+	}
+	.placeholder {
+		@apply block h-40 w-full;
+	}
+</style>

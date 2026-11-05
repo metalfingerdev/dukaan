@@ -16,11 +16,22 @@
 </svelte:head>
 
 {#if settings.error}
-	<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+	<p class="problem">{strings.common.error}</p>
 {:else if settings.data === undefined}
-	<div class="bg-surface-100-900 h-24 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+	<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
 {:else}
 	<StoreOpenSwitch hours={settings.data.settings} />
 {/if}
 
 <OrderBoard />
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.placeholder {
+		@apply h-20 w-full;
+	}
+</style>

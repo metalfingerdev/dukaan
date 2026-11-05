@@ -7,6 +7,7 @@
 
 	import { strings } from '#lib/store/strings.js';
 	import { uploadProductImage } from './uploadImage.js';
+	import Button from '#lib/ui/Button.svelte';
 
 	let { productId, imageUrl }: { productId: Id<'products'>; imageUrl: string | null } = $props();
 
@@ -54,32 +55,67 @@
 	};
 </script>
 
-<fieldset class="flex flex-col gap-3" disabled={busy}>
-	<legend class="mb-2 font-semibold">{text.photoTitle}</legend>
-	<div class="flex items-center gap-4">
-		<div
-			class="bg-surface-100-900 flex size-24 shrink-0 items-center justify-center overflow-hidden rounded text-xs"
-		>
+<fieldset class="photo" disabled={busy}>
+	<legend class="legend">{text.photoTitle}</legend>
+	<div class="row">
+		<div class="preview">
 			{#if current}
-				<img src={current} alt="" class="size-full object-cover" width="96" height="96" />
+				<img src={current} alt="" width="96" height="96" />
 			{:else}
-				<span class="text-surface-600-400">{strings.admin.products.noPhoto}</span>
+				<span class="none">{strings.admin.products.noPhoto}</span>
 			{/if}
 		</div>
-		<div class="flex flex-col gap-2">
-			<label class="btn preset-tonal min-h-11 cursor-pointer">
+		<div class="buttons">
+			<!-- A file input in a label: the label is the button, the input stays for the tests and
+				screen readers -->
+			<label class="pick">
 				{current ? text.changePhoto : text.choosePhoto}
 				<input type="file" accept="image/*" class="sr-only" onchange={change} />
 			</label>
 			{#if current}
-				<button type="button" class="btn preset-tonal min-h-11" onclick={remove}>
-					{text.removePhoto}
-				</button>
+				<Button onclick={remove}>{text.removePhoto}</Button>
 			{/if}
 		</div>
 	</div>
-	<span class="text-surface-600-400 text-xs">{text.photoHint}</span>
+	<span class="hint">{text.photoHint}</span>
 	{#if message}
-		<p class="text-sm" role="status">{message}</p>
+		<p class="message" role="status">{message}</p>
 	{/if}
 </fieldset>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.photo {
+		@apply flex flex-col gap-3;
+	}
+	.legend {
+		@apply mb-2 font-extrabold;
+	}
+	.row {
+		@apply flex items-center gap-4;
+	}
+	.preview {
+		--fill: var(--color-background);
+		@apply edge-flat flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-base bg-background text-xs;
+	}
+	.preview img {
+		@apply size-full object-cover;
+	}
+	.none {
+		@apply text-text-muted;
+	}
+	.buttons {
+		@apply flex flex-col gap-2;
+	}
+	.pick {
+		--fill: var(--color-foreground);
+		@apply edge edge-press inline-flex min-h-11 cursor-pointer items-center justify-center rounded-base bg-foreground px-4 font-bold;
+	}
+	.hint {
+		@apply text-xs text-text-muted;
+	}
+	.message {
+		@apply text-sm font-semibold;
+	}
+</style>

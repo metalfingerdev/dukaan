@@ -8,6 +8,8 @@
 
 	import { formatDateTime } from '#lib/store/format.js';
 	import { strings } from '#lib/store/strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Field from '#lib/ui/Field.svelte';
 
 	let { productId, stock }: { productId: Id<'products'>; stock: number } = $props();
 
@@ -77,51 +79,46 @@
 	};
 </script>
 
-<div class="border-surface-200-800 flex flex-col gap-4 border-t pt-3">
-	<div class="flex flex-wrap items-end gap-2">
-		<label class="label w-28">
-			<span class="label-text">{text.quantity}</span>
-			<input class="input" inputmode="numeric" autocomplete="off" bind:value={quantity} />
-		</label>
-		<button type="button" class="btn preset-filled-primary-500 min-h-11" disabled={busy} onclick={() => adjust('receiveStock')}>
-			{text.received}
-		</button>
-		<button type="button" class="btn preset-tonal min-h-11" disabled={busy} onclick={() => adjust('writeOff')}>
-			{text.damaged}
-		</button>
+<div class="panel">
+	<div class="row">
+		<span class="narrow">
+			<Field label={text.quantity}>
+				<input inputmode="numeric" autocomplete="off" bind:value={quantity} />
+			</Field>
+		</span>
+		<Button variant="primary" disabled={busy} onclick={() => adjust('receiveStock')}>{text.received}</Button>
+		<Button disabled={busy} onclick={() => adjust('writeOff')}>{text.damaged}</Button>
 	</div>
 
-	<div class="flex flex-col gap-1">
-		<div class="flex flex-wrap items-end gap-2">
-			<label class="label w-40">
-				<span class="label-text">{text.counted}</span>
-				<input class="input" inputmode="numeric" autocomplete="off" bind:value={counted} />
-			</label>
-			<button type="button" class="btn preset-tonal min-h-11" disabled={busy} onclick={count}>
-				{text.setCount}
-			</button>
+	<div class="count">
+		<div class="row">
+			<span class="wide">
+				<Field label={text.counted} hint={text.countHint}>
+					<input inputmode="numeric" autocomplete="off" bind:value={counted} />
+				</Field>
+			</span>
+			<Button disabled={busy} onclick={count}>{text.setCount}</Button>
 		</div>
-		<span class="text-surface-600-400 text-xs">{text.countHint}</span>
-		{#if held.data}<span class="text-xs">{text.held(held.data)}</span>{/if}
+		{#if held.data}<span class="small">{text.held(held.data)}</span>{/if}
 	</div>
 
-	{#if message}<p class="text-sm" role="status">{message}</p>{/if}
+	{#if message}<p class="message" role="status">{message}</p>{/if}
 
 	<div>
-		<h3 class="mb-1 text-sm font-semibold">{text.history}</h3>
+		<h3 class="heading">{text.history}</h3>
 		{#if history.data === undefined}
-			<div class="bg-surface-100-900 h-12 animate-pulse rounded" aria-busy="true"></div>
+			<div class="bone loading" aria-busy="true"></div>
 		{:else if history.data.length === 0}
-			<p class="text-surface-600-400 text-sm">{text.noHistory}</p>
+			<p class="small">{text.noHistory}</p>
 		{:else}
-			<ul class="flex flex-col gap-1 text-sm">
+			<ul class="history">
 				{#each history.data as row (row._id)}
-					<li class="flex justify-between gap-2">
+					<li>
 						<span>
 							{text.reason[row.reason]}
-							<span class="text-surface-600-400 text-xs">{formatDateTime(row.at)}</span>
+							<span class="small">{formatDateTime(row.at)}</span>
 						</span>
-						<span class="tabular-nums">
+						<span class="change">
 							{row.delta > 0 ? '+' : ''}{row.delta} → {row.stockAfter}
 						</span>
 					</li>
@@ -130,3 +127,44 @@
 		{/if}
 	</div>
 </div>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.panel {
+		@apply flex flex-col gap-4 border-t-2 border-border-muted pt-3;
+	}
+	.row {
+		@apply flex flex-wrap items-end gap-2;
+	}
+	.narrow {
+		@apply w-28;
+	}
+	.wide {
+		@apply w-40;
+	}
+	.count {
+		@apply flex flex-col gap-1;
+	}
+	.small {
+		@apply text-xs text-text-muted;
+	}
+	.message {
+		@apply text-sm font-semibold;
+	}
+	.heading {
+		@apply mb-1 text-sm font-extrabold;
+	}
+	.history {
+		@apply flex flex-col gap-1 text-sm;
+	}
+	.history li {
+		@apply flex justify-between gap-2;
+	}
+	.change {
+		@apply tabular-nums;
+	}
+	.loading {
+		@apply block h-12 w-full;
+	}
+</style>

@@ -24,6 +24,7 @@
   import DeliveryLink from "#lib/store/delivery/DeliveryLink.svelte";
   import ShopHeader from "#lib/store/ui/ShopHeader.svelte";
   import RiderHeader from "#lib/store/delivery/RiderHeader.svelte";
+  import AdminHeader from "#lib/store/admin/AdminHeader.svelte";
   import CartDrawer from "#lib/store/ui/CartDrawer.svelte";
 
   let { children, data } = $props();
@@ -32,8 +33,9 @@
   // auth pages keep the old one until their turn in the redesign
   const route = $derived(page.route.id ?? "");
   const rider = $derived(route.startsWith("/delivery"));
-  const legacy = $derived(/^\/(admin|\(auth\)\/(reset-password|device))/.test(route));
-  const shop = $derived(!rider && !legacy);
+  const admin = $derived(route.startsWith("/admin"));
+  const legacy = $derived(/^\/\(auth\)\/(reset-password|device)/.test(route));
+  const shop = $derived(!rider && !admin && !legacy);
 
   createSvelteAuthClient({ authClient, getServerState: () => data.authState });
   const auth = useAuth();
@@ -47,7 +49,7 @@
 
 <Toaster position="top-center" />
 <AuthProvider {api} {authClient} authConstants={AUTH_CONSTANTS}>
-  <div class="shell" class:shop={shop || rider}>
+  <div class="shell" class:shop={shop || rider || admin}>
     {#if AUTH_CONSTANTS.admin}
       <div class="print:hidden"><ImpersonationBanner /></div>
     {/if}
@@ -55,6 +57,8 @@
       <ShopHeader initialData={data.initialData} orgInitialData={data.initialData} />
     {:else if rider}
       <RiderHeader initialData={data.initialData} />
+    {:else if admin}
+      <AdminHeader initialData={data.initialData} />
     {:else}
       <header class="site-header">
         <a href={resolve("/")} class="wordmark">{STORE_NAME}</a>

@@ -258,6 +258,10 @@ those come first. Ordered by what unblocks what.
      biggest line on every card and on the delivery page, big green Call / Delivered and red
      Couldn't-deliver buttons, and the Delivered and Couldn't-deliver forms as bottom sheets
      (Bits `Dialog`). Why: one hand, on a bike, in sunlight.
+   - *Store admin* (`/admin`, except the users dashboard): calmer and denser than the shop (`Card
+     dense`: flat edge, small padding). A slim `AdminHeader` and a menu that is a scrolling tab row on
+     a phone and a left column on a laptop; the order board shows four columns on a laptop and tabs
+     on a phone; forms are `Field`s inside dense cards, one narrow column. Native `<select>`s stay.
    - *Not built*: a "call your delivery partner" button on order tracking, because the customer's
      order does not expose the partner's name or phone (riders phone customers). It needs a
      privacy decision first.

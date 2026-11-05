@@ -4,6 +4,9 @@
 	import { api } from '#convex/_generated/api.js';
 	import { financialYear, formatInvoiceNumber } from '#convex/model/store/invoice.js';
 	import { strings } from '#lib/store/strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
 
 	type Field = 'legalName' | 'addressLine' | 'gstin' | 'invoicePrefix';
 
@@ -55,54 +58,74 @@
 	};
 </script>
 
-{#snippet fieldError(field: Field)}
-	{#if error?.field === field}<span class="text-error-600-400 text-sm" role="alert">{error.text}</span>{/if}
-{/snippet}
-
-<section class="flex flex-col gap-3" aria-labelledby="invoice-details-title">
+<section class="section" aria-labelledby="invoice-details-title">
 	<div>
-		<h2 id="invoice-details-title" class="h5">{text.title}</h2>
-		<p class="text-surface-600-400 text-sm">{text.hint}</p>
+		<h2 id="invoice-details-title" class="heading">{text.title}</h2>
+		<p class="muted">{text.hint}</p>
 	</div>
 	{#if details.error}
-		<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+		<p class="problem">{strings.common.error}</p>
 	{:else if !loaded}
-		<div class="bg-surface-100-900 h-40 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+		<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
 	{:else}
-		<form class="flex flex-col gap-3" onsubmit={save} novalidate>
-			<label class="label">
-				<span class="label-text">{text.legalName}</span>
-				<input class="input min-h-11" bind:value={form.legalName} maxlength="100" required />
-				{@render fieldError('legalName')}
-			</label>
-			<label class="label">
-				<span class="label-text">{text.addressLine}</span>
-				<input class="input min-h-11" bind:value={form.addressLine} maxlength="200" required />
-				{@render fieldError('addressLine')}
-			</label>
-			<label class="label">
-				<span class="label-text">{text.gstin}</span>
-				<input
-					class="input min-h-11 uppercase"
-					bind:value={form.gstin}
-					maxlength="20"
-					autocapitalize="characters"
-					spellcheck="false"
-				/>
-				<span class="text-surface-600-400 text-xs">{text.gstinHint}</span>
-				{@render fieldError('gstin')}
-			</label>
-			<label class="label">
-				<span class="label-text">{text.invoicePrefix}</span>
-				<input class="input min-h-11 uppercase" bind:value={form.invoicePrefix} maxlength="3" required />
-				<span class="text-surface-600-400 text-xs">{text.prefixHint(example)}</span>
-				{@render fieldError('invoicePrefix')}
-			</label>
-			<button type="submit" class="btn preset-filled-primary-500 min-h-12" disabled={saving}>
-				{saving ? text.saving : text.save}
-			</button>
-			{#if error && error.field === null}<p class="text-error-600-400 text-sm" role="alert">{error.text}</p>{/if}
-			{#if message}<p class="text-sm" role="status">{message}</p>{/if}
-		</form>
+		<Card dense>
+			<form class="form" onsubmit={save} novalidate>
+				<Field label={text.legalName} error={error?.field === 'legalName' ? error.text : undefined}>
+					<input bind:value={form.legalName} maxlength="100" required />
+				</Field>
+				<Field label={text.addressLine} error={error?.field === 'addressLine' ? error.text : undefined}>
+					<input bind:value={form.addressLine} maxlength="200" required />
+				</Field>
+				<Field label={text.gstin} hint={text.gstinHint} error={error?.field === 'gstin' ? error.text : undefined}>
+					<input
+						class="upper"
+						bind:value={form.gstin}
+						maxlength="20"
+						autocapitalize="characters"
+						spellcheck="false"
+					/>
+				</Field>
+				<Field label={text.invoicePrefix} hint={text.prefixHint(example)} error={error?.field === 'invoicePrefix' ? error.text : undefined}>
+					<input class="upper" bind:value={form.invoicePrefix} maxlength="3" required />
+				</Field>
+				<Button type="submit" variant="primary" large disabled={saving}>
+					{saving ? text.saving : text.save}
+				</Button>
+				{#if error && error.field === null}<p class="problem" role="alert">{error.text}</p>{/if}
+				{#if message}<p class="message" role="status">{message}</p>{/if}
+			</form>
+		</Card>
 	{/if}
 </section>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.section {
+		@apply flex flex-col gap-3;
+	}
+	.heading {
+		@apply text-lg font-extrabold;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.message {
+		@apply text-sm font-semibold;
+	}
+	.form {
+		@apply flex flex-col items-start gap-3;
+	}
+	.form :global(.field) {
+		@apply w-full;
+	}
+	.upper {
+		@apply uppercase;
+	}
+	.placeholder {
+		@apply block h-40 w-full;
+	}
+</style>
