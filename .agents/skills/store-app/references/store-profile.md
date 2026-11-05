@@ -262,6 +262,12 @@ those come first. Ordered by what unblocks what.
      dense`: flat edge, small padding). A slim `AdminHeader` and a menu that is a scrolling tab row on
      a phone and a left column on a laptop; the order board shows four columns on a laptop and tabs
      on a phone; forms are `Field`s inside dense cards, one narrow column. Native `<select>`s stay.
+   - *Skeleton UI and Ark UI are removed.* Their class and colour names that the template's account,
+     user and organization screens still use live on as `src/themes/compat.css`, implemented on our
+     palette; the Ark-based primitives (dialog, drawer, popover, menu, select, tabs, avatar) are now
+     Bits UI wrappers with the same exports and props, so those screens did not change. Toasts
+     (sonner), the password meter and the focus rings use the palette too. To retire the compat
+     layer, move a screen to `src/lib/ui` components when you touch it.
    - *Not built*: a "call your delivery partner" button on order tracking, because the customer's
      order does not expose the partner's name or phone (riders phone customers). It needs a
      privacy decision first.

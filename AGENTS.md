@@ -72,15 +72,22 @@ docs/                  developer docs, start at docs/README.md
 - **Formatting is 2 spaces and double quotes** (`.prettierrc`). Older files still use tabs and single
   quotes; keep a file's existing style when you make a small edit, and never reformat files you
   aren't changing. New and rewritten files use the `.prettierrc` style.
-- **The UI is moving off Skeleton UI and Ark UI to our own palette and Bits UI** (roadmap:
+- **The UI uses our own palette and Bits UI; Skeleton UI and Ark UI are gone** (design record:
   `.agents/skills/store-app/references/store-profile.md`, step 8). Colours come from
   `src/themes/palette.css` only: layers `background` (darkest) < `midground` < `foreground`
   (lightest) in both light and dark mode, plus `text`, `text-muted`, `primary`, `secondary`,
-  `danger`, `warning`, `success`, `info`, `border`. Never flip the layers per mode. New code uses no
-  Skeleton classes (`preset-*`, `btn`, `card`, `surface-*`, `primary-500`) and no `@ark-ui`; use
-  `bits-ui`. Borders and hard shadows are never black (black is for text): use the `edge`,
-  `edge-flat` and `edge-press` utilities in `src/app.css` and set `--fill` to the element's own
-  background so the border is a shade darker than the surface. System dark mode only.
+  `on-secondary`, `danger`, `warning`, `success`, `info`, `border`. Never flip the layers per mode.
+  Build screens from `src/lib/ui` (Button, Card, Pill, Field, Choice, Notice, Select, Switch,
+  Sheet, Modal, ConfirmDialog, Spinner) and the Bits-based wrappers in `src/lib/primitives/ui`.
+  Borders and hard shadows are never black (black is for text): use the `edge`, `edge-flat` and
+  `edge-press` utilities in `src/app.css` and set `--fill` to the element's own background so the
+  border is a shade darker than the surface. System dark mode only.
+- **`src/themes/compat.css` implements Skeleton's old class and colour names** (`btn`,
+  `preset-tonal`, `input`, `surface-600-400`, `h3`, ...) on our palette, only so the template's
+  account, user and organization screens keep working. Never use those names in new code. When you
+  touch one of those files, move it to `src/lib/ui` components and drop the names nothing uses.
+  Don't give a scoped class one of those names (`card`, `label`, `chip`, `placeholder`, `table`,
+  `badge`, `input`, `select`, ...): the global rule would apply too.
 - **No long Tailwind class lists inline.** Give the element a short semantic class and put the
   Tailwind in the component's style block with `@apply`:
   `<style lang="postcss">` then `@reference 'src/app.css';` then rules. Why: the founder finds

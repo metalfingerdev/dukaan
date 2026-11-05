@@ -73,7 +73,7 @@
     <Popover.Trigger class="ui-account-trigger" aria-label={strings.header.account}>
       <Avatar.Root class="ui-avatar">
         <Avatar.Image src={user.image} alt="" class="ui-avatar-image" />
-        <Avatar.Fallback class="ui-avatar-fallback">{initials}</Avatar.Fallback>
+        <Avatar.Fallback class="ui-account-initials">{initials}</Avatar.Fallback>
       </Avatar.Root>
     </Popover.Trigger>
     <Popover.Portal>
@@ -81,7 +81,7 @@
         <button type="button" class="who" onclick={openProfile}>
           <Avatar.Root class="ui-avatar big">
             <Avatar.Image src={user.image} alt="" class="ui-avatar-image" />
-            <Avatar.Fallback class="ui-avatar-fallback">{initials}</Avatar.Fallback>
+            <Avatar.Fallback class="ui-account-initials">{initials}</Avatar.Fallback>
           </Avatar.Root>
           <span class="names">
             <b>{user.name}</b>
@@ -150,6 +150,9 @@
   }
   :global(.ui-avatar.big) {
     @apply size-12 shrink-0;
+  }
+  :global(.ui-account-initials) {
+    @apply grid size-full place-items-center;
   }
   :global(.ui-avatar-image) {
     @apply size-full object-cover;
