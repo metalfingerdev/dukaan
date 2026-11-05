@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { resolve } from "$app/paths";
+  import PhoneIcon from "@lucide/svelte/icons/phone";
   import { useConvexClient, useQuery } from "convex-svelte";
   import { api } from "#convex/_generated/api.js";
   import {
@@ -157,6 +158,19 @@
               orderId: order._id,
             })}
         />
+      {/if}
+
+      {#if order.partner}
+        <!-- Only while the order is on the way: the number is not kept on old orders -->
+        <Button
+          href={`tel:${order.partner.phoneNumber}`}
+          variant="success"
+          large
+          block
+        >
+          <PhoneIcon class="size-5" aria-hidden="true" />
+          {strings.orders.callPartner(order.partner.name)}
+        </Button>
       {/if}
 
       {#if order.status === "out_for_delivery" || order.status === "delivery_failed" || order.status === "packed"}

@@ -231,6 +231,7 @@ export const strings = {
 		cancelFailed: "We couldn't cancel this order. It may already be on its way.",
 		cancelledNote: 'This order was cancelled.',
 		cantCancel: 'This order is already being prepared. To cancel it, please call the store.',
+		callPartner: (name: string) => `Call ${name}, your delivery partner`,
 		callStore: 'Call the store',
 		contactStore: 'Please contact the store.',
 		codeTitle: 'Your delivery code',

@@ -288,6 +288,8 @@ const orderDetail = v.object({
 	invoiceNumber: v.optional(v.string()),
 	// Only while the order is open: the customer reads it out to the delivery partner
 	deliveryCode: v.optional(v.string()),
+	// The delivery partner the customer may phone, only while the order is out for delivery
+	partner: v.optional(v.object({ name: v.string(), phoneNumber: v.string() })),
 	// The Razorpay UPI QR, while the order is out for delivery
 	upiQr: v.optional(upiQrView),
 	// Paying online: what the page needs to open Razorpay Checkout
@@ -320,8 +322,9 @@ const orderDetail = v.object({
 
 /**
  * One of the customer's own orders with its items and timeline, or `null` when the id is
- * malformed, unknown or someone else's. A purpose-built projection: no user id, idempotency key,
- * partner or cash fields.
+ * malformed, unknown or someone else's. A purpose-built projection: no user id, idempotency key or
+ * cash fields. The assigned partner's name and phone appear only while the order is out for
+ * delivery, so a number is never left on an old order.
  */
 export const getOrder = query({
 	args: { orderId: v.string() },
@@ -343,6 +346,11 @@ export const getOrder = query({
 				.take(50)
 		]);
 
+		const partnerDoc =
+			order.status === 'out_for_delivery' && order.assignedPartnerId
+				? await ctx.db.get(order.assignedPartnerId)
+				: null;
+
 		return {
 			_id: order._id,
 			orderNumber: order.orderNumber,
@@ -363,6 +371,7 @@ export const getOrder = query({
 				contactPhone: order.address.contactPhone,
 				hasPin: order.address.lat !== undefined && order.address.lng !== undefined
 			},
+			...(partnerDoc ? { partner: { name: partnerDoc.name, phoneNumber: partnerDoc.phoneNumber } } : {}),
 			slotStartMs: order.slotStartMs,
 			customerNote: order.customerNote,
 			placedAt: order._creationTime,

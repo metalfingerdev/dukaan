@@ -539,7 +539,7 @@ describe('transitionOrder', () => {
 describe('reading orders', () => {
 	const KEYS = [
 		'_id', 'address', 'customerNote', 'deliveredAt', 'deliveryCode', 'deliveryFeePaise', 'events', 'invoiceNumber',
-		'items', 'orderNumber', 'paymentMethod', 'paymentStatus', 'placedAt', 'savingsPaise', 'slotStartMs',
+		'items', 'orderNumber', 'partner', 'paymentMethod', 'paymentStatus', 'placedAt', 'savingsPaise', 'slotStartMs',
 		'smallCartFeePaise', 'status', 'subtotalPaise', 'totalPaise'
 	];
 	const PRIVATE = ['userId', 'idempotencyKey', 'assignedPartnerId', 'cashCollectedPaise', 'cashSettledAt', '_creationTime'];
