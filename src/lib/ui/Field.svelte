@@ -7,10 +7,15 @@
     label,
     hint,
     hideLabel = false,
+    error,
+    errorId,
     children,
   }: {
     label: string;
     hint?: string;
+    /** A message for this field; link the control to it with aria-describedby={errorId} */
+    error?: string;
+    errorId?: string;
     /** Keep the label for screen readers only, when a heading already says it */
     hideLabel?: boolean;
     children: Snippet;
@@ -23,6 +28,7 @@
     {@render children()}
   </label>
   {#if hint}<p class="hint">{hint}</p>{/if}
+  {#if error}<p id={errorId} class="problem">{error}</p>{/if}
 </div>
 
 <style lang="postcss">
@@ -39,6 +45,9 @@
   }
   .hint {
     @apply text-xs text-text-muted;
+  }
+  .problem {
+    @apply text-sm font-semibold text-danger;
   }
   .field :global(input:not([type="radio"], [type="checkbox"])),
   .field :global(select),

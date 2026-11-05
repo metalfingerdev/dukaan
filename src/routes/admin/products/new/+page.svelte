@@ -21,13 +21,30 @@
 	<title>{text.form.newTitle} | {strings.admin.title}</title>
 </svelte:head>
 
-<a href={resolve('/admin/products')} class="text-primary-600-400 text-sm">&larr; {text.form.back}</a>
-<h1 class="h3">{text.form.newTitle}</h1>
+<a href={resolve('/admin/products')} class="back">&larr; {text.form.back}</a>
+<h1 class="title">{text.form.newTitle}</h1>
 
 {#if categories.error}
-	<p class="text-error-600-400 text-sm">{strings.common.error}</p>
+	<p class="problem">{strings.common.error}</p>
 {:else if categories.data === undefined}
-	<div class="bg-surface-100-900 h-64 animate-pulse rounded" aria-busy="true" aria-label={strings.common.loading}></div>
+	<div class="bone loading" aria-busy="true" aria-label={strings.common.loading}></div>
 {:else}
 	<ProductForm categories={categories.data} {initialCategoryId} />
 {/if}
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.back {
+		@apply text-sm font-semibold text-primary;
+	}
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.problem {
+		@apply text-sm font-semibold text-danger;
+	}
+	.loading {
+		@apply block h-64 w-full;
+	}
+</style>

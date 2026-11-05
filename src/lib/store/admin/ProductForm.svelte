@@ -13,6 +13,9 @@
 	import { strings } from '#lib/store/strings.js';
 	import ProductPhoto from './ProductPhoto.svelte';
 	import { uploadProductImage } from './uploadImage.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import Field from '#lib/ui/Field.svelte';
 
 	type Category = { _id: Id<'categories'>; name: string; isActive: boolean };
 	type Product = {
@@ -176,215 +179,218 @@
 	};
 </script>
 
-{#snippet fieldError(field: ProductField)}
-	{#if errors[field]}
-		<span id="{field}-error" class="text-error-600-400 text-sm">{errors[field]}</span>
-	{/if}
-{/snippet}
-
-<form class="flex flex-col gap-6" onsubmit={save} novalidate>
-	<fieldset class="flex flex-col gap-3" disabled={createdId !== null}>
-		<label class="label">
-			<span class="label-text">{text.name}</span>
-			<input
-				class="input"
-				bind:value={form.name}
-				maxlength={80}
-				autocomplete="off"
-				aria-invalid={errors.name ? 'true' : undefined}
-				aria-describedby={errors.name ? 'name-error' : undefined}
-			/>
-			<span class="text-surface-600-400 text-xs">{text.nameHint}</span>
-			{@render fieldError('name')}
-		</label>
-
-		<div class="grid gap-3 sm:grid-cols-2">
-			<label class="label">
-				<span class="label-text">{text.unitLabel}</span>
+<form class="form" onsubmit={save} novalidate>
+	<Card dense>
+		<fieldset class="group" disabled={createdId !== null}>
+			<Field label={text.name} hint={text.nameHint} error={errors.name} errorId="name-error">
 				<input
-					class="input"
-					bind:value={form.unitLabel}
-					maxlength={30}
+					bind:value={form.name}
+					maxlength={80}
 					autocomplete="off"
-					aria-invalid={errors.unitLabel ? 'true' : undefined}
-					aria-describedby={errors.unitLabel ? 'unitLabel-error' : undefined}
+					aria-invalid={errors.name ? 'true' : undefined}
+					aria-describedby={errors.name ? 'name-error' : undefined}
 				/>
-				<span class="text-surface-600-400 text-xs">{text.unitHint}</span>
-				{@render fieldError('unitLabel')}
-			</label>
-			<label class="label">
-				<span class="label-text">{text.category}</span>
-				<select
-					class="select"
-					bind:value={form.categoryId}
-					aria-invalid={errors.categoryId ? 'true' : undefined}
-					aria-describedby={errors.categoryId ? 'categoryId-error' : undefined}
-				>
-					<option value="" disabled>{text.pickCategory}</option>
-					{#each categories as category (category._id)}
-						<option value={category._id}>
-							{category.name}{category.isActive ? '' : ` (${strings.admin.products.hidden})`}
-						</option>
-					{/each}
-				</select>
-				{@render fieldError('categoryId')}
-			</label>
-		</div>
+			</Field>
 
-		<div class="grid gap-3 sm:grid-cols-2">
-			<label class="label">
-				<span class="label-text">{text.price}</span>
-				<input
-					class="input"
-					inputmode="decimal"
-					autocomplete="off"
-					bind:value={form.pricePaise}
-					aria-invalid={errors.pricePaise ? 'true' : undefined}
-					aria-describedby={errors.pricePaise ? 'pricePaise-error' : undefined}
-				/>
-				{@render fieldError('pricePaise')}
-			</label>
-			<label class="label">
-				<span class="label-text">{text.mrp}</span>
-				<input
-					class="input"
-					inputmode="decimal"
-					autocomplete="off"
-					bind:value={form.mrpPaise}
-					aria-invalid={errors.mrpPaise ? 'true' : undefined}
-					aria-describedby={errors.mrpPaise ? 'mrpPaise-error' : undefined}
-				/>
-				<span class="text-surface-600-400 text-xs">{text.mrpHint}</span>
-				{@render fieldError('mrpPaise')}
-			</label>
-		</div>
+			<div class="two">
+				<Field label={text.unitLabel} hint={text.unitHint} error={errors.unitLabel} errorId="unitLabel-error">
+					<input
+						bind:value={form.unitLabel}
+						maxlength={30}
+						autocomplete="off"
+						aria-invalid={errors.unitLabel ? 'true' : undefined}
+						aria-describedby={errors.unitLabel ? 'unitLabel-error' : undefined}
+					/>
+				</Field>
+				<Field label={text.category} error={errors.categoryId} errorId="categoryId-error">
+					<select
+						bind:value={form.categoryId}
+						aria-invalid={errors.categoryId ? 'true' : undefined}
+						aria-describedby={errors.categoryId ? 'categoryId-error' : undefined}
+					>
+						<option value="" disabled>{text.pickCategory}</option>
+						{#each categories as category (category._id)}
+							<option value={category._id}>
+								{category.name}{category.isActive ? '' : ` (${strings.admin.products.hidden})`}
+							</option>
+						{/each}
+					</select>
+				</Field>
+			</div>
 
-		{#if product}
-			<p class="text-sm">
-				<span class="font-semibold">{text.currentStock}:</span>
-				{product.stock}
-				<span class="text-surface-600-400 block text-xs">{text.stockLocked}</span>
-			</p>
-		{:else}
-			<label class="label">
-				<span class="label-text">{text.openingStock}</span>
-				<input
-					class="input"
-					inputmode="numeric"
-					autocomplete="off"
-					bind:value={form.stock}
-					aria-invalid={errors.stock ? 'true' : undefined}
-					aria-describedby={errors.stock ? 'stock-error' : undefined}
-				/>
-				<span class="text-surface-600-400 text-xs">{text.openingStockHint}</span>
-				{@render fieldError('stock')}
-			</label>
-		{/if}
+			<div class="two">
+				<Field label={text.price} error={errors.pricePaise} errorId="pricePaise-error">
+					<input
+						inputmode="decimal"
+						autocomplete="off"
+						bind:value={form.pricePaise}
+						aria-invalid={errors.pricePaise ? 'true' : undefined}
+						aria-describedby={errors.pricePaise ? 'pricePaise-error' : undefined}
+					/>
+				</Field>
+				<Field label={text.mrp} hint={text.mrpHint} error={errors.mrpPaise} errorId="mrpPaise-error">
+					<input
+						inputmode="decimal"
+						autocomplete="off"
+						bind:value={form.mrpPaise}
+						aria-invalid={errors.mrpPaise ? 'true' : undefined}
+						aria-describedby={errors.mrpPaise ? 'mrpPaise-error' : undefined}
+					/>
+				</Field>
+			</div>
 
-		<div class="grid gap-3 sm:grid-cols-2">
-			<label class="label">
-				<span class="label-text">{text.maxPerOrder}</span>
-				<input
-					class="input"
-					inputmode="numeric"
-					autocomplete="off"
-					bind:value={form.maxPerOrder}
-					aria-invalid={errors.maxPerOrder ? 'true' : undefined}
-					aria-describedby={errors.maxPerOrder ? 'maxPerOrder-error' : undefined}
-				/>
-				{@render fieldError('maxPerOrder')}
-			</label>
-			<label class="label">
-				<span class="label-text">{text.lowStockAt}</span>
-				<input
-					class="input"
-					inputmode="numeric"
-					autocomplete="off"
-					bind:value={form.lowStockAt}
-					aria-invalid={errors.lowStockAt ? 'true' : undefined}
-					aria-describedby={errors.lowStockAt ? 'lowStockAt-error' : undefined}
-				/>
-				<span class="text-surface-600-400 text-xs">{text.lowStockHint}</span>
-				{@render fieldError('lowStockAt')}
-			</label>
-		</div>
+			{#if product}
+				<p class="stock">
+					<b>{text.currentStock}:</b>
+					{product.stock}
+					<span class="hint block">{text.stockLocked}</span>
+				</p>
+			{:else}
+				<Field label={text.openingStock} hint={text.openingStockHint} error={errors.stock} errorId="stock-error">
+					<input
+						inputmode="numeric"
+						autocomplete="off"
+						bind:value={form.stock}
+						aria-invalid={errors.stock ? 'true' : undefined}
+						aria-describedby={errors.stock ? 'stock-error' : undefined}
+					/>
+				</Field>
+			{/if}
 
-		<label class="flex min-h-11 items-center gap-3">
-			<input class="checkbox" type="checkbox" bind:checked={form.isActive} />
-			<span>{text.isActive}</span>
-		</label>
-		<label class="flex min-h-11 items-center gap-3">
-			<input class="checkbox" type="checkbox" bind:checked={form.isFeatured} />
-			<span>{text.isFeatured}</span>
-		</label>
-	</fieldset>
+			<div class="two">
+				<Field label={text.maxPerOrder} error={errors.maxPerOrder} errorId="maxPerOrder-error">
+					<input
+						inputmode="numeric"
+						autocomplete="off"
+						bind:value={form.maxPerOrder}
+						aria-invalid={errors.maxPerOrder ? 'true' : undefined}
+						aria-describedby={errors.maxPerOrder ? 'maxPerOrder-error' : undefined}
+					/>
+				</Field>
+				<Field label={text.lowStockAt} hint={text.lowStockHint} error={errors.lowStockAt} errorId="lowStockAt-error">
+					<input
+						inputmode="numeric"
+						autocomplete="off"
+						bind:value={form.lowStockAt}
+						aria-invalid={errors.lowStockAt ? 'true' : undefined}
+						aria-describedby={errors.lowStockAt ? 'lowStockAt-error' : undefined}
+					/>
+				</Field>
+			</div>
 
-	<fieldset class="flex flex-col gap-3" disabled={createdId !== null}>
-		<legend class="mb-2 font-semibold">{text.taxTitle}</legend>
-		<p class="text-surface-600-400 text-sm">{text.taxHint}</p>
-		<div class="grid gap-3 sm:grid-cols-2">
-			<label class="label">
-				<span class="label-text">{text.gstRate}</span>
-				<input
-					class="input"
-					inputmode="decimal"
-					autocomplete="off"
-					bind:value={form.gstRatePercent}
-					aria-invalid={errors.gstRatePercent ? 'true' : undefined}
-					aria-describedby={errors.gstRatePercent ? 'gstRatePercent-error' : undefined}
-				/>
-				{@render fieldError('gstRatePercent')}
+			<label class="check">
+				<input type="checkbox" bind:checked={form.isActive} />
+				<span>{text.isActive}</span>
 			</label>
-			<label class="label">
-				<span class="label-text">{text.hsn}</span>
-				<input
-					class="input"
-					inputmode="numeric"
-					autocomplete="off"
-					bind:value={form.hsn}
-					aria-invalid={errors.hsn ? 'true' : undefined}
-					aria-describedby={errors.hsn ? 'hsn-error' : undefined}
-				/>
-				{@render fieldError('hsn')}
+			<label class="check">
+				<input type="checkbox" bind:checked={form.isFeatured} />
+				<span>{text.isFeatured}</span>
 			</label>
-		</div>
-	</fieldset>
-
-	{#if product}
-		<ProductPhoto productId={product._id} imageUrl={product.imageUrl} />
-	{:else}
-		<fieldset class="flex flex-col gap-2" disabled={createdId !== null}>
-			<legend class="mb-2 font-semibold">{text.photoTitle}</legend>
-			<input
-				class="input"
-				type="file"
-				accept="image/*"
-				aria-label={text.choosePhoto}
-				onchange={(event) => (photoFile = event.currentTarget.files?.[0] ?? null)}
-			/>
-			<span class="text-surface-600-400 text-xs">{text.photoHint}</span>
 		</fieldset>
-	{/if}
+	</Card>
 
-	<div class="flex flex-col gap-2">
-		{#if createdId}
-			<a
-				href={resolve('/admin/products/[id]', { id: createdId })}
-				class="btn preset-filled-primary-500 min-h-12"
-			>
-				{text.openProduct}
-			</a>
+	<Card dense>
+		<fieldset class="group" disabled={createdId !== null}>
+			<legend class="legend">{text.taxTitle}</legend>
+			<p class="hint">{text.taxHint}</p>
+			<div class="two">
+				<Field label={text.gstRate} error={errors.gstRatePercent} errorId="gstRatePercent-error">
+					<input
+						inputmode="decimal"
+						autocomplete="off"
+						bind:value={form.gstRatePercent}
+						aria-invalid={errors.gstRatePercent ? 'true' : undefined}
+						aria-describedby={errors.gstRatePercent ? 'gstRatePercent-error' : undefined}
+					/>
+				</Field>
+				<Field label={text.hsn} error={errors.hsn} errorId="hsn-error">
+					<input
+						inputmode="numeric"
+						autocomplete="off"
+						bind:value={form.hsn}
+						aria-invalid={errors.hsn ? 'true' : undefined}
+						aria-describedby={errors.hsn ? 'hsn-error' : undefined}
+					/>
+				</Field>
+			</div>
+		</fieldset>
+	</Card>
+
+	<Card dense>
+		{#if product}
+			<ProductPhoto productId={product._id} imageUrl={product.imageUrl} />
 		{:else}
-			<button type="submit" class="btn preset-filled-primary-500 min-h-12" disabled={saving}>
+			<fieldset class="group" disabled={createdId !== null}>
+				<legend class="legend">{text.photoTitle}</legend>
+				<input
+					class="file"
+					type="file"
+					accept="image/*"
+					aria-label={text.choosePhoto}
+					onchange={(event) => (photoFile = event.currentTarget.files?.[0] ?? null)}
+				/>
+				<span class="hint">{text.photoHint}</span>
+			</fieldset>
+		{/if}
+	</Card>
+
+	<div class="submit">
+		{#if createdId}
+			<Button href={resolve('/admin/products/[id]', { id: createdId })} variant="primary" large>
+				{text.openProduct}
+			</Button>
+		{:else}
+			<Button type="submit" variant="primary" large disabled={saving}>
 				{#if product}
 					{saving ? text.saving : text.save}
 				{:else}
 					{saving ? text.creating : text.create}
 				{/if}
-			</button>
+			</Button>
 		{/if}
 		{#if message}
-			<p class="text-sm" role="status">{message}</p>
+			<p class="message" role="status">{message}</p>
 		{/if}
 	</div>
 </form>
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	.form {
+		@apply flex max-w-3xl flex-col gap-4;
+	}
+	.group {
+		@apply flex flex-col gap-3;
+	}
+	.legend {
+		@apply mb-2 font-extrabold;
+	}
+	.two {
+		@apply grid gap-3 sm:grid-cols-2;
+	}
+	.stock {
+		@apply text-sm;
+	}
+	.hint {
+		@apply text-xs text-text-muted;
+	}
+	.block {
+		@apply block;
+	}
+	.check {
+		@apply flex min-h-11 items-center gap-3;
+	}
+	.check input {
+		@apply size-5 text-primary;
+	}
+	.file {
+		@apply min-h-11;
+	}
+	.submit {
+		@apply flex flex-col items-start gap-2;
+	}
+	.message {
+		@apply text-sm font-semibold;
+	}
+</style>
