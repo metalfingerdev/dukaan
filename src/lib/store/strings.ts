@@ -83,6 +83,17 @@ export const strings = {
 		checkoutSoon: 'Checkout is coming soon',
 		lineTotal: (amount: string) => `${amount}`
 	},
+	account: {
+		title: 'My account',
+		yourInformation: 'Your information',
+		profile: 'Profile details',
+		profileHint: 'Name, photo, mobile number and email',
+		ordersHint: 'Track and review your orders',
+		addressesHint: 'Where we deliver',
+		profileTitle: 'Profile details',
+		back: 'My account',
+		dangerZone: 'Danger zone'
+	},
 	address: {
 		title: 'Your addresses',
 		empty: 'No saved addresses yet.',

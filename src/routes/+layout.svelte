@@ -12,7 +12,6 @@
 
   import { Toaster } from "#lib/primitives/ui/sonner/index.js";
   import AuthProvider from "#lib/auth/ui/AuthProvider.svelte";
-  import UserProfileHost from "#lib/users/ui/UserProfileHost.svelte";
   import OrganizationProfileHost from "#lib/organizations/ui/OrganizationProfileHost.svelte";
   import ImpersonationBanner from "#lib/admin/ui/ImpersonationBanner.svelte";
   import ShopHeader from "#lib/store/ui/ShopHeader.svelte";
@@ -58,8 +57,6 @@
       <CartDrawer />
     {/if}
   </div>
-
-  <UserProfileHost initialData={data.initialData} />
 
   {#if AUTH_CONSTANTS.organizations}
     <OrganizationProfileHost initialData={data.initialData} />

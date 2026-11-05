@@ -75,13 +75,13 @@ docs/                  developer docs, start at docs/README.md
 - **The UI uses our own palette and Bits UI; Skeleton UI and Ark UI are gone** (design record:
   `.agents/skills/store-app/references/store-profile.md`, step 8). Colours come from
   `src/themes/palette.css` only: layers `background` (darkest) < `midground` < `foreground`
-  (lightest) in both light and dark mode, plus `text`, `text-muted`, `primary`, `secondary`,
+  (lightest) plus `text`, `text-muted`, `primary`, `secondary`,
   `on-secondary`, `danger`, `warning`, `success`, `info`, `border`. Never flip the layers per mode.
   Build screens from `src/lib/ui` (Button, Card, Pill, Field, Choice, Notice, Select, Switch,
   Sheet, Modal, ConfirmDialog, Spinner) and the Bits-based wrappers in `src/lib/primitives/ui`.
   Borders and hard shadows are never black (black is for text): use the `edge`, `edge-flat` and
   `edge-press` utilities in `src/app.css` and set `--fill` to the element's own background so the
-  border is a shade darker than the surface. System dark mode only.
+  border is a shade darker than the surface. Light only: there is no dark mode.
 - **`src/themes/compat.css` implements Skeleton's old class and colour names** (`btn`,
   `preset-tonal`, `input`, `surface-600-400`, `h3`, ...) on our palette, only so the template's
   account, user and organization screens keep working. Never use those names in new code. When you
