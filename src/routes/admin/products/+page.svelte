@@ -183,7 +183,7 @@
 	@reference 'src/app.css';
 
 	.head {
-		@apply flex items-center justify-between gap-3;
+		@apply flex flex-wrap items-center justify-between gap-3;
 	}
 	.title {
 		@apply text-2xl font-extrabold;
@@ -203,7 +203,7 @@
 		@apply grid gap-3 sm:grid-cols-2;
 	}
 	.rows {
-		@apply grid gap-2 xl:grid-cols-2;
+		@apply grid grid-cols-[minmax(0,1fr)] gap-2 xl:grid-cols-[repeat(2,minmax(0,1fr))];
 	}
 	.item {
 		@apply flex flex-col gap-3;

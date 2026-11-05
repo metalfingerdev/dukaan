@@ -35,7 +35,7 @@
 <section class="switch" class:on={takingOrders} aria-labelledby="store-open-title">
 	<div class="row">
 		<div>
-			<h2 id="store-open-title" class="label">{text.label}</h2>
+			<h2 id="store-open-title" class="caption">{text.label}</h2>
 			<p class="state" role="status">
 				{#if takingOrders}
 					{text.takingOrders}
@@ -75,7 +75,7 @@
 	.row {
 		@apply flex flex-wrap items-center justify-between gap-3;
 	}
-	.label {
+	.caption {
 		@apply font-extrabold;
 	}
 	.state {
