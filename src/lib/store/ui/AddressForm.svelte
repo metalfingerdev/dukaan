@@ -234,7 +234,7 @@
 		<legend class="legend">{strings.address.kind}</legend>
 		<div class="row">
 			{#each ['house', 'hostel', 'shop'] as const as option (option)}
-				<Choice chip name="kind" value={option} checked={kind === option} onchange={() => (kind = option)}>
+				<Choice pill name="kind" value={option} checked={kind === option} onchange={() => (kind = option)}>
 					{strings.address.kinds[option]}
 				</Choice>
 			{/each}
@@ -262,7 +262,7 @@
 		<legend class="legend">{strings.address.receiver}</legend>
 		<div class="row">
 			{#each [['myself', strings.address.myself], ['other', strings.address.someoneElse]] as const as [who, text] (who)}
-				<Choice chip name="receiver" value={who} checked={receiver === who} onchange={() => chooseReceiver(who)}>
+				<Choice pill name="receiver" value={who} checked={receiver === who} onchange={() => chooseReceiver(who)}>
 					{text}
 				</Choice>
 			{/each}

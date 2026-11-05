@@ -11,7 +11,7 @@
   // UI Components
   // Primitives
   import * as Select from "../../primitives/ui/select/index.js";
-  import { createListCollection } from "@ark-ui/svelte/select";
+  import { createListCollection } from '../../primitives/ui/select/index.js';
   import * as Dialog from "../../primitives/ui/dialog/index.js";
   import * as Drawer from "../../primitives/ui/drawer/index.js";
   import * as Password from "../../primitives/ui/password/index.js";

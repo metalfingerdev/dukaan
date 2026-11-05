@@ -66,7 +66,7 @@
 	{#if details.error}
 		<p class="problem">{strings.common.error}</p>
 	{:else if !loaded}
-		<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
+		<div class="bone holder" aria-busy="true" aria-label={strings.common.loading}></div>
 	{:else}
 		<Card dense>
 			<form class="form" onsubmit={save} novalidate>
@@ -125,7 +125,7 @@
 	.upper {
 		@apply uppercase;
 	}
-	.placeholder {
+	.holder {
 		@apply block h-40 w-full;
 	}
 </style>

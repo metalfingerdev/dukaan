@@ -1,26 +1,26 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  // A radio drawn as a tappable card (payment, address) or, with `chip`, as a small pill
+  // A radio drawn as a tappable card (payment, address) or, with `pill`, as a small pill
   // (house / hostel / shop). The native radio is kept, so keyboards and tests work as usual.
   let {
     name,
     value,
     checked,
     onchange,
-    chip = false,
+    pill = false,
     children,
   }: {
     name: string;
     value: string;
     checked: boolean;
     onchange: () => void;
-    chip?: boolean;
+    pill?: boolean;
     children: Snippet;
   } = $props();
 </script>
 
-<label class="choice" class:chip class:on={checked}>
+<label class="choice" class:pill class:on={checked}>
   <input type="radio" {name} {value} {checked} {onchange} />
   <span class="body">{@render children()}</span>
 </label>
@@ -36,20 +36,20 @@
     --fill: var(--color-primary);
     @apply bg-primary/10 outline-2 outline-primary;
   }
-  /* The real radio is visible in the card style, hidden in the chip style */
+  /* The real radio is visible in the card style, hidden in the pill style */
   .choice input {
     @apply mt-1 size-5 shrink-0 text-primary;
   }
   .body {
     @apply flex min-w-0 flex-col;
   }
-  .chip {
+  .pill {
     @apply items-center justify-center rounded-full px-4 py-2 font-bold;
   }
-  .chip input {
+  .pill input {
     @apply sr-only;
   }
-  .chip.on {
+  .pill.on {
     @apply bg-primary text-foreground;
   }
 </style>

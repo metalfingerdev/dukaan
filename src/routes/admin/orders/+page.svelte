@@ -22,7 +22,7 @@
 {#if orders.error}
 	<p class="problem">{strings.common.error}</p>
 {:else if orders.status === 'LoadingFirstPage'}
-	<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
+	<div class="bone holder" aria-busy="true" aria-label={strings.common.loading}></div>
 {:else if orders.results.length === 0}
 	<p class="muted">{text.empty}</p>
 {:else}
@@ -75,7 +75,7 @@
 	.strong {
 		@apply font-extrabold;
 	}
-	.placeholder {
+	.holder {
 		@apply block h-40 w-full;
 	}
 </style>
