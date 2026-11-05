@@ -18,7 +18,7 @@
 {#if settings.error}
 	<p class="problem">{strings.common.error}</p>
 {:else if settings.data === undefined}
-	<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
+	<div class="bone holder" aria-busy="true" aria-label={strings.common.loading}></div>
 {:else}
 	<StoreOpenSwitch hours={settings.data.settings} />
 {/if}
@@ -31,7 +31,7 @@
 	.problem {
 		@apply text-sm font-semibold text-danger;
 	}
-	.placeholder {
+	.holder {
 		@apply h-20 w-full;
 	}
 </style>

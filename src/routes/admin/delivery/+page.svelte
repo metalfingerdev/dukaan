@@ -104,7 +104,7 @@
 	{#if cash.error}
 		<p class="problem">{strings.common.error}</p>
 	{:else if cash.data === undefined}
-		<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
+		<div class="bone holder" aria-busy="true" aria-label={strings.common.loading}></div>
 	{:else if cash.data.length === 0}
 		<p class="muted">{text.cashEmpty}</p>
 	{:else}
@@ -176,7 +176,7 @@
 	{#if partners.error}
 		<p class="problem">{strings.common.error}</p>
 	{:else if partners.data === undefined}
-		<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
+		<div class="bone holder" aria-busy="true" aria-label={strings.common.loading}></div>
 	{:else if partners.data.length === 0}
 		<p class="muted">{text.empty}</p>
 	{:else}
@@ -251,7 +251,7 @@
 	.line {
 		@apply flex flex-wrap items-center justify-between gap-2;
 	}
-	.placeholder {
+	.holder {
 		@apply block h-20 w-full;
 	}
 </style>

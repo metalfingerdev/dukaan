@@ -99,7 +99,7 @@
 		{#each { length: 4 } as _, i (i)}
 			<li aria-hidden="true">
 				<Card dense>
-					<div class="bone placeholder"></div>
+					<div class="bone holder"></div>
 				</Card>
 			</li>
 		{/each}
@@ -242,7 +242,7 @@
 	.buttons {
 		@apply flex flex-wrap gap-2;
 	}
-	.placeholder {
+	.holder {
 		@apply block h-12 w-full;
 	}
 </style>

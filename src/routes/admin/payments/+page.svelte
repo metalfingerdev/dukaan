@@ -22,7 +22,7 @@
 {#if payments.error}
 	<p class="problem">{strings.common.error}</p>
 {:else if payments.data === undefined}
-	<div class="bone placeholder" aria-busy="true" aria-label={strings.common.loading}></div>
+	<div class="bone holder" aria-busy="true" aria-label={strings.common.loading}></div>
 {:else if payments.data.length === 0}
 	<p class="muted">{text.empty}</p>
 {:else}
@@ -92,7 +92,7 @@
 	.small {
 		@apply text-sm;
 	}
-	.placeholder {
+	.holder {
 		@apply block h-40 w-full;
 	}
 </style>
