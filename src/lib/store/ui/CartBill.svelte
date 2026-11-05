@@ -91,7 +91,7 @@
     @apply mt-1 border-t-2 border-border-muted pt-2 text-base font-extrabold;
   }
   .nudge {
-    @apply mt-2 rounded-base bg-secondary/25 px-2 py-1 text-sm font-semibold;
+    @apply mt-2 rounded-base bg-secondary-tint px-2 py-1 text-sm font-semibold;
   }
   .minimum {
     @apply mt-2 text-sm font-semibold text-warning;

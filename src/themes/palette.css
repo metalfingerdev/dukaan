@@ -18,6 +18,11 @@
   --color-warning: var(--warning);
   --color-success: var(--success);
   --color-info: var(--info);
+
+  --color-primary-tint: var(--primary-tint);
+  --color-secondary-tint: var(--secondary-tint);
+  --color-danger-tint: var(--danger-tint);
+  --color-success-tint: var(--success-tint);
 }
 
 :root {
@@ -47,4 +52,11 @@
   --warning:      oklch(0.55 0.13 65);
   --success:      oklch(0.5  0.13 150);
   --info:         oklch(0.5  0.1  250);
+
+  /* Solid washes of a colour on the lightest layer, for alerts, toasts and highlights. Never a
+     see-through colour: those let the page show through a toast */
+  --primary-tint:   color-mix(in oklab, var(--primary) 12%, var(--foreground));
+  --secondary-tint: color-mix(in oklab, var(--secondary) 30%, var(--foreground));
+  --danger-tint:    color-mix(in oklab, var(--danger) 12%, var(--foreground));
+  --success-tint:   color-mix(in oklab, var(--success) 15%, var(--foreground));
 }

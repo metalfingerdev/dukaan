@@ -78,7 +78,7 @@
 	}
 	/* A refund that failed is red: someone has to do it by hand in the Razorpay dashboard */
 	.failed {
-		@apply -m-2.5 rounded-base bg-danger/10 p-2.5 outline-2 outline-danger;
+		@apply -m-2.5 rounded-base bg-danger-tint p-2.5 outline-2 outline-danger;
 	}
 	.strong {
 		@apply font-extrabold;

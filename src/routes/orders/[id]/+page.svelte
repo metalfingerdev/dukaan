@@ -363,7 +363,7 @@
   /* The 4-digit code is the biggest thing on the page once the order is on its way */
   .code {
     --fill: var(--color-secondary);
-    @apply edge flex flex-col items-center gap-1 rounded-container bg-secondary/25 p-4 text-center;
+    @apply edge flex flex-col items-center gap-1 rounded-container bg-secondary-tint p-4 text-center;
   }
   .digits {
     @apply font-mono text-5xl font-extrabold tracking-[0.3em];

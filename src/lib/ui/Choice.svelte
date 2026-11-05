@@ -34,7 +34,7 @@
   }
   .on {
     --fill: var(--color-primary);
-    @apply bg-primary/10 outline-2 outline-primary;
+    @apply bg-primary-tint outline-2 outline-primary;
   }
   /* The real radio is visible in the card style, hidden in the pill style */
   .choice input {
