@@ -27,14 +27,26 @@ export const strings = {
 	category: {
 		notFound: "We couldn't find that category.",
 		empty: 'Nothing here yet.',
-		back: 'All categories'
+		back: 'All categories',
+		sortLabel: 'Sort products',
+		sort: {
+			popular: 'Popular',
+			priceLow: 'Price: low to high',
+			priceHigh: 'Price: high to low',
+			name: 'A to Z'
+		},
+		inStockOnly: 'In stock only',
+		noMatch: 'Nothing here is in stock right now.'
 	},
 	search: {
 		placeholder: 'Search for products',
 		button: 'Search',
 		prompt: 'Type at least 2 letters to search.',
 		noResults: (query: string) => `No products match "${query}".`,
-		resultsFor: (query: string) => `Results for "${query}"`
+		noResultsHint: 'Check the spelling, or browse by category.',
+		browse: 'Browse categories',
+		resultsFor: (query: string) => `Results for "${query}"`,
+		count: (count: number) => `${count} ${count === 1 ? 'result' : 'results'}`
 	},
 	cart: {
 		title: 'Your cart',
