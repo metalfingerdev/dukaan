@@ -20,7 +20,7 @@ code came from the `@auth/svelte` jsrepo registry (see `jsrepo.config.ts`).
 - **SvelteKit 3** with Svelte 5 (runes) and TypeScript
 - **Convex**: database, server functions, file storage, realtime (`convex-svelte`)
 - **Better Auth**, running inside Convex via `@convex-dev/better-auth`
-- **Tailwind CSS 4** + **Skeleton UI 5**, plus Ark UI / svelte-toolbelt primitives
+- **Tailwind CSS 4** + **Bits UI** primitives with our own palette (`src/themes/palette.css`), plus svelte-toolbelt
 - **Resend** (Convex component) for transactional email
 - **Phone OTP** via Better Auth's `phoneNumber` plugin, delivered by textbee / WhatsApp / Fast2SMS (`src/convex/otp/`)
 - **pnpm** as the package manager

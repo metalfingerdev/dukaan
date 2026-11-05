@@ -11,7 +11,7 @@ delivery partners see only the orders assigned to them.
 ## Stack
 
 SvelteKit 3 + Svelte 5, Convex (database, functions, storage, realtime), Better Auth running inside
-Convex, Tailwind CSS 4 + Skeleton UI 5, Resend for email, pnpm.
+Convex, Tailwind CSS 4 + Bits UI, Resend for email, pnpm.
 
 ## Run it locally
 

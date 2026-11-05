@@ -25,7 +25,7 @@ The founder is the only employee. Other developers contribute through pull reque
 ## Stack
 
 SvelteKit 3 + Svelte 5 (runes) + TypeScript, Convex (database, functions, storage, realtime),
-Better Auth running inside Convex, Tailwind CSS 4 + Skeleton UI 5, Resend for email, pnpm.
+Better Auth running inside Convex, Tailwind CSS 4 + Bits UI, Resend for email, pnpm.
 Hosted on Vercel (staging for now).
 
 ## Commands

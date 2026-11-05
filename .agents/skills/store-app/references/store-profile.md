@@ -121,9 +121,9 @@ deployment and `E2E_ADMIN_PHONE` / `E2E_CUSTOMER_PHONE` are in `.env.local` (nev
 every change: it is slow (~2 min) and has found only test bugs so far, so run it when a change
 touches a screen it covers, or when asked.
 
-**Not built**: the order board and anything for the
-delivery partner, so **an order stays at "Order placed" forever**; payments beyond cash; invoices;
-the designed UI.
+**Not built** (as of 2026-11-05): everything on the roadmap below is built. What is left is the
+"Smaller items" list at the end, the founder's real shop details, and the optional items noted in
+each step (for example a customer-facing partner call button, which needs a privacy decision).
 
 ## Step 2: the live order board (built)
 
@@ -211,15 +211,13 @@ those come first. Ordered by what unblocks what.
    `order.paid`, `refund.processed`, `refund.failed`, `qr_code.credited`) and
    `RAZORPAY_WEBHOOK_SECRET`; UPI enabled by Razorpay for UPI in Checkout and QR at the door;
    KYC and live keys before real money.
-8. **The designed UI**, last: colours, logo, layout, Hindi strings if wanted, inspired by
-   slothbytes.dev and not by another company's branding.
-   **In progress**, one screen per PR, founder reviews each (order: storefront, rider, admin, auth).
-   Own colours in `src/themes/palette.css` (not Skeleton), headless parts from Bits UI (replacing
-   Ark UI), shared parts as small components in `src/lib/ui`. Rules in AGENTS.md Conventions.
-   Design scratch pad: `/demo` (`src/routes/demo`, `src/lib/demo`) has one static mock page per
-   screen with a "this screen must" note; the founder edits the mocks and each real screen is built
-   from its mock. It 404s on the real production site; delete it, Skeleton and Ark when the last
-   area is done.
+8. **The designed UI** (**built**, 2026-11-05): own palette in `src/themes/palette.css`, Bits UI
+   primitives, shared parts as small components in `src/lib/ui`, rules in AGENTS.md Conventions.
+   Built one area per PR with the founder reviewing each: storefront, rider, store admin, then the
+   account, user and organization screens. The static `/demo` mock pages the founder drew the
+   designs on have been deleted. Skeleton UI and Ark UI are gone; `src/themes/compat.css` keeps
+   their old class names alive for the template's account, user and organization screens until
+   they are moved to `src/lib/ui` components. Hindi strings: not done (all text is in `strings.ts`).
 
    **Storefront design, decided with the founder (2026-11-04)**. Why each: the founder reviewed
    screenshots at phone, tablet and 1920px and asked for these.
