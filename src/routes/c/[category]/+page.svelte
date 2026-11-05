@@ -7,7 +7,6 @@
 
   import ShopPage from "#lib/store/ui/ShopPage.svelte";
   import ProductGrid from "#lib/store/ui/ProductGrid.svelte";
-  import GridSkeleton from "#lib/store/ui/GridSkeleton.svelte";
   import Select from "#lib/ui/Select.svelte";
   import Switch from "#lib/ui/Switch.svelte";
   import { strings } from "#lib/store/strings.js";
@@ -48,7 +47,8 @@
   {#if result.error}
     <p class="error">{strings.common.error}</p>
   {:else if result.data === undefined}
-    <GridSkeleton />
+    <h1 class="title"><span class="bone">Category name</span></h1>
+    <ProductGrid products={undefined} />
   {:else if result.data === null}
     <div class="missing">
       <p>{strings.category.notFound}</p>

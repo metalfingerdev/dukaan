@@ -34,7 +34,7 @@
   }
   .accent {
     --fill: var(--color-secondary);
-    @apply bg-secondary text-foreground;
+    @apply bg-secondary text-on-secondary;
   }
   .block {
     @apply w-full;

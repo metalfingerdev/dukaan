@@ -7,7 +7,6 @@
   // Store
   import { createClock } from "../now.svelte.js";
   import { strings } from "../strings.js";
-  import Pill from "#lib/ui/Pill.svelte";
 
   const info = useQuery(api.store.catalog.getStoreInfo, {});
   const clock = createClock();
@@ -18,16 +17,10 @@
   );
 </script>
 
-{#if info.data}
-  <div class="strip">
-    <Pill tone={open ? "ok" : "bad"}>
-      {open ? strings.store.open : strings.store.closed}
-    </Pill>
-    <span>{strings.store.deliveryIn(info.data.etaMinutes)}</span>
-  </div>
-  {#if open === false}
-    <p class="closed" role="status">{strings.store.closedBanner}</p>
-  {/if}
+<!-- Open/closed and the delivery time live in the header (StoreStatus); this is the page-level
+  notice when browsing works but checkout does not -->
+{#if open === false}
+  <p class="closed" role="status">{strings.store.closedBanner}</p>
 {:else if info.data === null}
   <p class="muted">{strings.store.notSetUp}</p>
 {/if}
@@ -35,9 +28,6 @@
 <style lang="postcss">
   @reference 'src/app.css';
 
-  .strip {
-    @apply flex flex-wrap items-center gap-2 text-sm;
-  }
   .closed {
     --fill: var(--color-foreground);
     @apply edge-flat rounded-container bg-foreground p-3 text-sm;

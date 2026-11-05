@@ -17,12 +17,12 @@
     @apply edge-flat inline-flex items-center rounded-full bg-foreground px-2 text-xs font-bold;
   }
   .ok {
-    --fill: var(--color-primary);
-    @apply bg-primary text-foreground;
+    --fill: var(--color-success);
+    @apply bg-success text-foreground;
   }
   .warn {
     --fill: var(--color-secondary);
-    @apply bg-secondary text-foreground;
+    @apply bg-secondary text-on-secondary;
   }
   .bad {
     --fill: var(--color-danger);

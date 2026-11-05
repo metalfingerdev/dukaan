@@ -65,9 +65,8 @@
 <style lang="postcss">
   @reference 'src/app.css';
 
-  /* Stays in reach while the page scrolls under it */
   .search {
-    @apply sticky top-0 z-10 flex gap-2 bg-midground py-1;
+    @apply flex gap-2;
   }
   .field {
     --fill: var(--color-foreground);

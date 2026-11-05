@@ -19,6 +19,11 @@ export const strings = {
 		notFound: "We couldn't find that product.",
 		maxPerOrder: (count: number) => `Up to ${count} per order`
 	},
+	header: {
+		signIn: 'Sign in',
+		orders: 'Orders',
+		myCart: 'My cart'
+	},
 	home: {
 		categories: 'Shop by category',
 		featured: 'Popular right now',
