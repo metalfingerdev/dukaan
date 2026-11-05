@@ -12,6 +12,8 @@
 
 	import { useRequireSignIn } from '#lib/store/requireSignIn.svelte.js';
 	import { strings } from '#lib/store/strings.js';
+	import Button from '#lib/ui/Button.svelte';
+	import Spinner from '#lib/ui/Spinner.svelte';
 
 	let { children } = $props();
 
@@ -45,17 +47,11 @@
 	admin Convex function calls. Signed-out visitors go to sign in and come back here.
 -->
 {#if adminResponse.error}
-	<div class="text-error-600-400 mx-auto max-w-md p-6 text-center text-sm">
-		{adminResponse.error.message}
-	</div>
+	<p class="problem">{adminResponse.error.message}</p>
 {:else if auth.isLoading || !auth.isAuthenticated || isAdmin === undefined}
-	<!-- Resolving auth or the admin check → a neutral spinner (no content flash). -->
-	<div class="flex min-h-[60vh] w-full items-center justify-center p-6">
-		<div
-			class="border-surface-300-700 size-6 animate-spin rounded-full border-2 border-t-transparent"
-			role="status"
-			aria-label={strings.common.loading}
-		></div>
+	<!-- Resolving auth or the admin check: a neutral spinner (no content flash) -->
+	<div class="center" role="status" aria-label={strings.common.loading}>
+		<Spinner />
 	</div>
 {:else if isAdmin === false}
 	<!--
@@ -63,29 +59,71 @@
 		every admin function checks on the server. To hide that an admin area exists, return a 404
 		from a `load` instead.
 	-->
-	<div
-		class="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center"
-	>
-		<ShieldAlertIcon class="size-10 opacity-60" aria-hidden="true" />
-		<div>
-			<h1 class="h4">{strings.admin.accessDenied}</h1>
-			<p class="text-surface-600-400 mt-1 text-sm">{strings.admin.accessDeniedHint}</p>
-		</div>
-		<a href={resolve('/')} class="btn preset-tonal">{strings.common.backHome}</a>
+	<div class="denied">
+		<ShieldAlertIcon class="size-10 text-text-muted" aria-hidden="true" />
+		<h1 class="title">{strings.admin.accessDenied}</h1>
+		<p class="muted">{strings.admin.accessDeniedHint}</p>
+		<Button href={resolve('/')}>{strings.common.backHome}</Button>
 	</div>
 {:else}
-	<div class="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 sm:p-6 print:max-w-none print:p-0">
-		<nav aria-label={strings.admin.title} class="-mx-1 flex gap-1 overflow-x-auto print:hidden">
+	<div class="admin">
+		<nav aria-label={strings.admin.title} class="menu print:hidden">
 			{#each nav as item (item.href)}
 				<a
 					href={resolve(item.href)}
 					aria-current={isCurrent(item.href) ? 'page' : undefined}
-					class="btn min-h-11 shrink-0 {isCurrent(item.href) ? 'preset-filled-primary-500' : 'preset-tonal'}"
+					class="link"
+					class:current={isCurrent(item.href)}
 				>
 					{item.label}
 				</a>
 			{/each}
 		</nav>
-		{@render children()}
+		<div class="content">
+			{@render children()}
+		</div>
 	</div>
 {/if}
+
+<style lang="postcss">
+	@reference 'src/app.css';
+
+	/* A phone: the menu is a row of tabs that scrolls sideways. A laptop: a column on the left. */
+	.admin {
+		@apply mx-auto flex w-full max-w-screen-2xl flex-col gap-3 p-3 sm:p-4 lg:grid lg:grid-cols-[12rem_minmax(0,1fr)] lg:items-start lg:gap-6 lg:px-8 print:max-w-none print:p-0;
+	}
+	.menu {
+		@apply -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 lg:sticky lg:top-20 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0;
+	}
+	.link {
+		@apply flex min-h-11 shrink-0 items-center rounded-base px-3 font-semibold whitespace-nowrap;
+	}
+	.link:hover {
+		@apply bg-foreground;
+	}
+	.current {
+		--fill: var(--color-primary);
+		@apply bg-primary text-foreground;
+	}
+	.current:hover {
+		@apply bg-primary;
+	}
+	.content {
+		@apply flex min-w-0 flex-col gap-4;
+	}
+	.center {
+		@apply flex min-h-[60vh] w-full items-center justify-center p-6;
+	}
+	.denied {
+		@apply mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center gap-3 p-6 text-center;
+	}
+	.title {
+		@apply text-2xl font-extrabold;
+	}
+	.muted {
+		@apply text-sm text-text-muted;
+	}
+	.problem {
+		@apply mx-auto max-w-md p-6 text-center text-sm font-semibold text-danger;
+	}
+</style>

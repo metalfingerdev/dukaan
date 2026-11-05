@@ -394,6 +394,8 @@ export const strings = {
 	},
 	admin: {
 		title: 'Store admin',
+		headerRole: 'Admin',
+		viewShop: 'View shop',
 		accessDenied: 'Access denied',
 		accessDeniedHint: "You don't have permission to view this page.",
 		nav: {
