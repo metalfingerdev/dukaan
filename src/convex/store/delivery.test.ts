@@ -98,7 +98,8 @@ describe('the run', () => {
 		const run = (await s.ravi.query(getRun, { orderId: s.orderId }))!;
 		expect(run.customer).toMatchObject({ firstName: 'Test', phone: '+919876501234', line1: '12, Test Street' });
 		expect(run.collectPaise).toBe(ORDER_TOTAL);
-		expect(JSON.stringify(run)).not.toContain(s.code);
+		// Quoted: the code is a string, and a bare 4-digit match would also hit a number like 13600
+		expect(JSON.stringify(run)).not.toContain(`"${s.code}"`);
 		for (const field of ['deliveryCode', 'userId', 'idempotencyKey']) expect(run).not.toHaveProperty(field);
 	});
 
