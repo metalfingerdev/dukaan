@@ -90,6 +90,23 @@ describe('who is a partner', () => {
 });
 
 describe('the run', () => {
+	it("gives the customer the partner's number only for their own order and only while it is on the way", async () => {
+		const s = await setupRun();
+		const getOrder = api.store.orders.getOrder;
+		// Assigned but still in the shop: no number yet
+		expect(await s.alice.query(getOrder, { orderId: s.orderId })).not.toHaveProperty('partner');
+
+		await s.ravi.mutation(pickUp, { orderId: s.orderId });
+		const onTheWay = await s.alice.query(getOrder, { orderId: s.orderId });
+		expect(onTheWay!.partner).toMatchObject({ name: 'Ravi' });
+		expect(onTheWay!.partner!.phoneNumber).toMatch(/9876543210$/);
+		// Someone else's order is simply not found, so the number stays private
+		expect(await s.bob.query(getOrder, { orderId: s.orderId })).toBeNull();
+
+		await s.ravi.mutation(markDelivered, { orderId: s.orderId, code: s.code, paidWith: 'cash' });
+		expect(await s.alice.query(getOrder, { orderId: s.orderId })).not.toHaveProperty('partner');
+	});
+
 	it("shows the partner what they need and never the delivery code or the customer's account", async () => {
 		const s = await setupRun();
 		const runs = await s.ravi.query(myRuns, { dayStartMs: DAY_START });

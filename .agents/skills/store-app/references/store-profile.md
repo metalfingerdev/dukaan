@@ -123,7 +123,7 @@ touches a screen it covers, or when asked.
 
 **Not built** (as of 2026-11-05): everything on the roadmap below is built. What is left is the
 "Smaller items" list at the end, the founder's real shop details, and the optional items noted in
-each step (for example a customer-facing partner call button, which needs a privacy decision).
+each step.
 
 ## Step 2: the live order board (built)
 
@@ -266,9 +266,10 @@ those come first. Ordered by what unblocks what.
      Bits UI wrappers with the same exports and props, so those screens did not change. Toasts
      (sonner), the password meter and the focus rings use the palette too. To retire the compat
      layer, move a screen to `src/lib/ui` components when you touch it.
-   - *Not built*: a "call your delivery partner" button on order tracking, because the customer's
-     order does not expose the partner's name or phone (riders phone customers). It needs a
-     privacy decision first.
+   - *Customers can phone their delivery partner* (decided by the founder, 2026-11-05): the order
+     tracking page has a "Call <name>" button. `getOrder` returns the partner's name and phone only
+     to the order's owner and only while the order is `out_for_delivery`, so a number is never left
+     on an old order (tested in `delivery.test.ts`).
 
 **Smaller items, any time**: the founder enters the real delivery areas, hours, fees and store
 phone in `/admin/settings` on staging; create the Maps key (`docs/08-environments-and-deployment.md`); push or SMS
