@@ -21,30 +21,30 @@
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
-  /* Layers: background is always the darkest, foreground the lightest, in both modes.
-     Warm cream by day, warm brown-black by night: warm neutrals flatter food photos */
-  --background:   light-dark(oklch(0.93 0.035 80), oklch(0.15 0.012 60));
-  --midground:    light-dark(oklch(0.97 0.025 80), oklch(0.19 0.012 60));
-  --foreground:   light-dark(oklch(1    0.008 80), oklch(0.23 0.014 60));
+  /* Layers: background is the darkest, foreground the lightest. Light only (no dark mode).
+     Warm cream: warm neutrals flatter food photos */
+  --background:   oklch(0.93 0.035 80);
+  --midground:    oklch(0.97 0.025 80);
+  --foreground:   oklch(1    0.008 80);
 
-  --text:         light-dark(oklch(0.22 0.03 45),  oklch(0.96 0.012 75));
-  --text-muted:   light-dark(oklch(0.47 0.03 55),  oklch(0.74 0.02 70));
+  --text:         oklch(0.22 0.03 45);
+  --text-muted:   oklch(0.47 0.03 55);
 
-  --highlight:    light-dark(oklch(1    0.04 80),  oklch(0.29 0.02 60));
-  --border:       light-dark(oklch(0.62 0.05 70),  oklch(0.4  0.03 60));
-  --border-muted: light-dark(oklch(0.76 0.04 75),  oklch(0.31 0.02 60));
+  --highlight:    oklch(1    0.04 80);
+  --border:       oklch(0.62 0.05 70);
+  --border-muted: oklch(0.76 0.04 75);
 
   /* Appetite colours: tomato red-orange for actions (Add, cart, checkout), turmeric gold for
      accents (offers, search). Red, orange and yellow are the hues tied to appetite in food-app
      research; green is kept for "fresh / open / in stock" so red never means "open" */
-  --primary:      light-dark(oklch(0.57 0.19 38),  oklch(0.72 0.17 42));
-  --secondary:    light-dark(oklch(0.84 0.16 85),  oklch(0.82 0.15 85));
+  --primary:      oklch(0.57 0.19 38);
+  --secondary:    oklch(0.84 0.16 85);
   --on-secondary: oklch(0.24 0.04 50);
 
-  --danger:       light-dark(oklch(0.5  0.19 20),  oklch(0.7  0.16 20));
-  --warning:      light-dark(oklch(0.55 0.13 65),  oklch(0.78 0.13 70));
-  --success:      light-dark(oklch(0.5  0.13 150), oklch(0.74 0.15 150));
-  --info:         light-dark(oklch(0.5  0.1  250), oklch(0.72 0.1  250));
+  --danger:       oklch(0.5  0.19 20);
+  --warning:      oklch(0.55 0.13 65);
+  --success:      oklch(0.5  0.13 150);
+  --info:         oklch(0.5  0.1  250);
 }

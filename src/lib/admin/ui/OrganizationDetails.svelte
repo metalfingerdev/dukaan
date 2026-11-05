@@ -393,7 +393,7 @@
 								</div>
 							{/if}
 							<div
-								class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
+								class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 							>
 								<PencilIcon class="size-4" aria-hidden="true" />
 							</div>
