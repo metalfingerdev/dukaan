@@ -256,7 +256,7 @@
 	}
 	.row {
 		--fill: var(--color-foreground);
-		@apply edge-flat flex flex-wrap justify-between gap-x-3 rounded-base bg-foreground p-2;
+		@apply edge-flat flex flex-wrap justify-between gap-x-3 rounded-lg bg-foreground p-2;
 	}
 	.bad {
 		--fill: var(--color-danger);

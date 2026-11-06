@@ -82,12 +82,11 @@ docs/                  developer docs, start at docs/README.md
   Borders and hard shadows are never black (black is for text): use the `edge`, `edge-flat` and
   `edge-press` utilities in `src/app.css` and set `--fill` to the element's own background so the
   border is a shade darker than the surface. Light only: there is no dark mode.
-- **`src/themes/compat.css` implements Skeleton's old class and colour names** (`btn`,
-  `preset-tonal`, `input`, `surface-600-400`, `h3`, ...) on our palette, only so the template's
-  account, user and organization screens keep working. Never use those names in new code. When you
-  touch one of those files, move it to `src/lib/ui` components and drop the names nothing uses.
-  Don't give a scoped class one of those names (`card`, `label`, `chip`, `placeholder`, `table`,
-  `badge`, `input`, `select`, ...): the global rule would apply too.
+- **Skeleton's class and colour names are gone** (`btn`, `preset-*`, `surface-*-*`, `h1`-`h6`,
+  `badge`, `card`, `input`, ...). Use `src/lib/ui` components first. For elements that can't be one
+  (triggers, links, native controls) `src/app.css` has our own utilities: `button`, `tone-*`,
+  `tag`, `panel`, `control`, `field-label`, `data-table`, `bone`. Colours are the palette names
+  only (`bg-foreground`, `text-text-muted`, `border-border-muted`, `bg-danger-tint`, ...).
 - **No long Tailwind class lists inline.** Give the element a short semantic class and put the
   Tailwind in the component's style block with `@apply`:
   `<style lang="postcss">` then `@reference 'src/app.css';` then rules. Why: the founder finds

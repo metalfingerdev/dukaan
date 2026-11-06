@@ -115,7 +115,7 @@
 	}
 	.map {
 		--fill: var(--color-background);
-		@apply edge-flat relative h-72 w-full overflow-hidden rounded-base;
+		@apply edge-flat relative h-72 w-full overflow-hidden rounded-lg;
 	}
 	.canvas {
 		@apply size-full bg-background;

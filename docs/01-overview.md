@@ -56,7 +56,7 @@ src/
 ├── hooks.server.ts            # Route protection + Convex token for SSR
 ├── hooks.ts                   # initConvex(PUBLIC_CONVEX_URL)
 ├── env.ts                     # Typed public env vars
-└── themes/auth.css            # Skeleton theme
+└── themes/palette.css         # colour palette
 ```
 
 ## Import aliases

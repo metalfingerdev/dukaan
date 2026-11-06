@@ -194,7 +194,7 @@
 	}
 	.failed {
 		--fill: var(--color-secondary);
-		@apply edge-flat flex flex-col gap-2 rounded-container bg-secondary-tint p-3;
+		@apply edge-flat flex flex-col gap-2 rounded-xl bg-secondary-tint p-3;
 	}
 	.failed-title {
 		@apply font-extrabold;
@@ -207,7 +207,7 @@
 	}
 	.tab {
 		--fill: var(--color-foreground);
-		@apply edge-flat flex min-h-12 flex-col items-center justify-center rounded-base bg-foreground px-1 text-xs;
+		@apply edge-flat flex min-h-12 flex-col items-center justify-center rounded-lg bg-foreground px-1 text-xs;
 	}
 	.tab.on {
 		--fill: var(--color-primary);

@@ -59,7 +59,7 @@
   }
   .browse {
     --fill: var(--color-primary);
-    @apply edge edge-press inline-flex min-h-11 items-center rounded-base bg-primary px-4 font-bold text-foreground;
+    @apply edge edge-press inline-flex min-h-11 items-center rounded-lg bg-primary px-4 font-bold text-foreground;
   }
   .error {
     @apply text-sm text-danger;

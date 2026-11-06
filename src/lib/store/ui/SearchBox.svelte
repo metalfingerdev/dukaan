@@ -70,7 +70,7 @@
   }
   .field {
     --fill: var(--color-foreground);
-    @apply edge min-h-11 min-w-0 flex-1 rounded-base bg-foreground px-3;
+    @apply edge min-h-11 min-w-0 flex-1 rounded-lg bg-foreground px-3;
   }
   .field::placeholder {
     @apply text-text-muted;

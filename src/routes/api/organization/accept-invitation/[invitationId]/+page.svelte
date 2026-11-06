@@ -56,7 +56,7 @@
 </script>
 
 <div class="flex min-h-dvh items-center justify-center p-6">
-	<div class="card w-full max-w-md p-8 text-center">
+	<div class="panel w-full max-w-md p-8 text-center">
 		{#if isLoading}
 			<div class="flex flex-col items-center gap-4">
 				<Loader2Icon class="size-10 animate-spin" />
@@ -74,14 +74,14 @@
 				<TriangleAlertIcon class="size-10" />
 				<h1 class="text-lg font-semibold">Couldn't accept invitation</h1>
 				<p class="text-sm opacity-80">{error}</p>
-				<a class="btn preset-tonal hover:preset-filled" href={resolve('/')}>Go to Home</a>
+				<a class="button tone-raised hover:tone-primary" href={resolve('/')}>Go to Home</a>
 			</div>
 		{:else if !invitationId}
 			<div class="flex flex-col items-center gap-4">
 				<TriangleAlertIcon class="size-10" />
 				<h1 class="text-lg font-semibold">Invalid invite link</h1>
 				<p class="text-sm opacity-60">Please use a valid invite link.</p>
-				<a class="btn preset-tonal hover:preset-filled" href={resolve('/')}>Go to Home</a>
+				<a class="button tone-raised hover:tone-primary" href={resolve('/')}>Go to Home</a>
 			</div>
 		{/if}
 	</div>

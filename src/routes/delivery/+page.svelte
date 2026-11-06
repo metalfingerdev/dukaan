@@ -94,7 +94,7 @@
 	}
 	.today {
 		--fill: var(--color-secondary);
-		@apply edge flex flex-col gap-1 rounded-container bg-secondary-tint p-4;
+		@apply edge flex flex-col gap-1 rounded-xl bg-secondary-tint p-4;
 	}
 	.cash {
 		@apply text-lg;

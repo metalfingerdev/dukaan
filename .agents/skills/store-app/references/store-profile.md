@@ -215,9 +215,9 @@ those come first. Ordered by what unblocks what.
    primitives, shared parts as small components in `src/lib/ui`, rules in AGENTS.md Conventions.
    Built one area per PR with the founder reviewing each: storefront, rider, store admin, then the
    account, user and organization screens. The static `/demo` mock pages the founder drew the
-   designs on have been deleted. Skeleton UI and Ark UI are gone; `src/themes/compat.css` keeps
-   their old class names alive for the template's account, user and organization screens until
-   they are moved to `src/lib/ui` components. Hindi strings: not done (all text is in `strings.ts`).
+   designs on have been deleted. Skeleton UI and Ark UI are gone, and so is the compat layer: the
+   template's account, user and organization screens now use the palette names and the utilities
+   in `src/app.css`. Hindi strings: not done (all text is in `strings.ts`).
 
    **Storefront design, decided with the founder (2026-11-04)**. Why each: the founder reviewed
    screenshots at phone, tablet and 1920px and asked for these.
@@ -260,12 +260,10 @@ those come first. Ordered by what unblocks what.
      dense`: flat edge, small padding). A slim `AdminHeader` and a menu that is a scrolling tab row on
      a phone and a left column on a laptop; the order board shows four columns on a laptop and tabs
      on a phone; forms are `Field`s inside dense cards, one narrow column. Native `<select>`s stay.
-   - *Skeleton UI and Ark UI are removed.* Their class and colour names that the template's account,
-     user and organization screens still use live on as `src/themes/compat.css`, implemented on our
-     palette; the Ark-based primitives (dialog, drawer, popover, menu, select, tabs, avatar) are now
+   - *Skeleton UI and Ark UI are removed.* The class and colour names the template's account, user and
+     organization screens used were replaced by the palette and `src/app.css` utilities; the Ark-based primitives (dialog, drawer, popover, menu, select, tabs, avatar) are now
      Bits UI wrappers with the same exports and props, so those screens did not change. Toasts
-     (sonner), the password meter and the focus rings use the palette too. To retire the compat
-     layer, move a screen to `src/lib/ui` components when you touch it.
+     (sonner), the password meter and the focus rings use the palette too.
    - *Customers can phone their delivery partner* (decided by the founder, 2026-11-05): the order
      tracking page has a "Call <name>" button. `getOrder` returns the partner's name and phone only
      to the order's owner and only while the order is `out_for_delivery`, so a number is never left

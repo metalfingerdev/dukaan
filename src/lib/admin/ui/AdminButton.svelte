@@ -22,7 +22,7 @@
 	shows it in the header; the user dashboard is at `/admin/users`.
 -->
 {#if authConstants.admin && admin.isAppAdmin}
-	<a href={resolve(ADMIN_ROUTE)} class={className ?? 'btn preset-tonal gap-2'}>
+	<a href={resolve(ADMIN_ROUTE)} class={className ?? 'button tone-raised gap-2'}>
 		<ShieldIcon class="size-4" aria-hidden="true" />
 		<span>Admin</span>
 	</a>
