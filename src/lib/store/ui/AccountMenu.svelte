@@ -112,7 +112,7 @@
     @apply block size-10 rounded-full;
   }
   .who {
-    @apply flex items-center gap-3 rounded-base p-2 text-left;
+    @apply flex items-center gap-3 rounded-lg p-2 text-left;
   }
   .names {
     @apply flex min-w-0 flex-1 flex-col;
@@ -124,7 +124,7 @@
     @apply truncate text-xs text-text-muted;
   }
   .item {
-    @apply flex min-h-11 items-center rounded-base px-2 text-left font-semibold;
+    @apply flex min-h-11 items-center rounded-lg px-2 text-left font-semibold;
   }
 
   /* Bits renders these elements itself, so they are styled with :global */
@@ -146,7 +146,7 @@
   }
   :global(.ui-account-menu) {
     --fill: var(--color-foreground);
-    @apply edge z-30 flex w-72 max-w-[calc(100vw-1rem)] flex-col gap-1 rounded-container bg-foreground p-2 text-text;
+    @apply edge z-30 flex w-72 max-w-[calc(100vw-1rem)] flex-col gap-1 rounded-xl bg-foreground p-2 text-text;
   }
   :global(.ui-account-menu .who:hover),
   :global(.ui-account-menu .item:hover) {

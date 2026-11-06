@@ -8,5 +8,5 @@
 	<title>{strings.admin.nav.users} | {strings.admin.title}</title>
 </svelte:head>
 
-<h1 class="h3">{strings.admin.nav.users}</h1>
+<h1 class="text-2xl font-extrabold">{strings.admin.nav.users}</h1>
 <AdminDashboard />

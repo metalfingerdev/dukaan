@@ -146,7 +146,7 @@
   }
   .cart {
     --fill: var(--color-primary);
-    @apply edge edge-press ml-auto hidden min-h-11 shrink-0 items-center gap-2 rounded-base bg-primary px-3 font-bold text-foreground md:flex;
+    @apply edge edge-press ml-auto hidden min-h-11 shrink-0 items-center gap-2 rounded-lg bg-primary px-3 font-bold text-foreground md:flex;
   }
   .cart-text {
     @apply flex flex-col text-xs leading-tight;

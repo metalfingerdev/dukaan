@@ -216,7 +216,7 @@
 	}
 	.thumb {
 		--fill: var(--color-background);
-		@apply edge-flat grid size-14 shrink-0 place-items-center overflow-hidden rounded-base bg-background;
+		@apply edge-flat grid size-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-background;
 	}
 	.thumb img {
 		@apply size-full object-cover;

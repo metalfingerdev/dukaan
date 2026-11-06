@@ -93,7 +93,7 @@
   }
   .home-link {
     --fill: var(--color-foreground);
-    @apply edge edge-press inline-flex min-h-11 items-center rounded-base bg-foreground px-4 font-bold;
+    @apply edge edge-press inline-flex min-h-11 items-center rounded-lg bg-foreground px-4 font-bold;
   }
   .error {
     @apply text-sm text-danger;

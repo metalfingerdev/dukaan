@@ -61,7 +61,7 @@
     @apply flex flex-wrap gap-2 print:hidden;
   }
   .paper {
-    @apply overflow-x-auto rounded-base border-2 border-border-muted print:overflow-visible print:border-0;
+    @apply overflow-x-auto rounded-lg border-2 border-border-muted print:overflow-visible print:border-0;
   }
   .loading {
     @apply h-96;

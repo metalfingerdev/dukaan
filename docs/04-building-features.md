@@ -105,7 +105,7 @@ These become `api.products.queries.listMine`, `api.products.mutations.create`, a
 <form onsubmit={add} class="flex gap-2 p-4">
 	<input class="input" bind:value={name} placeholder="Name" required />
 	<input class="input" type="number" step="0.01" bind:value={price} />
-	<button class="btn preset-filled">Add</button>
+	<button class="button tone-primary">Add</button>
 </form>
 
 {#if products.isLoading}Loading…{:else}
@@ -138,8 +138,8 @@ the returned URL, then save the resulting `storageId` with a mutation. Serve it 
 
 `src/lib/primitives/ui/` has avatar, combobox, copy-button, dialog, drawer, image-cropper, menu,
 password, popover, select, separator, sonner (toasts: `import { toast } from 'svelte-sonner'`),
-tabs and toggle. For styling, use Skeleton classes (`btn`, `input`, `card`, `preset-*`) and
-Tailwind utilities. The theme lives in `src/themes/auth.css`.
+tabs and toggle. For styling, use the components in `src/lib/ui`, our utilities in `src/app.css` (`button`, `tone-*`, `panel`,
+`control`) and Tailwind. The palette lives in `src/themes/palette.css`.
 
 ## Common tasks
 

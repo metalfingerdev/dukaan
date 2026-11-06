@@ -99,14 +99,14 @@
 	}
 	.paid {
 		--fill: var(--color-success);
-		@apply edge-flat w-full rounded-base bg-success p-3 text-xl font-extrabold text-foreground;
+		@apply edge-flat w-full rounded-lg bg-success p-3 text-xl font-extrabold text-foreground;
 	}
 	.scan {
 		@apply font-bold;
 	}
 	/* A QR code needs a light background and no tint to scan, whatever the theme */
 	.qr {
-		@apply size-64 rounded-base bg-white object-contain;
+		@apply size-64 rounded-lg bg-white object-contain;
 	}
 	.muted {
 		@apply text-text-muted;

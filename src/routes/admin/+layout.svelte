@@ -96,7 +96,7 @@
 		@apply -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 lg:sticky lg:top-20 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0;
 	}
 	.link {
-		@apply flex min-h-11 shrink-0 items-center rounded-base px-3 font-semibold whitespace-nowrap;
+		@apply flex min-h-11 shrink-0 items-center rounded-lg px-3 font-semibold whitespace-nowrap;
 	}
 	.link:hover {
 		@apply bg-foreground;

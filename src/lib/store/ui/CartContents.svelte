@@ -107,7 +107,7 @@
   }
   .thumb {
     --fill: var(--color-background);
-    @apply edge-flat grid size-16 shrink-0 place-items-center overflow-hidden rounded-base bg-background;
+    @apply edge-flat grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-background;
   }
   .thumb img {
     @apply size-full object-cover;
@@ -146,7 +146,7 @@
     @apply text-text-muted;
   }
   .button {
-    @apply edge edge-press inline-flex min-h-12 items-center justify-center rounded-base px-4 font-bold;
+    @apply edge edge-press inline-flex min-h-12 items-center justify-center rounded-lg px-4 font-bold;
   }
   .primary {
     --fill: var(--color-primary);

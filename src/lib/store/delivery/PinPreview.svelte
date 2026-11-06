@@ -59,7 +59,7 @@
 
 	.preview {
 		--fill: var(--color-background);
-		@apply edge-flat relative block h-48 w-full overflow-hidden rounded-base;
+		@apply edge-flat relative block h-48 w-full overflow-hidden rounded-lg;
 	}
 	.canvas {
 		@apply pointer-events-none size-full bg-background;

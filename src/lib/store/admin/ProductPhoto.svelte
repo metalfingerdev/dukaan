@@ -97,7 +97,7 @@
 	}
 	.preview {
 		--fill: var(--color-background);
-		@apply edge-flat flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-base bg-background text-xs;
+		@apply edge-flat flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-background text-xs;
 	}
 	.preview img {
 		@apply size-full object-cover;
@@ -110,7 +110,7 @@
 	}
 	.pick {
 		--fill: var(--color-foreground);
-		@apply edge edge-press inline-flex min-h-11 cursor-pointer items-center justify-center rounded-base bg-foreground px-4 font-bold;
+		@apply edge edge-press inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-foreground px-4 font-bold;
 	}
 	.hint {
 		@apply text-xs text-text-muted;

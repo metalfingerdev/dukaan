@@ -278,7 +278,7 @@
 
 	.collect {
 		--fill: var(--color-primary);
-		@apply edge rounded-container bg-primary p-4 text-3xl leading-tight font-extrabold text-foreground;
+		@apply edge rounded-xl bg-primary p-4 text-3xl leading-tight font-extrabold text-foreground;
 	}
 	.customer {
 		@apply flex flex-col gap-3;

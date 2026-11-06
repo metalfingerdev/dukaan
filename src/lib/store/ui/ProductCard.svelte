@@ -93,7 +93,7 @@
   }
   .photo {
     --fill: var(--color-background);
-    @apply edge-flat relative aspect-square w-full overflow-hidden rounded-base bg-background;
+    @apply edge-flat relative aspect-square w-full overflow-hidden rounded-lg bg-background;
   }
   .off {
     @apply absolute top-1.5 left-1.5;

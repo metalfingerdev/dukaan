@@ -30,7 +30,7 @@
 
   .closed {
     --fill: var(--color-foreground);
-    @apply edge-flat rounded-container bg-foreground p-3 text-sm;
+    @apply edge-flat rounded-xl bg-foreground p-3 text-sm;
   }
   .muted {
     @apply text-sm text-text-muted;

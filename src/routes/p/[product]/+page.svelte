@@ -106,7 +106,7 @@
   }
   .photo {
     --fill: var(--color-background);
-    @apply edge-flat aspect-square w-full overflow-hidden rounded-container bg-background;
+    @apply edge-flat aspect-square w-full overflow-hidden rounded-xl bg-background;
   }
   .photo img {
     @apply size-full object-cover;
@@ -154,7 +154,7 @@
   }
   .home-link {
     --fill: var(--color-foreground);
-    @apply edge edge-press inline-flex min-h-11 items-center rounded-base bg-foreground px-4 font-bold;
+    @apply edge edge-press inline-flex min-h-11 items-center rounded-lg bg-foreground px-4 font-bold;
   }
   .error {
     @apply text-sm text-danger;

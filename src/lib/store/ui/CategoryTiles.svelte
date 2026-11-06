@@ -83,7 +83,7 @@
   }
   .picture {
     --fill: var(--color-background);
-    @apply edge-flat block aspect-square w-full overflow-hidden rounded-base bg-secondary-tint;
+    @apply edge-flat block aspect-square w-full overflow-hidden rounded-lg bg-secondary-tint;
   }
   .picture img {
     @apply size-full object-cover;
