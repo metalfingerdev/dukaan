@@ -31,10 +31,14 @@ export function getChannelOrder(): OtpChannelId[] {
 	return ids as OtpChannelId[];
 }
 
-/** The text SMS channels send. Keep it identical to your DLT template once you register one (phase 3). */
+/**
+ * The text the textbee channel sends from an ordinary SIM. Airtel drops P2P texts that look like a
+ * bank-style OTP (code first, "OTP", "login code", "do not share"), so this reads like a normal
+ * message instead. Fast2SMS and WhatsApp use their own registered templates, not this text.
+ */
 export function renderOtpSms(code: string): string {
 	const minutes = Math.round(OTP_EXPIRES_IN_SECONDS / 60);
-	return `${code} is your ${BRAND_NAME} login code. It expires in ${minutes} minutes. Do not share it with anyone.`;
+	return `Hi from ${BRAND_NAME}! Please enter ${code} on the website to sign in. Valid for ${minutes} minutes.`;
 }
 
 /**
